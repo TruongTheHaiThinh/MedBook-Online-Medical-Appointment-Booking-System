@@ -5,7 +5,7 @@
 ### Nhóm
 
 - Thành viên 1: Trương Thế Hải Thịnh - 23725051
-- Thành viên 2: Nguyễn Thị Quỳnh Trang - 
+- Thành viên 2: Nguyễn Thị Quỳnh Trang - 23676071
 
 ### Git
 
