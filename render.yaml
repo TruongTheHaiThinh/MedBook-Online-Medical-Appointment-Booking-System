@@ -5,7 +5,7 @@ services:
     region: singapore
     plan: free
     buildCommand: pip install -r backend/requirements.txt
-    startCommand: cd backend && alembic upgrade head && python scripts/seed_data.py && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    startCommand: cd backend && alembic upgrade head && python scripts/seed_data.py || true && uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: DATABASE_URL
         fromDatabase:
