@@ -13,5 +13,6 @@ httpx
 pytest
 pytest-asyncio
 aiosqlite
-greenlet==3.0.3
+greenlet>=3.0.0
 psycopg2-binary
+bcrypt==4.0.1
