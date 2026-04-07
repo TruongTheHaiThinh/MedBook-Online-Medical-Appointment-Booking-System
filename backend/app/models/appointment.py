@@ -1,3 +1,4 @@
+from typing import Optional
 import uuid
 from datetime import datetime, date, time, timezone
 from enum import Enum as PyEnum
@@ -32,11 +33,11 @@ class Appointment(Base):
     )
     scheduled_date: Mapped[date] = mapped_column(Date, nullable=False)
     scheduled_time: Mapped[time] = mapped_column(Time, nullable=False)
-    reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     status: Mapped[AppointmentStatus] = mapped_column(
         Enum(AppointmentStatus), default=AppointmentStatus.pending, nullable=False
     )
-    doctor_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    doctor_notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     reminder_sent: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)

@@ -1,3 +1,4 @@
+from typing import Optional
 import uuid
 from sqlalchemy import String, Text, Integer, Boolean, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -14,10 +15,10 @@ class Doctor(Base):
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), unique=True, nullable=False
     )
-    specialty_id: Mapped[uuid.UUID | None] = mapped_column(
+    specialty_id: Mapped[Optional[uuid.UUID]] = mapped_column(
         UUID(as_uuid=True), ForeignKey("specialties.id", ondelete="SET NULL"), nullable=True
     )
-    bio: Mapped[str | None] = mapped_column(Text, nullable=True)
+    bio: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     experience_years: Mapped[int] = mapped_column(Integer, default=0)
     is_approved: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 

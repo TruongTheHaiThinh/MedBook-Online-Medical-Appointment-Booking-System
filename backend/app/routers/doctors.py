@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
@@ -16,7 +17,7 @@ router = APIRouter(prefix="/doctors", tags=["Doctors"])
 
 @router.get("", response_model=list[DoctorPublicResponse])
 async def list_doctors(
-    specialty_id: uuid.UUID | None = Query(None),
+    specialty_id: Optional[uuid.UUID] = Query(None),
     page: int = Query(1, ge=1),
     size: int = Query(20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),

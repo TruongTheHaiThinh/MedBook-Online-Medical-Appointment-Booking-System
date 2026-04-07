@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     DEBUG: bool = False
 
     # Database
-    DATABASE_URL: str = "postgresql+asyncpg://postgres:password@localhost:5432/medbook"
+    DATABASE_URL: str = "sqlite+aiosqlite:///./medbook.db"
 
     # JWT
     SECRET_KEY: str = "your-super-secret-key-change-in-production"
