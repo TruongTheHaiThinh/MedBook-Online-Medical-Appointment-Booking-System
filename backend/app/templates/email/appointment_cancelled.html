@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 20px; }
+    .card { background: #fff; border-radius: 8px; padding: 30px; max-width: 600px; margin: auto; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .header { background: #ef4444; color: white; padding: 20px; border-radius: 8px 8px 0 0; text-align: center; margin: -30px -30px 24px; }
+    .badge { display: inline-block; background: #fee2e2; color: #dc2626; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; }
+    .info-row { display: flex; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+    .info-label { color: #6b7280; min-width: 120px; }
+    .reason-box { background: #fff7ed; border-left: 4px solid #f97316; padding: 12px 16px; border-radius: 4px; margin-top: 16px; }
+    .footer { color: #9ca3af; font-size: 12px; text-align: center; margin-top: 24px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <h2>🏥 MedBook</h2>
+      <p>Thông báo hủy lịch hẹn</p>
+    </div>
+    <p>Xin chào <strong>{{ patient_name }}</strong>,</p>
+    <p>Lịch hẹn của bạn đã bị <span class="badge">❌ Hủy</span>.</p>
+    <div class="info-row"><span class="info-label">📅 Ngày khám:</span><span>{{ date }}</span></div>
+    <div class="info-row"><span class="info-label">🕐 Giờ khám:</span><span>{{ time }}</span></div>
+    <div class="reason-box">
+      <strong>Lý do:</strong> {{ reason }}
+    </div>
+    <p style="margin-top: 20px; color: #6b7280;">Bạn có thể đặt lại lịch hẹn mới trên hệ thống MedBook bất cứ lúc nào.</p>
+    <div class="footer">© 2026 MedBook – Hệ thống đặt lịch khám bệnh trực tuyến</div>
+  </div>
+</body>
+</html>

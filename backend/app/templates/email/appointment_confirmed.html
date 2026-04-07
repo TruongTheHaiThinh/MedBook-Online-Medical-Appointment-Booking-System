@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 20px; }
+    .card { background: #fff; border-radius: 8px; padding: 30px; max-width: 600px; margin: auto; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .header { background: #22c55e; color: white; padding: 20px; border-radius: 8px 8px 0 0; text-align: center; margin: -30px -30px 24px; }
+    .badge { display: inline-block; background: #dcfce7; color: #16a34a; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; }
+    .info-row { display: flex; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+    .info-label { color: #6b7280; min-width: 120px; }
+    .footer { color: #9ca3af; font-size: 12px; text-align: center; margin-top: 24px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <h2>🏥 MedBook</h2>
+      <p>Lịch hẹn đã được xác nhận!</p>
+    </div>
+    <p>Xin chào <strong>{{ patient_name }}</strong>,</p>
+    <p>Lịch hẹn của bạn đã được <span class="badge">✅ Xác nhận</span> bởi bác sĩ. Xin đến đúng giờ!</p>
+    <div class="info-row"><span class="info-label">📅 Ngày khám:</span><span><strong>{{ date }}</strong></span></div>
+    <div class="info-row"><span class="info-label">🕐 Giờ khám:</span><span><strong>{{ time }}</strong></span></div>
+    <p style="margin-top: 20px; color: #6b7280;">Bạn sẽ nhận được email nhắc lịch 24 giờ trước khi đến khám.</p>
+    <div class="footer">© 2026 MedBook – Hệ thống đặt lịch khám bệnh trực tuyến</div>
+  </div>
+</body>
+</html>
