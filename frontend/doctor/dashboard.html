@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bác sĩ - MedBook</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/print.css">
+    <style>
+        .modal-overlay {
+            overflow-y: auto !important;
+            padding: 40px 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1050;
+        }
+
+        .modal-content {
+            max-height: none !important;
+            margin: auto;
+            background: white;
+            border-radius: 12px;
+            position: relative;
+        }
+
+        .confirm-modal-content {
+            max-width: 450px !important;
+            text-align: center;
+            padding: 2.5rem !important;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+
+<body class="bg-light theme-doctor">
+
+    <!-- Navbar -->
+    <nav class="navbar no-print">
+        <div class="container nav-container">
+            <a href="../index.html" class="logo">
+                <i class="fa-solid fa-hospital-user text-primary"></i> <span class="text-primary">Med</span>Book
+            </a>
+            <div class="flex items-center gap-3">
+                <span class="text-sm font-bold text-gray" id="doc-status-badge"></span>
+                <span class="text-sm font-bold text-gray"><i class="fa-solid fa-user-doctor mr-2"></i><span
+                        class="user-name-display"></span></span>
+                <button class="btn btn-outline btn-sm" onclick="logout()">Đăng xuất</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Layout -->
+    <div class="dashboard-layout no-print">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <a href="#" class="sidebar-link active" onclick="showTab('appointments-tab', this)">
+                    <i class="fa-solid fa-calendar-alt"></i> Quản lý ca khám
+                </a>
+                <a href="#" class="sidebar-link" onclick="showTab('schedule-tab', this)">
+                    <i class="fa-solid fa-clock"></i> Cấu hình lịch làm việc
+                </a>
+                <a href="#" class="sidebar-link" onclick="showTab('profile-tab', this)">
+                    <i class="fa-solid fa-user-pen"></i> Cập nhật hồ sơ
+                </a>
+                <a href="#" class="sidebar-link" onclick="showTab('leaves-tab', this)">
+                    <i class="fa-solid fa-umbrella-beach"></i> Đăng ký nghỉ phép
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+
+            <!-- Global Not Approved Warning -->
+            <div id="unapproved-warning" class="card mb-4"
+                style="display:none; border-color:var(--warning); background:#fffbeb;">
+                <div class="flex gap-3">
+                    <i class="fa-solid fa-triangle-exclamation text-warning text-xl mt-1"></i>
+                    <div>
+                        <h4 class="text-warning">Tài khoản chưa được phê duyệt</h4>
+                        <p class="text-sm mt-1">Hồ sơ bác sĩ của bạn đang chờ Admin phê duyệt. Bạn vẫn có thể cập nhật
+                            hồ sơ, nhưng bệnh nhân chưa thể tìm thấy bạn và bạn chưa thể tạo lịch làm việc.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Appointments -->
+            <div id="appointments-tab" class="tab-content">
+                <div class="flex justify-between items-center mb-4">
+                    <h2>Quản lý lịch hẹn</h2>
+                    <div class="flex items-center gap-2">
+                        <label class="text-bold mb-0">Trạng thái:</label>
+                        <select id="filter-status" class="form-control" style="min-width:150px"
+                            onchange="loadAppointments()">
+                            <option value="">Tất cả</option>
+                            <option value="PENDING">Chờ xác nhận (PENDING)</option>
+                            <option value="CONFIRMED">Đã xác nhận (CONFIRMED)</option>
+                            <option value="COMPLETED">Đã hoàn thành</option>
+                            <option value="CANCELLED">Đã hủy</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="card p-0" style="overflow-x:auto;">
+                    <table id="appointments-table">
+                        <thead>
+                            <tr>
+                                <th>Ngày hẹn</th>
+                                <th>Giờ</th>
+                                <th>Bệnh nhân</th>
+                                <th>Lý do</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="appointments-body">
+                            <tr>
+                                <td colspan="6" class="text-center">Đang tải dữ liệu...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab: Schedule Config -->
+            <div id="schedule-tab" class="tab-content" style="display:none;">
+                <div class="flex justify-between items-center mb-4">
+                    <h2>Cấu hình lịch làm việc cố định</h2>
+                </div>
+
+                <div class="grid grid-2">
+                    <div class="card">
+                        <h3 class="mb-3 text-primary"><i class="fa-solid fa-plus-circle"></i> Thêm lịch mới</h3>
+                        <form id="schedule-form" onsubmit="createSchedule(event)">
+                            <div class="form-group">
+                                <label>Loại lịch</label>
+                                <div class="flex gap-4 mb-2 mt-1">
+                                    <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                        <input type="radio" name="sch-type" value="recurring" checked
+                                            onchange="toggleSchType()"> Lịch cố định hàng tuần
+                                    </label>
+                                    <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                        <input type="radio" name="sch-type" value="specific" onchange="toggleSchType()">
+                                        Lịch một ngày cụ thể
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group" id="sch-day-group">
+                                <label>Thứ (*)</label>
+                                <select id="sch-day" class="form-control">
+                                    <option value="1">Thứ Hai</option>
+                                    <option value="2">Thứ Ba</option>
+                                    <option value="3">Thứ Tư</option>
+                                    <option value="4">Thứ Năm</option>
+                                    <option value="5">Thứ Sáu</option>
+                                    <option value="6">Thứ Bảy</option>
+                                    <option value="0">Chủ Nhật</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="sch-date-group" style="display:none;">
+                                <label>Ngày cụ thể (*)</label>
+                                <input type="date" id="sch-date" class="form-control">
+                            </div>
+                            <div class="grid grid-2">
+                                <div class="form-group">
+                                    <label>Giờ bắt đầu (*)</label>
+                                    <input type="time" id="sch-start" class="form-control" value="07:00" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Giờ kết thúc (*)</label>
+                                    <input type="time" id="sch-end" class="form-control" value="17:00" required>
+                                </div>
+                            </div>
+                            <div class="grid grid-2">
+                                <div class="form-group">
+                                    <label>Độ dài 1 ca (phút) (*)</label>
+                                    <input type="number" id="sch-duration" class="form-control" value="30" min="10"
+                                        max="120" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Số ca tối đa/buổi (*)</label>
+                                    <input type="number" id="sch-max" class="form-control" value="8" min="1" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100" id="sch-submit-btn">Tạo Lịch</button>
+                            <div id="sch-error" class="error-msg mt-3" style="display:none;"></div>
+                        </form>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="mb-3"><i class="fa-solid fa-calendar-alt"></i> Lịch hiện tại</h3>
+
+                        <div class="calendar-nav flex justify-between items-center mb-4">
+                            <button type="button" class="btn btn-outline btn-sm" onclick="changeCalendarMonth(-1)"><i
+                                    class="fa-solid fa-chevron-left"></i></button>
+                            <h4 id="calendar-month-year" class="font-bold text-gray uppercase tracking-wider">THÁNG ...
+                            </h4>
+                            <button type="button" class="btn btn-outline btn-sm" onclick="changeCalendarMonth(1)"><i
+                                    class="fa-solid fa-chevron-right"></i></button>
+                        </div>
+                        <div class="calendar-grid mb-1"
+                            style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.25rem; text-align: center;">
+                            <div class="calendar-day-header">CN</div>
+                            <div class="calendar-day-header">T2</div>
+                            <div class="calendar-day-header">T3</div>
+                            <div class="calendar-day-header">T4</div>
+                            <div class="calendar-day-header">T5</div>
+                            <div class="calendar-day-header">T6</div>
+                            <div class="calendar-day-header">T7</div>
+                        </div>
+                        <div id="calendar-days" class="calendar-grid mb-4"
+                            style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.25rem; text-align: center;">
+                            <p class="text-sm text-gray" style="grid-column: span 7;">Đang tải...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Full width for the details table -->
+                <div class="card mt-4">
+                    <h4 class="mb-3 text-sm font-bold text-gray uppercase tracking-wider">Danh sách chi tiết ngày làm
+                        việc</h4>
+                    <div style="overflow-x:auto;">
+                        <table class="text-sm table-compact w-100">
+                            <thead>
+                                <tr>
+                                    <th>Ngày/Thứ</th>
+                                    <th>Thời gian</th>
+                                    <th>Cấu hình ca</th>
+                                    <th class="text-center">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="schedules-table-body">
+                                <tr>
+                                    <td colspan="4" class="text-center py-4">Chưa có dữ liệu</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Profile -->
+            <div id="profile-tab" class="tab-content" style="display:none;">
+                <div class="card max-w-lg mx-auto" style="max-width:600px">
+                    <h2 class="mb-4">Hồ sơ chuyên môn</h2>
+                    <form id="profile-form" onsubmit="updateProfile(event)">
+                        <div class="form-group">
+                            <label>Chuyên khoa (*)</label>
+                            <select id="prof-spec" class="form-control" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Kinh nghiệm (Năm) (*)</label>
+                            <input type="number" id="prof-exp" class="form-control" required min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Giới thiệu bản thân</label>
+                            <textarea id="prof-bio" class="form-control" rows="5"
+                                placeholder="Tóm tắt về kinh nghiệm, chứng chỉ..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100" id="prof-submit-btn">Lưu Hồ Sơ</button>
+                        <div id="prof-msg" class="mt-3 text-center text-sm font-bold" style="display:none;"></div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Tab: Leave Requests -->
+            <div id="leaves-tab" class="tab-content" style="display:none;">
+                <div class="flex justify-between items-center mb-4">
+                    <h2>Quản lý lịch nghỉ phép</h2>
+                </div>
+
+                <div class="grid grid-2">
+                    <div class="card">
+                        <h3 class="mb-3 text-primary"><i class="fa-solid fa-calendar-plus"></i> Đăng ký ngày nghỉ</h3>
+                        <p class="text-xs text-gray mb-3 italic">* Lưu ý: Đăng ký nghỉ sẽ tự động hủy các ca khám chưa
+                            được thực hiện vào ngày đó.</p>
+                        <form id="leave-form" onsubmit="createLeave(event)">
+                            <div class="form-group">
+                                <label>Ngày nghỉ (*)</label>
+                                <input type="date" id="leave-date" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Lý do nghỉ</label>
+                                <textarea id="leave-reason" class="form-control" rows="3"
+                                    placeholder="Ghi chú lý do nghỉ..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100" id="leave-submit-btn">Đăng Ký
+                                Nghỉ</button>
+                            <div id="leave-error" class="error-msg mt-3" style="display:none;"></div>
+                        </form>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="mb-3"><i class="fa-solid fa-list"></i> Danh sách ngày nghỉ</h3>
+                        <div id="leaves-list" class="flex flex-column gap-3">
+                            <p class="text-sm text-gray text-center py-3">Đang tải...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Modals for Appointment Actions -->
+    <!-- Action Modal -->
+    <div class="modal-overlay no-print" id="action-modal" style="display: none;">
+        <div class="modal-content" id="action-modal-content" style="max-width: 500px; width: 95%;">
+            <button class="close-btn" onclick="cancelActionModal()"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="mb-3" id="action-title">Thao tác</h3>
+            <p class="text-sm mb-3">Lịch hẹn: <span id="action-info" class="font-bold"></span></p>
+
+            <form id="action-form" onsubmit="submitAction(event)">
+                <input type="hidden" id="action-id">
+                <input type="hidden" id="action-type">
+
+                <div class="form-group" id="action-notes-group">
+                    <label id="action-notes-label">Ghi chú cho bệnh nhân</label>
+                    <textarea id="action-notes" class="form-control" rows="3" placeholder="..."></textarea>
+                </div>
+
+                <div id="action-complete-group" style="display: none;">
+                    <div class="form-group">
+                        <label>Chẩn đoán bệnh (*)</label>
+                        <textarea id="action-diagnosis" class="form-control" rows="2"
+                            placeholder="Ví dụ: Viêm họng cấp, Sốt siêu vi..."></textarea>
+                    </div>
+                    <div class="grid grid-2">
+                        <div class="form-group">
+                            <label>Tuổi</label>
+                            <input type="number" id="action-patient-age" class="form-control" placeholder="Ví dụ: 25">
+                        </div>
+                        <div class="form-group">
+                            <label>Cân nặng (kg)</label>
+                            <input type="number" step="0.1" id="action-patient-weight" class="form-control"
+                                placeholder="Ví dụ: 65.5">
+                        </div>
+                    </div>
+                    <div class="grid grid-2">
+                        <div class="form-group">
+                            <label>Chiều cao (cm)</label>
+                            <input type="number" step="0.1" id="action-patient-height" class="form-control"
+                                placeholder="Ví dụ: 170">
+                        </div>
+                        <div class="form-group">
+                            <label>Địa chỉ bệnh nhân</label>
+                            <input type="text" id="action-patient-address" class="form-control"
+                                placeholder="Quận/Huyện, TP.HCM">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Lời dặn bác sĩ</label>
+                        <textarea id="action-advice" class="form-control" rows="2"
+                            placeholder="Nghỉ ngơi, uống nhiều nước..."></textarea>
+                    </div>
+                    <div class="form-group border-top pt-3 mt-3">
+                        <label class="text-primary font-bold mb-2 block flex justify-between items-center">
+                            <span><i class="fa-solid fa-pills"></i> Đơn thuốc</span>
+                            <div class="medicine-search-container" style="position:relative; width:250px;">
+                                <input type="text" id="med-search-input" class="form-control form-control-sm"
+                                    placeholder="Tìm & thêm thuốc từ..." oninput="debounceSearchMedicines(this.value)">
+                                <div id="med-search-results" class="search-results-dropdown"></div>
+                            </div>
+                        </label>
+                        <div
+                            style="overflow-x:auto; margin-bottom: 15px; border: 1px solid #e2e8f0; border-radius: 8px;">
+                            <table class="table-compact text-sm"
+                                style="width:100%; border-collapse: collapse; min-width: 800px;">
+                                <thead style="background: #f8fafc;">
+                                    <tr>
+                                        <th style="padding: 12px; text-align: left; width: 300px;">Tên Thuốc & Liều
+                                            Lượng</th>
+                                        <th style="width:65px; text-align: center;">Sáng</th>
+                                        <th style="width:65px; text-align: center;">Trưa</th>
+                                        <th style="width:65px; text-align: center;">Chiều</th>
+                                        <th style="width:65px; text-align: center;">Tối</th>
+                                        <th style="width:80px; text-align: center;">Tổng SL</th>
+                                        <th style="width:50px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="prescription-list">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <button type="button" class="btn btn-outline btn-sm shadow-none mt-2" onclick="addRxRow()"
+                            style="border-style: dashed;"><i class="fa-solid fa-plus"></i> Thêm thuốc thủ công</button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100" id="action-btn"
+                    style="height: 45px; font-weight: bold;">Xác nhận hoàn tất</button>
+                <div id="action-error" class="error-msg mt-3" style="display:none;"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Finish Confirm Modal (Custom Dialog) -->
+    <div class="modal-overlay no-print" id="finish-confirm-modal"
+        style="display: none; background: rgba(0,0,0,0.4); z-index: 2000;">
+        <div class="modal-content confirm-modal-content card shadow-lg">
+            <div class="icon-box bg-light-primary text-primary mx-auto mb-4"
+                style="width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="fa-solid fa-file-signature text-3xl"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2">Xác nhận hoàn tất ca khám</h3>
+            <p class="text-gray mb-6">Hồ sơ đã sẵn sàng. Bạn muốn thực hiện bước nào tiếp theo?</p>
+
+            <div class="grid grid-2 gap-3 mb-2">
+                <button class="btn btn-outline" style="padding: 12px;" onclick="closeFinishConfirm()">
+                    <i class="fa-solid fa-arrow-left mr-2"></i> Quay lại
+                </button>
+                <button class="btn btn-primary" style="padding: 12px;" onclick="finalSubmitAction('save_only')">
+                    <i class="fa-solid fa-check mr-2"></i> Xác nhận
+                </button>
+            </div>
+            <button class="btn btn-primary w-100" style="padding: 15px; background: #059669; border-color: #059669;"
+                onclick="finalSubmitAction('save_print')">
+                <i class="fa-solid fa-print mr-2"></i> Lưu & In đơn thuốc (A5)
+            </button>
+        </div>
+    </div>
+
+    <!-- History Modal -->
+    <div class="modal-overlay no-print" id="history-modal" style="display: none;">
+        <div class="modal-content" style="max-width: 800px; width: 90%;">
+            <button class="close-btn" onclick="closeHistoryModal()"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="mb-4"><i class="fa-solid fa-history text-primary"></i> Lịch sử khám bệnh: <span
+                    id="history-patient-name" class="text-gray"></span></h3>
+
+            <div id="history-loading" class="text-center py-5">
+                <i class="fa-solid fa-circle-notch fa-spin fa-2x text-primary"></i>
+                <p class="mt-2 text-gray">Đang tải lịch sử...</p>
+            </div>
+
+            <div id="history-content" style="max-height: 400px; overflow-y: auto;">
+                <table class="table-compact w-100">
+                    <thead>
+                        <tr>
+                            <th>Ngày khám</th>
+                            <th>Bác sĩ</th>
+                            <th>Lý do / Chẩn đoán</th>
+                            <th>Ghi chú / Đơn thuốc</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-table-body"></tbody>
+                </table>
+            </div>
+
+            <div id="history-empty" class="text-center py-5" style="display:none;">
+                <i class="fa-solid fa-folder-open fa-2x text-gray mb-2"></i>
+                <p class="text-gray">Chưa có lịch sử khám bệnh trước đó.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Confirm Modal -->
+    <div class="modal-overlay no-print" id="custom-confirm-modal" style="display: none;">
+        <div class="modal-content" style="max-width: 400px;">
+            <h3 class="mb-3" id="confirm-title">Xác nhận</h3>
+            <p class="mb-4" id="confirm-message"></p>
+            <div class="flex justify-end gap-3">
+                <button class="btn btn-outline btn-sm" onclick="closeConfirmModal()">Hủy</button>
+                <button class="btn btn-primary btn-sm" id="confirm-ok-btn">Đồng ý</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Print Preview Selection (Hidden) -->
+    <div id="print-section" style="display:none;"></div>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js?v=2"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        let isApproved = false;
+        let currentAppointmentId = null;
+
+        // Guard route
+        if (guardRoute('doctor')) {
+            document.addEventListener('DOMContentLoaded', async () => {
+                await checkProfileStatus();
+                loadAppointments();
+                loadSpecialties();
+            });
+        }
+
+        function showTab(id, el) {
+            document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+            document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+            document.getElementById(id).style.display = 'block';
+            el.classList.add('active');
+
+            if (id === 'appointments-tab') loadAppointments();
+            if (id === 'schedule-tab') loadSchedules();
+            if (id === 'leaves-tab') {
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                const ld = document.getElementById('leave-date');
+                if (ld) {
+                    ld.value = tomorrow.toISOString().split('T')[0];
+                    ld.setAttribute('min', tomorrow.toISOString().split('T')[0]);
+                }
+                loadLeaves();
+            }
+            if (id === 'profile-tab') loadProfile();
+        }
+
+        const DAY_NAMES = { 0: 'Chủ Nhật', 1: 'Thứ 2', 2: 'Thứ 3', 3: 'Thứ 4', 4: 'Thứ 5', 5: 'Thứ 6', 6: 'Thứ 7' };
+
+        async function checkProfileStatus() {
+            try {
+                const profile = await api.get('/doctors/me');
+                isApproved = profile.is_approved;
+
+                const badge = document.getElementById('doc-status-badge');
+                if (isApproved) {
+                    badge.innerHTML = '<span class="text-success"><i class="fa-solid fa-check-circle"></i> Đã duyệt</span>';
+                } else {
+                    badge.innerHTML = '<span class="text-warning"><i class="fa-solid fa-clock"></i> Chờ duyệt</span>';
+                    document.getElementById('unapproved-warning').style.display = 'block';
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        // --- Appointments ---
+        async function loadAppointments() {
+            const status = document.getElementById('filter-status').value;
+            const tbody = document.getElementById('appointments-body');
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải...</td></tr>';
+
+            try {
+                const query = status ? `?status=${status}` : '';
+                const apps = await api.get(`/appointments/doctor/list${query}`);
+
+                window.currentAppointments = apps;
+
+                if (apps.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-gray py-4">Không có lịch hẹn nào.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = apps.map(app => {
+                    const badgeClass = `badge badge-${app.status.toLowerCase()}`;
+                    let actions = '-';
+
+                    if (app.status === 'PENDING') {
+                        actions = `<button class="btn btn-success btn-sm mr-2" onclick="openActionModal('${app.id}', 'confirm', '${formatDate(app.scheduled_date)} ${formatTime(app.scheduled_time)} - ${escapeHTML(app.patient_name)}')"><i class="fa-solid fa-check mr-2"></i> Xác nhận</button>` +
+                            `<button class="btn btn-danger btn-sm" onclick="openActionModal('${app.id}', 'cancel', '${formatDate(app.scheduled_date)} ${formatTime(app.scheduled_time)} - ${escapeHTML(app.patient_name)}')"><i class="fa-solid fa-xmark mr-2"></i> Hủy</button>`;
+                    } else if (app.status === 'CONFIRMED') {
+                        actions = `<button class="btn btn-primary btn-sm mr-2" onclick="openActionModal('${app.id}', 'complete', '${formatDate(app.scheduled_date)} ${formatTime(app.scheduled_time)} - ${escapeHTML(app.patient_name)}')"><i class="fa-solid fa-notes-medical mr-2"></i> Hoàn thành ca</button>` +
+                            `<button class="btn btn-outline btn-sm text-danger" style="border-color:var(--danger)" onclick="openActionModal('${app.id}', 'cancel', '${formatDate(app.scheduled_date)} ${formatTime(app.scheduled_time)} - ${escapeHTML(app.patient_name)}')"><i class="fa-solid fa-xmark mr-2"></i> Hủy</button>`;
+                    } else if (app.status === 'COMPLETED') {
+                        actions = `<button class="btn btn-outline btn-sm text-primary mr-2" style="padding:2px 8px;" onclick="printPrescription('${app.id}')" title="In đơn thuốc"><i class="fa-solid fa-print mr-2"></i> Hồ Sơ</button>` +
+                                  `<button class="btn btn-outline btn-sm text-orange" style="padding:2px 8px; color: #f59e0b; border-color: #f59e0b;" onclick="openActionModal('${app.id}', 'complete', '${formatDate(app.scheduled_date)} ${formatTime(app.scheduled_time)} - ${escapeHTML(app.patient_name)}')" title="Chỉnh sửa ca khám"><i class="fa-solid fa-pen-to-square mr-2"></i> Sửa</button>`;
+                    }
+
+                    return `
+                    <tr>
+                        <td class="font-bold">${formatDate(app.scheduled_date)}</td>
+                        <td><span class="text-primary font-bold"><i class="fa-regular fa-clock"></i> ${formatTime(app.scheduled_time)}</span></td>
+                        <td>
+                            ${escapeHTML(app.patient_name || 'Bệnh nhân')}
+                            <button class="btn btn-outline btn-sm shadow-none ml-1 p-0 px-1 text-xs" title="Xem lịch sử khám" onclick="viewHistory('${app.patient_id}', '${escapeHTML(app.patient_name)}')"><i class="fa-solid fa-clock-rotate-left"></i></button>
+                        </td>
+                        <td><small>${escapeHTML(app.reason || '-')}</small></td>
+                        <td><span class="badge ${badgeClass}">${app.status}</span></td>
+                        <td>${actions}</td>
+                    </tr>
+                    `;
+                }).join('');
+
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center text-danger py-4">${escapeHTML(e.message)}</td></tr>`;
+            }
+        }
+
+        function openActionModal(id, type, info) {
+            currentAppointmentId = id;
+            document.getElementById('action-id').value = id;
+            document.getElementById('action-type').value = type;
+            document.getElementById('action-info').textContent = info;
+            document.getElementById('action-error').style.display = 'none';
+            document.getElementById('action-notes').value = '';
+
+            const btn = document.getElementById('action-btn');
+            const formObj = document.getElementById('action-notes-group');
+            const labelObj = document.getElementById('action-notes-label');
+            const taObj = document.getElementById('action-notes');
+
+            const diagGroup = document.getElementById('action-complete-group');
+            const diagObj = document.getElementById('action-diagnosis');
+            diagObj.value = '';
+            document.getElementById('action-advice').value = '';
+            document.getElementById('action-patient-age').value = '';
+            document.getElementById('action-patient-weight').value = '';
+            document.getElementById('action-patient-height').value = '';
+            document.getElementById('action-patient-address').value = '';
+            document.getElementById('prescription-list').innerHTML = '';
+
+            if (type === 'confirm') {
+                document.getElementById('action-title').textContent = "Xác nhận lịch hẹn";
+                btn.className = "btn btn-success w-100";
+                btn.textContent = "Xác Nhận & Gửi Email";
+                formObj.style.display = 'block';
+                labelObj.textContent = "Ghi chú dặn dò (không bắt buộc)";
+                taObj.required = false;
+                diagGroup.style.display = 'none';
+                diagObj.required = false;
+            } else if (type === 'cancel') {
+                document.getElementById('action-title').textContent = "Hủy / Từ chối lịch hẹn";
+                btn.className = "btn btn-danger w-100";
+                btn.textContent = "Xác nhận Hủy";
+                formObj.style.display = 'block';
+                labelObj.textContent = "Lý do hủy (* Bắt buộc)";
+                taObj.required = true;
+                diagGroup.style.display = 'none';
+                diagObj.required = false;
+            } else if (type === 'complete') {
+                document.getElementById('action-modal-content').style.maxWidth = '900px';
+
+                const app = window.currentAppointments.find(a => a.id === id);
+                const isEdit = app && app.status === 'COMPLETED';
+
+                document.getElementById('action-title').innerHTML = isEdit
+                    ? "<i class=\"fa-solid fa-pen-to-square\"></i> Chỉnh sửa Hồ Sơ & Đơn Thuốc"
+                    : "<i class=\"fa-solid fa-notes-medical\"></i> Hoàn thành ca & Sổ khám bệnh";
+
+                btn.className = "btn btn-primary w-100";
+                btn.textContent = isEdit ? "Cập nhật Hồ Sơ" : "Lưu Sổ Khám & Hoàn Thành";
+                formObj.style.display = 'none';
+                taObj.required = false;
+                diagGroup.style.display = 'block';
+                diagObj.required = true;
+
+                // If edit, fetch and fill
+                if (isEdit) {
+                    loadExistingPrescription(id);
+                }
+            }
+
+            document.getElementById('action-modal').style.display = 'flex';
+        }
+
+        async function finalSubmitAction(mode) {
+            const id = currentAppointmentId;
+            const diagnosis = document.getElementById('action-diagnosis').value;
+            const advice = document.getElementById('action-advice').value;
+
+            // Collect meds
+            const items = [];
+            document.querySelectorAll('.rx-row').forEach(row => {
+                const name = row.querySelector('.rx-name').value;
+                if (name) {
+                    items.push({
+                        medicine_name: name,
+                        dosage: "viên",
+                        frequency: "Hàng ngày",
+                        duration: "Theo liều",
+                        morning: parseFloat(row.querySelector('.rx-mng').value) || 0,
+                        noon: parseFloat(row.querySelector('.rx-noon').value) || 0,
+                        afternoon: parseFloat(row.querySelector('.rx-eve').value) || 0,
+                        evening: parseFloat(row.querySelector('.rx-night').value) || 0,
+                        total_quantity: parseInt(row.querySelector('.rx-total').value) || 0,
+                        instructions: ""
+                    });
+                }
+            });
+
+            if (!diagnosis && items.length === 0) {
+                alert("Vui lòng nhập chẩn đoán hoặc kê đơn thuốc.");
+                closeFinishConfirm();
+                return;
+            }
+
+            try {
+                // 1. Update status
+                await api.patch(`/appointments/${id}/status`, { status: 'completed' });
+
+                // 2. Save Prescription
+                if (diagnosis || items.length > 0) {
+                    await api.post('/prescriptions', {
+                        appointment_id: id,
+                        diagnosis: diagnosis,
+                        advice: advice,
+                        patient_age: parseInt(document.getElementById('action-patient-age').value) || null,
+                        patient_weight: parseFloat(document.getElementById('action-patient-weight').value) || null,
+                        patient_height: parseFloat(document.getElementById('action-patient-height').value) || null,
+                        patient_address: document.getElementById('action-patient-address').value || null,
+                        items: items
+                    });
+                }
+
+                showToast("Đã lưu hồ sơ ca khám bệnh thành công!");
+
+                // 3. Handle Print if requested
+                if (mode === 'save_print') {
+                    await printPrescription(id);
+                }
+
+                // Close all
+                closeFinishConfirm();
+                closeActionModal();
+                loadAppointments();
+
+            } catch (error) {
+                alert("Lỗi khi hoàn thành ca khám: " + error.message);
+            }
+        }
+
+        async function viewHistory(patientId, patientName) {
+            document.getElementById('history-patient-name').textContent = patientName;
+            document.getElementById('history-modal').style.display = 'flex';
+            document.getElementById('history-loading').style.display = 'block';
+            document.getElementById('history-content').style.display = 'none';
+            document.getElementById('history-empty').style.display = 'none';
+
+            try {
+                const history = await api.get(`/doctors/patients/${patientId}/history`);
+                const tbody = document.getElementById('history-table-body');
+
+                if (history.length === 0) {
+                    document.getElementById('history-loading').style.display = 'none';
+                    document.getElementById('history-empty').style.display = 'block';
+                    return;
+                }
+
+                tbody.innerHTML = history.map(h => {
+                    const c = h.clinical_data;
+                    let clinicalHtml = '';
+                    if (c) {
+                        clinicalHtml = `
+                            <div class="text-xs mb-2 bg-light p-2 rounded flex gap-4" style="background:#f8fafc; margin-top:5px; border: 1px solid #e2e8f0;">
+                                <span><strong>Tuổi:</strong> ${c.age || '---'}</span>
+                                <span><strong>Cân nặng:</strong> ${c.weight || '---'} kg</span>
+                                <span><strong>Chiều cao:</strong> ${c.height || '---'} cm</span>
+                            </div>
+                            <div class="text-xs p-2 rounded mb-2" style="background:#f1f5f9; margin-top:-5px;">
+                                <strong>Địa chỉ:</strong> ${escapeHTML(c.address || '---')}
+                            </div>
+                        `;
+                    }
+                    return `
+                    <tr>
+                        <td class="font-bold">${formatDate(h.date)}</td>
+                        <td><small>${escapeHTML(h.doctor_name)}</small></td>
+                        <td>
+                            ${escapeHTML(h.reason || 'K/b tổng quát')}
+                            ${clinicalHtml}
+                            <div class="text-primary font-bold mt-1" style="font-size:11px;">Chẩn đoán: ${escapeHTML(c ? c.diagnosis : (h.doctor_notes ? h.doctor_notes.split('\n')[0] : '-'))}</div>
+                        </td>
+                        <td>
+                            <div style="font-size:11px; white-space:pre-wrap;">${escapeHTML(h.doctor_notes || '-')}</div>
+                        </td>
+                    </tr>
+                `}).join('');
+
+                document.getElementById('history-loading').style.display = 'none';
+                document.getElementById('history-content').style.display = 'block';
+            } catch (e) {
+                console.error(e);
+                showToast("Lỗi khi tải lịch sử: " + e.message);
+            }
+        }
+
+        function closeHistoryModal() {
+            document.getElementById('history-modal').style.display = 'none';
+        }
+
+        // --- Medicine Search ---
+        let searchTimeout = null;
+        function debounceSearchMedicines(q) {
+            clearTimeout(searchTimeout);
+            if (q.length < 2) {
+                document.getElementById('med-search-results').style.display = 'none';
+                return;
+            }
+            searchTimeout = setTimeout(() => searchMedicines(q), 300);
+        }
+
+        async function searchMedicines(q) {
+            try {
+                const medicines = await api.get(`/prescriptions/medicines?q=${encodeURIComponent(q)}&limit=10`);
+                const dropdown = document.getElementById('med-search-results');
+
+                if (medicines.length === 0) {
+                    dropdown.innerHTML = '<div class="search-result-item text-gray">Không tìm thấy thuốc</div>';
+                } else {
+                    dropdown.innerHTML = medicines.map(m => `
+                        <div class="search-result-item" onclick="selectMedicine('${escapeHTML(m.name)}', '${escapeHTML(m.strength)}')">
+                            <div class="font-bold">${escapeHTML(m.name)} <span class="text-primary font-normal">${escapeHTML(m.strength || '')}</span></div>
+                            <div class="text-xs text-gray">${escapeHTML(m.category || '')} - ${escapeHTML(m.manufacturer || '')}</div>
+                        </div>
+                    `).join('');
+                }
+                dropdown.style.display = 'block';
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function selectMedicine(name, strength) {
+            addRxRow(name + (strength ? ` (${strength})` : ''));
+            document.getElementById('med-search-input').value = '';
+            document.getElementById('med-search-results').style.display = 'none';
+        }
+
+        function addRxRow(name = '') {
+            const tbody = document.getElementById('prescription-list');
+            const row = document.createElement('tr');
+            row.className = "rx-row";
+            row.style.borderBottom = "1px solid #eee";
+            row.innerHTML = `
+                <td style="padding: 10px;"><input type="text" class="form-control rx-name" placeholder="Tên thuốc..." required value="${escapeHTML(name)}"></td>
+                <td style="padding: 10px;"><input type="number" class="form-control text-center rx-mng" min="0" step="0.5" value="1"></td>
+                <td style="padding: 10px;"><input type="number" class="form-control text-center rx-noon" min="0" step="0.5" value="0"></td>
+                <td style="padding: 10px;"><input type="number" class="form-control text-center rx-eve" min="0" step="0.5" value="1"></td>
+                <td style="padding: 10px;"><input type="number" class="form-control text-center rx-night" min="0" step="0.5" value="0"></td>
+                <td style="padding: 10px;"><input type="number" class="form-control text-center rx-total" min="1" value="10"></td>
+                <td style="padding: 10px;" class="text-center"><button type="button" class="btn btn-outline btn-sm p-2 text-danger border-0" onclick="this.closest('tr').remove()"><i class="fa-solid fa-trash"></i></button></td>
+            `;
+            tbody.appendChild(row);
+        }
+
+        async function printPrescription(appointmentId) {
+            try {
+                const app = window.currentAppointments.find(a => a.id === appointmentId);
+                const presc = await api.get(`/prescriptions/appointment/${appointmentId}`);
+
+                const printSection = document.getElementById('print-section');
+                const now = new Date();
+                const dateStr = `Ngày ${now.getDate()} tháng ${now.getMonth() + 1} năm ${now.getFullYear()}`;
+
+                printSection.innerHTML = `
+                    <div class="prescription-a5">
+                        <div class="presc-hospital-header">
+                            <div class="hospital-info">
+                                <p class="hospital-name">HỆ THỐNG PHÒNG KHÁM MEDBOOK</p>
+                                <p>Số điện thoại: 1900 xxxx</p>
+                                <p>Địa chỉ: 123 Đường ABC, Quận XYZ, TP.HCM</p>
+                            </div>
+                            <div class="barcode-area">
+                                <div class="barcode-placeholder">|| ||| || ||| || ||</div>
+                                <p class="text-xs text-center">${presc.id.substring(0, 8).toUpperCase()}</p>
+                            </div>
+                        </div>
+
+                        <h1 class="presc-main-title">ĐƠN THUỐC</h1>
+
+                        <div class="presc-patient-grid">
+                            <div class="full-row"><strong>Họ tên:</strong> ${escapeHTML(app ? app.patient_name : 'N/A')}</div>
+                            <div class="full-row"><strong>Khoa:</strong> ${escapeHTML(app ? app.specialty_name : '---')}</div>
+                            <div class="full-row">
+                                <span style="margin-right: 15mm;"><strong>Tuổi:</strong> ${presc.patient_age || '---'}</span>
+                                <span style="margin-right: 15mm;"><strong>Cân nặng:</strong> ${presc.patient_weight || '---'} kg</span>
+                                <span><strong>Chiều cao:</strong> ${presc.patient_height || '---'} cm</span>
+                            </div>
+                            <div class="full-row"><strong>Địa chỉ:</strong> ${escapeHTML(presc.patient_address || '---')}</div>
+                            <div class="full-row"><strong>Chẩn đoán:</strong> ${escapeHTML(presc.diagnosis || 'K/b định kỳ')}</div>
+                        </div>
+
+                        <div class="presc-meds-list">
+                            ${presc.items.map((item, idx) => `
+                                <div class="med-item">
+                                    <div class="med-main">
+                                        <span class="med-name">${idx + 1}. ${escapeHTML(item.medicine_name)}</span>
+                                        <span class="med-qty">SL: ${item.total_quantity} Viên</span>
+                                    </div>
+                                    <div class="med-usage" style="margin-left: 10mm; font-size: 11.5px; line-height: 1.6;">
+                                        ${(() => {
+                        const d = (item.dosage === 'Theo chỉ dẫn' || !item.dosage) ? 'viên' : item.dosage;
+                        return `Sáng: &nbsp;${item.morning}${item.morning > 0 ? ` ${d}` : ''} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Trưa: ${item.noon}${item.noon > 0 ? ` ${d}` : ''} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Chiều: ${item.afternoon}${item.afternoon > 0 ? ` ${d}` : ''} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tối: ${item.evening}${item.evening > 0 ? ` ${d}` : ''}`;
+                    })()}<br>
+                                        Cách dùng: Uống mỗi ngày.
+                                    </div>
+                                </div>
+                            `).join('')}
+
+                            <div class="presc-advice-inline mt-4">
+                                <p><strong>- Lời dặn:</strong></p>
+                                <div class="advice-content" style="font-style: italic; white-space: pre-wrap; font-size: 12px; margin-left: 5mm;">
+                                    ${escapeHTML(presc.advice || 'Uống đúng liều, tái khám nếu có dấu hiệu bất thường.')}
+                                </div>
+                                <p class="mt-4 text-xs">- Khám lại xin mang theo đơn này.</p>
+                            </div>
+                        </div>
+
+                        <div class="presc-bottom-layout">
+                            <div class="presc-advice-left">
+                                <!-- Empty, moved to inline -->
+                            </div>
+                            <div class="presc-signature-right">
+                                <p class="italic">${dateStr}</p>
+                                <p class="font-bold">Bác sĩ khám bệnh</p>
+                                <div class="sign-space"></div>
+                                <p class="font-bold">${escapeHTML(app ? app.doctor_name : 'Bác sĩ điều trị')}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="manual-stamp-space"></div>
+                    </div>
+                `;
+
+                window.print();
+            } catch (e) {
+                console.error(e);
+                let msg = e.message;
+                if (e.status === 404) msg = "Đơn thuốc chưa được kê cho ca khám này.";
+                showToast("Lỗi khi in đơn thuốc: " + msg);
+            }
+        }
+
+        function closeActionModal() {
+            document.getElementById('action-modal').style.display = 'none';
+        }
+
+        function closeFinishConfirm() {
+            document.getElementById('finish-confirm-modal').style.display = 'none';
+        }
+
+        async function loadExistingPrescription(appId) {
+            try {
+                const presc = await api.get(`/prescriptions/appointment/${appId}`);
+                document.getElementById('action-diagnosis').value = presc.diagnosis || '';
+                document.getElementById('action-advice').value = presc.advice || '';
+                document.getElementById('action-patient-age').value = presc.patient_age || '';
+                document.getElementById('action-patient-weight').value = presc.patient_weight || '';
+                document.getElementById('action-patient-height').value = presc.patient_height || '';
+                document.getElementById('action-patient-address').value = presc.patient_address || '';
+
+                const list = document.getElementById('prescription-list');
+                list.innerHTML = '';
+                presc.items.forEach(it => {
+                    const row = document.createElement('tr');
+                    row.className = "rx-row";
+                    row.style.borderBottom = "1px solid #eee";
+                    row.innerHTML = `
+                        <td style="padding: 10px;"><input type="text" class="form-control rx-name" placeholder="Tên thuốc..." required value="${escapeHTML(it.medicine_name)}"></td>
+                        <td style="padding: 10px;"><input type="number" class="form-control text-center rx-mng" min="0" step="0.5" value="${it.morning}"></td>
+                        <td style="padding: 10px;"><input type="number" class="form-control text-center rx-noon" min="0" step="0.5" value="${it.noon}"></td>
+                        <td style="padding: 10px;"><input type="number" class="form-control text-center rx-eve" min="0" step="0.5" value="${it.afternoon}"></td>
+                        <td style="padding: 10px;"><input type="number" class="form-control text-center rx-night" min="0" step="0.5" value="${it.evening}"></td>
+                        <td style="padding: 10px;"><input type="number" class="form-control text-center rx-total" min="1" value="${it.total_quantity}"></td>
+                        <td style="padding: 10px;" class="text-center"><button type="button" class="btn btn-outline btn-sm p-2 text-danger border-0" onclick="this.closest('tr').remove()"><i class="fa-solid fa-trash"></i></button></td>
+                    `;
+                    list.appendChild(row);
+                });
+            } catch (e) {
+                console.error("Lỗi khi tải đơn thuốc cũ:", e);
+                showToast("Lỗi khi tải dữ liệu cũ: " + e.message);
+            }
+        }
+
+        async function finalSubmitAction(mode) {
+            const id = currentAppointmentId;
+            const diagnosis = document.getElementById('action-diagnosis').value;
+            const advice = document.getElementById('action-advice').value;
+
+            const app = window.currentAppointments.find(a => a.id === id);
+            const isEdit = app && app.status === 'COMPLETED';
+
+            // Collect meds
+            const items = [];
+            document.querySelectorAll('.rx-row').forEach(row => {
+                const name = row.querySelector('.rx-name').value;
+                if (name) {
+                    items.push({
+                        medicine_name: name,
+                        dosage: "viên",
+                        frequency: "Hàng ngày",
+                        duration: "Theo liều",
+                        morning: parseFloat(row.querySelector('.rx-mng').value) || 0,
+                        noon: parseFloat(row.querySelector('.rx-noon').value) || 0,
+                        afternoon: parseFloat(row.querySelector('.rx-eve').value) || 0,
+                        evening: parseFloat(row.querySelector('.rx-night').value) || 0,
+                        total_quantity: parseInt(row.querySelector('.rx-total').value) || 0,
+                        instructions: ""
+                    });
+                }
+            });
+
+            if (!diagnosis && items.length === 0) {
+                alert("Vui lòng nhập chẩn đoán hoặc kê đơn thuốc.");
+                closeFinishConfirm();
+                return;
+            }
+
+            try {
+                // 1. Update status (Only if not already completed)
+                if (!isEdit) {
+                    const notes = diagnosis + (advice ? "\nLời dặn: " + advice : "");
+                    await api.patch(`/appointments/${id}/complete`, { doctor_notes: notes });
+                }
+
+                // 2. Save/Update Prescription
+                const pData = {
+                    appointment_id: id,
+                    diagnosis: diagnosis,
+                    advice: advice,
+                    patient_age: parseInt(document.getElementById('action-patient-age').value) || null,
+                    patient_weight: parseFloat(document.getElementById('action-patient-weight').value) || null,
+                    patient_height: parseFloat(document.getElementById('action-patient-height').value) || null,
+                    patient_address: document.getElementById('action-patient-address').value || null,
+                    items: items
+                };
+
+                if (isEdit) {
+                    await api.put(`/prescriptions/appointment/${id}`, pData);
+                } else {
+                    await api.post('/prescriptions', pData);
+                }
+
+                showToast(isEdit ? "Đã cập nhật hồ sơ khám thành công!" : "Đã hoàn tất ca khám và lưu hồ sơ!");
+
+                // 3. Handle Print if requested
+                if (mode === 'save_print') {
+                    await printPrescription(id);
+                }
+
+                // Close all
+                closeFinishConfirm();
+                closeActionModal();
+                loadAppointments();
+
+            } catch (error) {
+                alert("Lỗi: " + error.message);
+            }
+        }
+
+        async function submitAction(e) {
+            e.preventDefault();
+            const id = document.getElementById('action-id').value;
+            const type = document.getElementById('action-type').value;
+            const notes = document.getElementById('action-notes').value;
+
+            const btn = document.getElementById('action-btn');
+            const err = document.getElementById('action-error');
+
+            btn.disabled = true;
+            const originalText = btn.textContent;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...';
+
+            try {
+                if (type === 'confirm') {
+                    await api.patch(`/appointments/${id}/confirm`, { doctor_notes: notes || null });
+                    showToast("Đã xác nhận lịch hẹn!");
+                    closeActionModal();
+                    loadAppointments();
+                } else if (type === 'cancel') {
+                    await api.patch(`/appointments/${id}/cancel`, { doctor_notes: notes });
+                    showToast("Đã hủy lịch hẹn!");
+                    closeActionModal();
+                    loadAppointments();
+                } else if (type === 'complete') {
+                    // Just show the final choice modal
+                    document.getElementById('finish-confirm-modal').style.display = 'flex';
+                }
+            } catch (error) {
+                err.textContent = error.message;
+                err.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        }
+
+        async function loadSchedules() {
+            const calDays = document.getElementById('calendar-days');
+            const tableBody = document.getElementById('schedules-table-body');
+            calDays.innerHTML = '<p class="text-sm" style="grid-column: span 7;"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải...</p>';
+            try {
+                const res = await api.get('/doctors/me/schedules');
+                if (res.length === 0) {
+                    calDays.innerHTML = '<p class="text-sm text-gray text-center py-3" style="grid-column: span 7;">Vui lòng tạo lịch làm việc bên trái.</p>';
+                    tableBody.innerHTML = '<tr><td colspan="4" class="text-center py-4">Chưa có dữ liệu</td></tr>';
+                    return;
+                }
+                res.sort((a, b) => {
+                    if (a.day_of_week !== null && b.day_of_week !== null) return a.day_of_week - b.day_of_week;
+                    if (a.day_of_week !== null) return -1;
+                    if (b.day_of_week !== null) return 1;
+                    return a.specific_date.localeCompare(b.specific_date);
+                });
+                renderCalendar(res);
+                tableBody.innerHTML = res.map(s => {
+                    const dayText = s.specific_date ? formatDate(s.specific_date) : DAY_NAMES[s.day_of_week];
+                    const typeLabel = s.specific_date ? '<span class="badge badge-primary">Riêng</span>' : '<span class="badge" style="background:#e2e8f0; color:#475569">Cố định</span>';
+                    return `<tr><td class="font-bold">${dayText} ${typeLabel}</td><td>${formatTime(s.start_time)} - ${formatTime(s.end_time)}</td><td>${s.slot_duration_min}m | max ${s.max_slots}</td><td class="text-center"><button class="btn btn-outline btn-sm text-danger" style="border-color:var(--danger); padding:2px 8px;" onclick="deleteSchedule('${s.id}')"><i class="fa-solid fa-trash"></i></button></td></tr>`;
+                }).join('');
+            } catch (e) {
+                document.getElementById('calendar-days').innerHTML = `<p class="text-danger text-sm" style="grid-column: span 7;">${escapeHTML(e.message)}</p>`;
+            }
+        }
+
+        let currentCalYear = new Date().getFullYear();
+        let currentCalMonth = new Date().getMonth();
+
+        function renderCalendar(schedules) {
+            const container = document.getElementById('calendar-days');
+            const monthYearEl = document.getElementById('calendar-month-year');
+            monthYearEl.textContent = `THÁNG ${currentCalMonth + 1} / ${currentCalYear}`;
+            const firstDay = new Date(currentCalYear, currentCalMonth, 1).getDay();
+            const daysInMonth = new Date(currentCalYear, currentCalMonth + 1, 0).getDate();
+            let html = '';
+            for (let i = 0; i < firstDay; i++) {
+                html += `<div class="calendar-cell inactive"></div>`;
+            }
+            const todayStr = new Date(new Date().getTime() - (new Date().getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+            for (let d = 1; d <= daysInMonth; d++) {
+                const tmp = new Date(currentCalYear, currentCalMonth, d);
+                const dateStr = new Date(tmp.getTime() - (tmp.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+                const dayOfWeek = tmp.getDay();
+                const daySchedules = schedules.filter(s => {
+                    if (s.specific_date && s.specific_date === dateStr) return true;
+                    if (s.day_of_week !== null && parseInt(s.day_of_week) === dayOfWeek) return true;
+                    return false;
+                });
+                const hasSchedule = daySchedules.length > 0;
+                let classes = 'calendar-cell';
+                let dotHtml = '';
+                let titleAttr = '';
+                if (hasSchedule) {
+                    classes += ' has-work';
+                    const lines = daySchedules.map(s => `${s.start_time.substring(0, 5)} - ${s.end_time.substring(0, 5)}`);
+                    titleAttr = `title="CA LÀM VIỆC:\n${lines.join('\n')}"`;
+                    dotHtml = `<div class="green-dot" style="margin-top: 4px; pointer-events: none;"></div>`;
+                }
+                if (dateStr === todayStr) {
+                    html += `<div class="${classes}" ${titleAttr} style="border: 2px solid var(--primary); background-color: #e0f2fe; box-shadow: 0 2px 4px rgba(0,0,0,0.1); font-weight: bold; transform: scale(1.02); cursor: default;"><span class="date-num text-primary">${d}</span><div style="font-size: 0.6rem; color: var(--primary); margin-top:2px;">HÔM NAY</div>${dotHtml}</div>`;
+                } else {
+                    html += `<div class="${classes}" ${titleAttr} style="${hasSchedule ? 'cursor: pointer;' : 'cursor: default;'}"><span class="date-num">${d}</span>${dotHtml}</div>`;
+                }
+            }
+            container.innerHTML = html;
+        }
+
+        function changeCalendarMonth(offset) {
+            currentCalMonth += offset;
+            if (currentCalMonth > 11) { currentCalMonth = 0; currentCalYear++; }
+            else if (currentCalMonth < 0) { currentCalMonth = 11; currentCalYear--; }
+            loadSchedules();
+        }
+
+        async function createSchedule(e) {
+            e.preventDefault();
+            if (!isApproved) { alert("Tài khoản chưa được phê duyệt. Không thể tự tạo lịch."); return; }
+            const btn = document.getElementById('sch-submit-btn');
+            const err = document.getElementById('sch-error');
+            btn.disabled = true; btn.textContent = 'Đang xử lý...'; err.style.display = 'none';
+            try {
+                const type = document.querySelector('input[name="sch-type"]:checked').value;
+                const body = { start_time: document.getElementById('sch-start').value + ":00", end_time: document.getElementById('sch-end').value + ":00", slot_duration_min: parseInt(document.getElementById('sch-duration').value), max_slots: parseInt(document.getElementById('sch-max').value) };
+                if (type === 'recurring') { body.day_of_week = parseInt(document.getElementById('sch-day').value); body.specific_date = null; }
+                else { body.specific_date = document.getElementById('sch-date').value; body.day_of_week = null; if (!body.specific_date) throw new Error("Vui lòng chọn ngày cụ thể"); }
+                await api.post('/doctors/me/schedules', body);
+                document.getElementById('sch-start').value = '07:00'; document.getElementById('sch-end').value = '17:00'; loadSchedules(); showToast("Thêm lịch thành công!");
+            } catch (error) { err.textContent = error.message; err.style.display = 'block'; } finally { btn.disabled = false; btn.textContent = 'Tạo Lịch'; }
+        }
+
+        function deleteSchedule(id) {
+            openConfirmModal('<i class="fa-solid fa-triangle-exclamation"></i> Xóa lịch làm việc', "Bạn có chắc chắn muốn xóa lịch làm việc này?", async () => {
+                try { await api.delete(`/doctors/me/schedules/${id}`); showToast("Đã xóa lịch làm việc"); loadSchedules(); } catch (e) { showToast("Lỗi khi xóa: " + e.message); }
+            });
+        }
+
+        async function loadSpecialties() {
+            try {
+                const spRes = await api.get('/admin/specialties');
+                const sel = document.getElementById('prof-spec');
+                sel.innerHTML = '<option value="">-- Chọn chuyên khoa --</option>' + spRes.map(sp => `<option value="${sp.id}">${escapeHTML(sp.name)}</option>`).join('');
+            } catch (e) { console.error(e); }
+        }
+
+        async function loadProfile() {
+            try {
+                const profile = await api.get('/doctors/me');
+                if (profile.specialty_id) document.getElementById('prof-spec').value = profile.specialty_id;
+                document.getElementById('prof-exp').value = profile.experience_years;
+                document.getElementById('prof-bio').value = profile.bio || '';
+            } catch (e) { console.error("Failed to load profile", e); }
+        }
+
+        async function updateProfile(e) {
+            e.preventDefault();
+            const btn = document.getElementById('prof-submit-btn');
+            const msg = document.getElementById('prof-msg');
+            btn.disabled = true; btn.textContent = 'Đang xử lý...'; msg.style.display = 'none';
+            try {
+                const body = { specialty_id: document.getElementById('prof-spec').value, experience_years: parseInt(document.getElementById('prof-exp').value), bio: document.getElementById('prof-bio').value };
+                await api.patch('/doctors/me', body);
+                showToast("Cập nhật hồ sơ thành công!");
+                msg.className = "mt-3 text-center text-sm font-bold text-success"; msg.style.display = 'block';
+                checkProfileStatus();
+            } catch (error) { msg.textContent = error.message; msg.className = "mt-3 text-center text-sm font-bold text-danger"; msg.style.display = 'block'; } finally { btn.disabled = false; btn.textContent = 'Lưu Hồ Sơ'; }
+        }
+
+        async function loadLeaves() {
+            const list = document.getElementById('leaves-list');
+            list.innerHTML = '<p class="text-sm"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải...</p>';
+            try {
+                const res = await api.get('/doctors/me/leaves');
+                if (res.length === 0) { list.innerHTML = '<p class="text-sm text-gray text-center py-3 border rounded-md">Chưa có lịch nghỉ nào.</p>'; return; }
+                list.innerHTML = res.map(l => `<div class="p-3 border rounded-md shadow-sm bg-white flex justify-between gap-3 mb-3"><div style="flex:1;"><span class="font-bold text-danger mb-1 block"><i class="fa-solid fa-calendar-xmark mr-2"></i>Ngày nghỉ: ${formatDate(l.leave_date)}</span><p class="text-sm text-gray" style="white-space:pre-wrap; word-break:break-word;">Lý do: ${escapeHTML(l.reason || 'Không có')}</p></div><div class="flex items-start gap-2" style="white-space:nowrap;"><span class="badge badge-cancelled">Đã nghỉ</span><button class="btn btn-outline btn-sm text-danger" style="border-color:var(--danger); padding:2px 8px;" onclick="deleteLeave('${l.id}')" title="Hủy lịch nghỉ"><i class="fa-solid fa-trash"></i></button></div></div>`).join('');
+            } catch (e) { list.innerHTML = `<p class="text-danger text-sm">${escapeHTML(e.message)}</p>`; }
+        }
+
+        function createLeave(e) {
+            e.preventDefault();
+            const date = document.getElementById('leave-date').value;
+            const reason = document.getElementById('leave-reason').value;
+            openConfirmModal('<i class="fa-solid fa-calendar-xmark"></i> Xác nhận lịch nghỉ', `Bạn có chắc muốn đăng ký nghỉ ngày ${formatDate(date)}? Toàn bộ ca khám ngày này sẽ không thể đặt được.`, async () => {
+                const btn = document.getElementById('leave-submit-btn');
+                const err = document.getElementById('leave-error');
+                btn.disabled = true; btn.textContent = 'Đang đăng ký...'; err.style.display = 'none';
+                try {
+                    await api.post('/doctors/me/leaves', { leave_date: date, reason: reason });
+                    document.getElementById('leave-reason').value = '';
+                    const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+                    document.getElementById('leave-date').value = tomorrow.toISOString().split('T')[0];
+                    loadLeaves(); showToast("Đăng ký nghỉ thành công!");
+                } catch (error) { err.textContent = error.message; err.style.display = 'block'; } finally { btn.disabled = false; btn.textContent = 'Đăng Ký Nghỉ'; }
+            });
+        }
+
+        function deleteLeave(id) {
+            openConfirmModal('<i class="fa-solid fa-trash"></i> Hủy lịch nghỉ', "Bạn có chắc chắn muốn hủy lịch nghỉ này?", async () => {
+                try { await api.delete(`/doctors/me/leaves/${id}`); showToast("Đã hủy lịch nghỉ"); loadLeaves(); } catch (e) { showToast("Lỗi khi xóa: " + e.message); }
+            });
+        }
+
+        function toggleSchType() {
+            const type = document.querySelector('input[name="sch-type"]:checked').value;
+            document.getElementById('sch-day-group').style.display = type === 'recurring' ? 'block' : 'none';
+            document.getElementById('sch-date-group').style.display = type === 'specific' ? 'block' : 'none';
+        }
+
+        function cancelActionModal() {
+            document.getElementById('action-modal').style.display = 'none';
+            document.getElementById('action-modal').querySelector('.modal-content').style.maxWidth = '500px';
+        }
+
+        function openConfirmModal(title, message, callback) {
+            document.getElementById('confirm-title').innerHTML = title;
+            document.getElementById('confirm-message').textContent = message;
+            confirmCallback = callback;
+            document.getElementById('custom-confirm-modal').style.display = 'flex';
+        }
+        function closeConfirmModal() { document.getElementById('custom-confirm-modal').style.display = 'none'; confirmCallback = null; }
+        document.getElementById('confirm-ok-btn').addEventListener('click', function () { if (confirmCallback) confirmCallback(); closeConfirmModal(); });
+
+        // Custom Styles for Prescription Inputs
+        const style = document.createElement('style');
+        style.textContent = `
+            .search-results-dropdown { 
+                position: absolute; top: 100%; left: 0; right: 0; background: white; 
+                border: 1px solid #ddd; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+                z-index: 1000; max-height: 250px; overflow-y: auto; display: none; 
+            }
+            .search-result-item { padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; }
+            .search-result-item:hover { background: #f8fafc; }
+            .search-result-item:last-child { border-bottom: none; }
+            
+            .rx-qty-input {
+                width: 50px;
+                padding: 4px 2px;
+                border: 1px solid #cbd5e1;
+                border-radius: 4px;
+                text-align: center;
+                font-size: 0.875rem;
+            }
+            .rx-qty-input:focus {
+                border-color: var(--primary);
+                outline: none;
+                box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+            }
+            /* Hide arrows for number inputs in compact table */
+            .rx-qty-input::-webkit-inner-spin-button, 
+            .rx-qty-input::-webkit-outer-spin-button { 
+                -webkit-appearance: none; margin: 0; 
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+
+</html>

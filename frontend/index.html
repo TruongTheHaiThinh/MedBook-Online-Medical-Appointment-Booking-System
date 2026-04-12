@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedBook - Hệ thống Đặt Lịch Khám</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="bg-light theme-patient">
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <i class="fa-solid fa-hospital-user text-primary"></i> Med<span class="text-primary">Book</span>
+            </a>
+            <div class="nav-links">
+                <a href="#about">Về chúng tôi</a>
+                <a href="#services">Dịch vụ</a>
+                <a href="#doctors">Bác sĩ</a>
+                <a href="#contact">Liên hệ</a>
+            </div>
+            <div class="auth-buttons" id="nav-auth">
+                <!-- Dynamically injected based on auth status -->
+                <button class="btn btn-outline" onclick="openLoginModal()">Đăng nhập</button>
+                <button class="btn btn-primary" onclick="openRegisterModal()">Đăng ký</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero">
+        <div class="container hero-container">
+            <div class="hero-content">
+                <h1 class="hero-title">Giải pháp <span>Chăm sóc sức khỏe</span> thông minh.</h1>
+                <p class="hero-subtitle">Đặt lịch hẹn với các chuyên gia y tế hàng đầu dễ dàng, nhanh chóng và bảo mật.
+                    Trải nghiệm sự tiện lợi của thế hệ y tế số.</p>
+                <div class="hero-actions">
+                    <button class="btn btn-primary btn-lg shadow-primary" onclick="goToDashboard()">
+                        <i class="fa-regular fa-calendar-check mr-2"></i> Đặt Lịch Ngay
+                    </button>
+                    <button class="btn btn-outline btn-lg ml-3"
+                        onclick="document.getElementById('services').scrollIntoView({behavior: 'smooth'})">Tìm hiểu
+                        thêm</button>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="blob-shape"></div>
+                <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                    alt="Doctor providing care" class="rounded-image shadow-lg">
+
+                <!-- Floating Info Cards -->
+                <div class="floating-card top-right glow">
+                    <div class="card-icon"><i class="fa-solid fa-user-doctor"></i></div>
+                    <div>
+                        <div class="text-bold">Bác sĩ chuyên khoa</div>
+                        <div class="text-sm text-gray">Kinh nghiệm > 10 năm</div>
+                    </div>
+                </div>
+                <div class="floating-card bottom-left glow delay-1">
+                    <div class="card-icon text-success"><i class="fa-solid fa-circle-check"></i></div>
+                    <div>
+                        <div class="text-bold">Đặt lịch 24/7</div>
+                        <div class="text-sm text-gray">Xác nhận tức thì</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Services Section -->
+    <section id="services" class="section bg-white text-center" style="padding-top: 12rem; padding-bottom: 12rem;">
+        <div class="container">
+            <h2 class="section-title">Chuyên khoa của chúng tôi</h2>
+            <p class="section-subtitle">MedBook cung cấp dịch vụ đặt lịch đa dạng các chuyên khoa phục vụ mọi nhu cầu
+                sức khỏe của bạn.</p>
+
+            <div class="grid grid-3 mt-5 mb-5" id="specialties-grid">
+                <!-- Dynamically loaded specialties will go here -->
+                <p class="text-gray col-span-3">Đang tải chuyên khoa...</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="grid grid-3">
+                <div>
+                    <h3 class="footer-title">
+                        <i class="fa-solid fa-hospital-user text-primary"></i> MedBook
+                    </h3>
+                    <p class="text-gray">Nền tảng đặt lịch khám bệnh thông minh, kết nối bệnh nhân và bác sĩ nhanh
+                        chóng, tiện lợi.</p>
+                </div>
+                <div>
+                    <h4 class="text-bold mb-3">Liên kết</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Trang chủ</a></li>
+                        <li><a href="#">Dịch vụ</a></li>
+                        <li><a href="#">Chính sách bảo mật</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-bold mb-3">Liên hệ</h4>
+                    <ul class="footer-contact">
+                        <li><i class="fa-solid fa-location-dot"></i> Đại học Công Nghiệp TP.HCM</li>
+                        <li><i class="fa-solid fa-phone"></i> 0337.608.284</li>
+                        <li><i class="fa-solid fa-envelope"></i> contact@medbook.com</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                &copy; 2026 MedBook Project by Trương Thế Hải Thịnh & Nguyễn Thị Quỳnh Trang. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Auth Modals -->
+    <div class="modal-overlay" id="auth-modal" style="display: none;">
+        <div class="modal-content auth-card">
+            <button class="close-btn" onclick="closeAuthModal()"><i class="fa-solid fa-xmark"></i></button>
+
+            <!-- Login Form -->
+            <div id="login-section">
+                <h2 class="text-center mb-4">Đăng Nhập</h2>
+                <form id="login-form" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label for="login-email">Email hoặc Số điện thoại</label>
+                        <input type="text" id="login-email" class="form-control" required placeholder="nhap@email.com hoặc 09xxx">
+                    </div>
+                    <div class="form-group mb-4">
+                        <label for="login-password">Mật khẩu</label>
+                        <input type="password" id="login-password" class="form-control" required placeholder="••••••••">
+                    </div>
+                    <div id="login-error" class="error-msg mb-3" style="display:none;"></div>
+                    <button type="submit" class="btn btn-primary w-100" id="login-btn">Đăng Nhập</button>
+                    <p class="text-center mt-4">
+                        Chưa có tài khoản? <a href="#" onclick="toggleAuthForms(); return false;"
+                            class="text-primary text-bold">Đăng ký ngay</a>
+                    </p>
+                </form>
+            </div>
+
+            <!-- Register Form -->
+            <div id="register-section" style="display: none;">
+                <h2 class="text-center mb-4">Đăng Ký</h2>
+                <form id="register-form" onsubmit="handleRegister(event)">
+                    <div class="form-group">
+                        <label for="reg-role">Bạn là?</label>
+                        <select id="reg-role" class="form-control" required>
+                            <option value="patient">Bệnh nhân</option>
+                            <option value="doctor">Bác sĩ</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-name">Họ và tên</label>
+                        <input type="text" id="reg-name" class="form-control" required placeholder="Nguyễn Văn A">
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-email">Email (Không bắt buộc)</label>
+                        <input type="email" id="reg-email" class="form-control" placeholder="nhap@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-phone">Số điện thoại (* Bắt buộc)</label>
+                        <input type="tel" id="reg-phone" class="form-control" required placeholder="0911222333">
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-address">Địa chỉ (* Bắt buộc)</label>
+                        <input type="text" id="reg-address" class="form-control" required placeholder="Số nhà, đường, Quận/Huyện, TP.HCM">
+                    </div>
+                    <div class="form-group mb-4">
+                        <label for="reg-password">Mật khẩu</label>
+                        <input type="password" id="reg-password" class="form-control" required
+                            placeholder="Tối thiểu 8 ký tự, có hoa, thường, số" minlength="8">
+                    </div>
+                    <div id="reg-error" class="error-msg mb-3" style="display:none;"></div>
+                    <button type="submit" class="btn btn-primary w-100" id="reg-btn">Tạo Tài Khoản</button>
+                    <p class="text-center mt-4">
+                        Đã có tài khoản? <a href="#" onclick="toggleAuthForms(); return false;"
+                            class="text-primary text-bold">Đăng nhập</a>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Apply theme based on role
+            if (isAuthenticated()) {
+                const user = getUser();
+                if (user.role === 'doctor') document.body.className = 'bg-light theme-doctor';
+                else if (user.role === 'admin') document.body.className = 'bg-light theme-admin';
+                else document.body.className = 'bg-light theme-patient';
+            } else {
+                document.body.className = 'bg-light theme-patient';
+            }
+
+            initAuthUI();
+
+            // Load specialties list for homepage
+            try {
+                const spRes = await api.get('/admin/specialties');
+                const grid = document.getElementById('specialties-grid');
+                if (spRes.length === 0) {
+                    grid.innerHTML = '<p class="text-gray col-span-3">Chưa có dữ liệu chuyên khoa.</p>';
+                    return;
+                }
+
+                const getSpecialtyIcon = (name) => {
+                    const n = name.toLowerCase();
+                    if (n.includes('tim mạch')) return 'fa-heart-pulse';
+                    if (n.includes('tiêu hóa')) return 'fa-clipboard-list';
+                    if (n.includes('thần kinh')) return 'fa-brain';
+                    if (n.includes('chấn thương') || n.includes('xương')) return 'fa-bone';
+                    if (n.includes('truyền nhiễm')) return 'fa-virus-covid';
+                    if (n.includes('sản') || n.includes('phụ khoa')) return 'fa-baby';
+                    if (n.includes('thận') || n.includes('lọc máu')) return 'fa-droplet';
+                    if (n.includes('ung bướu')) return 'fa-microscope';
+                    if (n.includes('da liễu')) return 'fa-allergies';
+                    if (n.includes('cấp cứu')) return 'fa-truck-medical';
+                    if (n.includes('răng') || n.includes('mặt')) return 'fa-tooth';
+                    if (n.includes('tai mũi họng')) return 'fa-ear-listen';
+                    if (n.includes('mắt')) return 'fa-eye';
+                    if (n.includes('phục hồi') || n.includes('vật lý trị liệu')) return 'fa-walking';
+                    if (n.includes('nội')) return 'fa-stethoscope';
+                    if (n.includes('ngoại')) return 'fa-scalpel-path';
+                    return 'fa-house-medical-check';
+                };
+
+                grid.innerHTML = spRes.map(sp => `
+                    <div class="card hover-lift p-4 text-center">
+                        <div class="icon-box bg-light-primary text-primary mx-auto mb-3">
+                            <i class="fa-solid ${getSpecialtyIcon(sp.name)} text-xl"></i>
+                        </div>
+                        <h3 class="text-lg font-bold mb-2">${escapeHTML(sp.name)}</h3>
+                        <p class="text-gray text-sm">${escapeHTML(sp.description || '')}</p>
+                    </div>
+                `).join('');
+            } catch (e) {
+                console.error(e);
+            }
+        });
+
+        // Navigation logic based on auth
+        function goToDashboard() {
+            if (!isAuthenticated()) {
+                openLoginModal();
+                return;
+            }
+
+            const user = getUser();
+            if (user.role === 'patient') window.location.href = 'patient/dashboard.html';
+            else if (user.role === 'doctor') window.location.href = 'doctor/dashboard.html';
+            else if (user.role === 'admin') window.location.href = 'admin/dashboard.html';
+        }
+    </script>
+</body>
+
+</html>

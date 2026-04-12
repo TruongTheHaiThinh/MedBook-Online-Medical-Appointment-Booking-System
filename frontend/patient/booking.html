@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đặt lịch khám - MedBook</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .slot-btn {
+            border: 1px solid var(--primary);
+            background: white;
+            color: var(--primary);
+            padding: 10px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+        }
+        .slot-btn:hover { background: var(--bg-light-primary); }
+        .slot-btn.selected { background: var(--primary); color: white; box-shadow: var(--shadow-primary);}
+        .slots-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; }
+    </style>
+</head>
+<body class="bg-light theme-patient">
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="../index.html" class="logo">
+                <i class="fa-solid fa-hospital-user text-primary"></i> MedBook
+            </a>
+            <div class="flex items-center gap-3">
+                <span class="text-sm font-bold text-gray"><i class="fa-solid fa-user-circle mr-2"></i><span class="user-name-display"></span></span>
+                <button class="btn btn-outline btn-sm" onclick="logout()">Đăng xuất</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Layout -->
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="sidebar-link">
+                    <i class="fa-solid fa-calendar-check"></i> Lịch hẹn của tôi
+                </a>
+                <a href="booking.html" class="sidebar-link active">
+                    <i class="fa-solid fa-user-doctor"></i> Đặt lịch mới
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <h2 class="mb-4">Đặt lịch khám bệnh mới</h2>
+
+            <div class="grid grid-2">
+                <!-- Select Doctor Area -->
+                <div class="card">
+                    <h3 class="mb-3"><i class="fa-solid fa-1"></i> Chọn Bác sĩ</h3>
+                    <div class="form-group">
+                        <label>Chuyên khoa</label>
+                        <select id="spec-select" class="form-control" onchange="loadDoctors()"></select>
+                    </div>
+                    <div class="form-group mb-0">
+                        <label>Danh sách Bác sĩ</label>
+                        <select id="doc-select" class="form-control" onchange="handleDoctorChange()">
+                            <option value="">-- Vui lòng chọn chuyên khoa trước --</option>
+                        </select>
+                    </div>
+                    <div id="doc-info" class="mt-3 p-3 bg-light-primary rounded-md" style="display:none; border-radius:12px; border: 1px solid rgba(var(--primary-rgb), 0.1);">
+                        <div class="flex gap-4">
+                            <img id="doc-avatar-display" src="" alt="Doctor" class="rounded-lg shadow-sm" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid white;">
+                            <div class="flex-1">
+                                <p class="font-bold text-primary mb-1 text-lg" id="doc-name-display"></p>
+                                <p class="text-sm mb-1"><i class="fa-solid fa-medal text-warning"></i> <span id="doc-exp-display"></span> năm kinh nghiệm</p>
+                                <p class="text-sm text-gray italic" id="doc-bio-display"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Select Time & Confirm Area -->
+                <div class="card" id="booking-area" style="opacity: 0.5; pointer-events: none;">
+                    <h3 class="mb-3"><i class="fa-solid fa-2"></i> Chọn Thời gian</h3>
+                    <div class="form-group">
+                        <label>Ngày khám</label>
+                        <!-- Min is today -->
+                        <input type="date" id="date-input" class="form-control" onchange="loadSlots()">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Khung giờ trống</label>
+                        <div id="slots-container" class="slots-grid">
+                            <p class="text-sm text-gray" style="grid-column: 1/-1;">Vui lòng chọn ngày khám.</p>
+                        </div>
+                    </div>
+
+                    <form id="confirm-form" onsubmit="submitBooking(event)" style="display:none;" class="mt-4 border-top pt-4">
+                        <h3 class="mb-3"><i class="fa-solid fa-3"></i> Xác nhận</h3>
+                        <p class="mb-3">
+                            Bạn đang đặt lịch lúc <span id="confirm-time" class="font-bold text-primary"></span> 
+                            ngày <span id="confirm-date" class="font-bold"></span>
+                        </p>
+                        <div class="form-group">
+                            <label>Lý do khám (không bắt buộc)</label>
+                            <textarea id="reason-input" class="form-control" rows="3" placeholder="Triệu chứng của bạn..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100" id="submit-btn">Xác Nhận Đặt Lịch</button>
+                        <div id="booking-error" class="error-msg mt-3" style="display:none;"></div>
+                    </form>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        let selectedDoctorId = null;
+        let selectedTime = null;
+
+        if (guardRoute('patient')) {
+            document.addEventListener('DOMContentLoaded', () => {
+                // Set min date to today
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('date-input').setAttribute('min', today);
+                
+                loadSpecialties();
+            });
+        }
+
+        async function loadSpecialties() {
+            try {
+                const spRes = await api.get('/admin/specialties');
+                const sel = document.getElementById('spec-select');
+                sel.innerHTML = '<option value="">-- Chọn chuyên khoa --</option>' + 
+                    spRes.map(sp => `<option value="${sp.id}">${escapeHTML(sp.name)}</option>`).join('');
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        async function loadDoctors() {
+            const specId = document.getElementById('spec-select').value;
+            const docSel = document.getElementById('doc-select');
+            
+            // Reset booking area
+            resetBookingArea();
+            document.getElementById('doc-info').style.display = 'none';
+
+            if (!specId) {
+                docSel.innerHTML = '<option value="">-- Vui lòng chọn chuyên khoa trước --</option>';
+                return;
+            }
+
+            docSel.innerHTML = '<option value="">Đang tải...</option>';
+            try {
+                const docs = await api.get(`/doctors?specialty_id=${specId}`);
+                docSel.innerHTML = '<option value="">-- Chọn bác sĩ --</option>' + 
+                    docs.map(d => `<option value="${d.id}" data-exp="${d.experience_years}" data-avatar="${d.avatar_url||''}" data-bio="${encodeURIComponent(d.bio||'')}">${escapeHTML(d.full_name)}</option>`).join('');
+            } catch(e) {
+                docSel.innerHTML = '<option value="">Lỗi tải dữ liệu</option>';
+                console.error(e);
+            }
+        }
+
+        function handleDoctorChange() {
+            const docSel = document.getElementById('doc-select');
+            selectedDoctorId = docSel.value;
+            
+            resetBookingArea();
+            
+            const infoBox = document.getElementById('doc-info');
+            if (selectedDoctorId && docSel.selectedIndex > 0) {
+                const opt = docSel.options[docSel.selectedIndex];
+                document.getElementById('doc-name-display').textContent = opt.text;
+                document.getElementById('doc-exp-display').textContent = opt.getAttribute('data-exp');
+                document.getElementById('doc-avatar-display').src = opt.getAttribute('data-avatar') || 'https://via.placeholder.com/150';
+                document.getElementById('doc-bio-display').textContent = decodeURIComponent(opt.getAttribute('data-bio'));
+                infoBox.style.display = 'block';
+                
+                // Enable booking area
+                document.getElementById('booking-area').style.opacity = '1';
+                document.getElementById('booking-area').style.pointerEvents = 'auto';
+                
+                // If date was already selected, reload slots
+                if(document.getElementById('date-input').value) loadSlots();
+            } else {
+                infoBox.style.display = 'none';
+                document.getElementById('booking-area').style.opacity = '0.5';
+                document.getElementById('booking-area').style.pointerEvents = 'none';
+            }
+        }
+
+        function resetBookingArea() {
+            selectedTime = null;
+            document.getElementById('slots-container').innerHTML = '<p class="text-sm text-gray" style="grid-column: 1/-1;">Vui lòng chọn ngày khám.</p>';
+            document.getElementById('confirm-form').style.display = 'none';
+        }
+
+        async function loadSlots() {
+            const dateStr = document.getElementById('date-input').value;
+            if (!dateStr || !selectedDoctorId) return;
+
+            const container = document.getElementById('slots-container');
+            container.innerHTML = '<p class="text-sm" style="grid-column: 1/-1;"><i class="fa-solid fa-spinner fa-spin"></i> Đang tính toán slot trống...</p>';
+            document.getElementById('confirm-form').style.display = 'none';
+
+            try {
+                const res = await api.get(`/doctors/${selectedDoctorId}/available-slots?date=${dateStr}`);
+                if (!res.slots || res.slots.length === 0) {
+                    container.innerHTML = '<p class="text-danger text-sm font-bold" style="grid-column: 1/-1;">Bác sĩ không có lịch làm việc hoặc đã kín lịch ngày này.</p>';
+                    return;
+                }
+
+                const morningSlots = res.slots.filter(t => parseInt(t.split(':')[0]) < 12);
+                const afternoonSlots = res.slots.filter(t => parseInt(t.split(':')[0]) >= 12);
+
+                let html = '';
+                if (morningSlots.length > 0) {
+                    html += '<h4 class="text-xs font-bold text-gray mb-2" style="grid-column: 1/-1;">Sáng</h4>';
+                    html += morningSlots.map(time => `<button class="slot-btn" onclick="selectSlot(this, '${time}')">${time}</button>`).join('');
+                }
+                if (afternoonSlots.length > 0) {
+                    html += `<h4 class="text-xs font-bold text-gray ${morningSlots.length > 0 ? 'mt-4' : ''} mb-2" style="grid-column: 1/-1;">Chiều</h4>`;
+                    html += afternoonSlots.map(time => `<button class="slot-btn" onclick="selectSlot(this, '${time}')">${time}</button>`).join('');
+                }
+                container.innerHTML = html;
+
+            } catch(e) {
+                container.innerHTML = `<p class="text-danger text-sm" style="grid-column: 1/-1;">${escapeHTML(e.message)}</p>`;
+            }
+        }
+
+        function selectSlot(btnEl, time) {
+            // Remove selected class from all
+            document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
+            btnEl.classList.add('selected');
+            selectedTime = time;
+
+            // Show confirm form
+            const form = document.getElementById('confirm-form');
+            form.style.display = 'block';
+            document.getElementById('confirm-time').textContent = time;
+            document.getElementById('confirm-date').textContent = formatDate(document.getElementById('date-input').value);
+            
+            form.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function submitBooking(e) {
+            e.preventDefault();
+            const dateStr = document.getElementById('date-input').value;
+            const reason = document.getElementById('reason-input').value;
+            
+            const btn = document.getElementById('submit-btn');
+            const err = document.getElementById('booking-error');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...';
+            err.style.display = 'none';
+
+            try {
+                await api.post('/appointments', {
+                    doctor_id: selectedDoctorId,
+                    scheduled_date: dateStr,
+                    scheduled_time: selectedTime + ":00", // Add seconds for time validation if needed
+                    reason: reason
+                });
+                
+                showToast("Đặt lịch thành công! Vui lòng chờ bác sĩ xác nhận.");
+                window.location.href = 'dashboard.html';
+                
+            } catch(error) {
+                err.textContent = error.message;
+                err.style.display = 'block';
+                // Reload slots in case of double-booking conflict
+                loadSlots();
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Xác Nhận Đặt Lịch';
+            }
+        }
+    </script>
+</body>
+</html>

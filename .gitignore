@@ -1,0 +1,20 @@
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+.pytest_cache/
+
+# Databases
+*.db
+*.sqlite3
+
+# Project specific
+backend/scratch/
+backend/medbook.db
+
+# OS
+.DS_Store
+Thumbs.db
