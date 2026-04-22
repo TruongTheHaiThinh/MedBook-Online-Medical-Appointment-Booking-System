@@ -321,8 +321,8 @@ graph TD
     end
 
     subgraph Frontend_Tier ["Frontend – HTML/CSS/JS (Render Static Site)"]
-        A --> |HTTPS| FE["Giao diện Web\nHTML/CSS/JS thuần\nPatient / Doctor / HR Admin / Cashier Admin pages"]:::frontend
-        FE --> |fetch() + JWT| B
+        A --> |"HTTPS"| FE["Giao diện Web\nHTML/CSS/JS thuần\nPatient / Doctor / HR Admin / Cashier Admin pages"]:::frontend
+        FE --> |"fetch() + JWT"| B
     end
 
     subgraph Application_Tier ["Backend API – FastAPI (Render Web Service)"]
@@ -337,7 +337,7 @@ graph TD
     end
 
     subgraph Background_Tier ["Background Tasks"]
-        D -. "Trigger khi tạo/cập nhật appointment" .-> G["Email Service\nFastAPI-Mail + Jinja2 Template\n(Xác nhận, Hủy, Giấy hẹn khám)"]:::external
+        D -.-> |"Trigger khi tạo/cập nhật appointment"| G["Email Service\nFastAPI-Mail + Jinja2 Template\n(Xác nhận, Hủy, Giấy hẹn khám)"]:::external
         H["APScheduler\nJob chạy mỗi giờ\n(Nhắc lịch 24h trước)"]:::external --> F
         H --> G
     end
