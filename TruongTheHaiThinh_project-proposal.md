@@ -16,10 +16,10 @@
 | Nhánh | Mục đích | Người phụ trách |
 | :--- | :--- | :--- |
 | `feature/auth` | Module 1 – Xác thực & Phân quyền (JWT, bcrypt, roles) | Thịnh |
-| `feature/doctor-specialty` | Module 2 – Bác sĩ, Chuyên khoa & Lịch làm việc | Trang |
+| `feature/doctor-specialty` | Module 2 – Bác sĩ, Chuyên khoa & Lịch làm việc | Thịnh |
 | `feature/appointment` | Module 3 – Luồng Đặt lịch & State Machine | Thịnh |
 | `feature/admin-management` | Module 4 – Quản lý nhân sự & Kế toán thu ngân | Trang |
-| `feature/medical-record` | Module 5 – Hồ sơ bệnh nhân & Sổ khám điện tử | Thịnh |
+| `feature/medical-record` | Module 5 – Hồ sơ bệnh nhân & Sổ khám điện tử | Trang |
 | `develop` | Tích hợp tất cả feature branch sau khi review | Cả nhóm |
 | `main` | Push cuối cùng – bản hoàn chỉnh để nộp/deploy | Cả nhóm |
 
@@ -222,3 +222,79 @@ MedBook/
     │   └── api.js
     └── css/
         └── style.css
+```
+
+---
+
+### 6. CÔNG NGHỆ SỬ DỤNG (TECH STACK)
+
+| Layer | Công nghệ | Ghi chú |
+| :--- | :--- | :--- |
+| Frontend | HTML5, CSS3, JavaScript (ES6+) | Không dùng framework – thuần JS với Fetch API |
+| Backend | Python 3.11+, FastAPI | Framework chính |
+| ORM | SQLAlchemy 2.0 (async) | Kết nối PostgreSQL qua asyncpg |
+| Database | PostgreSQL (Render managed) | Free tier trên Render |
+| Migration | Alembic | Quản lý schema version |
+| Authentication | python-jose (JWT), passlib + bcrypt | Access Token 30 phút, Refresh 7 ngày |
+| QR Code | qrcode (Python) / jsQR (Frontend) | Sinh và đọc mã QR/mã vạch xác thực |
+| Email | FastAPI-Mail, Jinja2 | HTML email template |
+| Background Tasks | APScheduler | Nhắc lịch 24h trước ca khám |
+| Chart | Chart.js (CDN) | Render biểu đồ thống kê trên Admin frontend |
+| Testing | Pytest, httpx (AsyncClient) | Coverage mục tiêu >= 70% |
+| Deployment | Render Web Service + Static Site + PostgreSQL | Free tier, auto-deploy từ GitHub nhánh main |
+| API Docs | Swagger UI + ReDoc | Tự sinh từ FastAPI tại /docs và /redoc |
+
+---
+
+### 7. KẾ HOẠCH PHÁT TRIỂN
+
+**7.1 MVP (Đã hoàn thành: 12.04.2026)**
+* Hệ thống xác thực & Phân quyền: 4 vai trò, JWT, phê duyệt tài khoản bác sĩ.
+* Quy trình khám bệnh đầy đủ: Đặt lịch → Thu ngân xác nhận → Thông báo bác sĩ → Khám → Kê đơn → Phát thuốc.
+* Mã QR / mã vạch xác thực được sinh sau khi thanh toán thành công.
+* Giấy hẹn khám điện tử có lộ trình chi tiết.
+* Sổ khám bệnh điện tử cho bệnh nhân (read-only).
+* Đơn thuốc chuẩn A5 với chức năng in, có trường ghi chú tái khám.
+* 4 Dashboard riêng biệt với giao diện tối ưu cho từng vai trò.
+* Dữ liệu mẫu (Seed Data) để demo ngay lập tức.
+
+**7.2 Test Cases trọng tâm**
+
+| Mã TC | Module | Hành động | Kết quả mong đợi |
+| :--- | :--- | :--- | :--- |
+| TC-01 | Auth | Đăng ký với email sai format hoặc mật khẩu thiếu chữ hoa | 422 Unprocessable Entity, thông báo lỗi cụ thể từng field |
+| TC-02 | Auth | Gọi API không có Authorization header | 401 Unauthorized |
+| TC-03 | Auth | Patient gọi endpoint chỉ dành cho Cashier Admin | 403 Forbidden |
+| TC-04 | QR Code | Bệnh nhân thanh toán thành công → kiểm tra mã QR | Mã QR được sinh và gắn vào appointment, có thể quét để xác thực |
+| TC-05 | Scheduling | Truy vấn slot bác sĩ ngày hợp lệ | Trả về đúng số slot theo lịch, loại trừ slot đã đặt |
+| TC-06 | Race Condition | 2 bệnh nhân đặt cùng 1 slot cùng lúc | Chỉ 1 thành công (201), bên còn lại nhận 409 Conflict |
+| TC-07 | Flow | Thu ngân xác nhận → kiểm tra thông báo bác sĩ | Bác sĩ nhận thông báo có nhãn Khám mới / Tái khám |
+| TC-08 | Flow | Bác sĩ gửi đơn thuốc → kiểm tra thu ngân | Thu ngân nhận thông báo đơn thuốc với đầy đủ thông tin |
+| TC-09 | Email | Bệnh nhân đặt lịch thành công | Trong 30 giây, email xác nhận xuất hiện trong hộp thư |
+| TC-10 | Frontend | Bệnh nhân truy cập URL dashboard bác sĩ chưa đăng nhập | JS kiểm tra localStorage, redirect về trang login |
+
+**7.3 Beta Version (Dự kiến: 10.05.2026)**
+* **Kiểm thử:** Báo cáo Code Coverage Pytest >= 70%; danh sách lỗi MVP và tình trạng xử lý.
+* **Triển khai:** Backend trên Render Web Service, Frontend trên Render Static Site, Database trên Render PostgreSQL – tất cả có URL public để demo.
+* **Tài liệu:** Báo cáo kỹ thuật đầy đủ: kiến trúc, hướng dẫn cài đặt local, quyết định thiết kế, tổng kết đồ án.
+
+**7.4 Phân công phát triển**
+
+| Module | Thịnh | Trang |
+| :--- | :--- | :--- |
+| Module 1 – Auth & Phân quyền | ✔ Chính | – Hỗ trợ |
+| Module 2 – Bác sĩ & Chuyên khoa | – Hỗ trợ | ✔ Chính |
+| Module 3 – Đặt lịch & State Machine | ✔ Chính | – Hỗ trợ |
+| Module 4 – HR Admin & Thống kê | – Hỗ trợ | ✔ Chính |
+| Module 5 – Hồ sơ & Sổ khám điện tử | ✔ Chính | – Hỗ trợ |
+| Module 6 – Đơn thuốc & Thanh toán (Cashier) | – Hỗ trợ | ✔ Chính |
+
+---
+
+### 8. CÂU HỎI
+
+* **Về xử lý race condition:** Nhóm dùng PostgreSQL `SELECT ... FOR UPDATE` bên trong DB transaction để chặn double-booking. Cách này có phù hợp quy mô đồ án không, hay có pattern nào đơn giản hơn mà vẫn đảm bảo nhất quán dữ liệu?
+* **Về Smart Scheduling Engine:** Nhóm thiết kế slot generation chạy on-demand (không lưu từng slot vào DB). Với quy mô đồ án (vài trăm appointment), approach nào phù hợp hơn để chấm điểm thiết kế DB?
+* **Về phạm vi kiểm thử:** Nhóm viết Pytest (integration test) cho ~70% endpoint quan trọng kết hợp manual test giao diện. Mức độ này đã đủ chưa, hay cần bổ sung thêm dạng test khác (VD: load test, contract test)?
+* **Về vai trò Admin Thu ngân:** Nghiệp vụ thu ngân xác nhận lịch hẹn và xử lý đơn thuốc trong một workflow liên tục. Nhóm có nên tách thành 2 endpoint riêng (xác nhận lịch và xử lý thuốc) hay gộp chung vào một flow duy nhất?
+```
