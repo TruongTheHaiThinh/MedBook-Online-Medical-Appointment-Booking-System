@@ -283,10 +283,10 @@ MedBook/
 | Module | Thịnh | Trang |
 | :--- | :--- | :--- |
 | Module 1 – Auth & Phân quyền | ✔ Chính | – Hỗ trợ |
-| Module 2 – Bác sĩ & Chuyên khoa | – Hỗ trợ | ✔ Chính |
+| Module 2 – Bác sĩ & Chuyên khoa |  ✔ Chính | – Hỗ trợ |
 | Module 3 – Đặt lịch & State Machine | ✔ Chính | – Hỗ trợ |
 | Module 4 – HR Admin & Thống kê | – Hỗ trợ | ✔ Chính |
-| Module 5 – Hồ sơ & Sổ khám điện tử | ✔ Chính | – Hỗ trợ |
+| Module 5 – Hồ sơ & Sổ khám điện tử | – Hỗ trợ |  ✔ Chính |
 | Module 6 – Đơn thuốc & Thanh toán (Cashier) | – Hỗ trợ | ✔ Chính |
 
 ---
