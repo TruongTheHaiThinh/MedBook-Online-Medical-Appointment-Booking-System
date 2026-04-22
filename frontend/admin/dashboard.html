@@ -83,8 +83,19 @@
                     </div>
                 </div>
 
-                <div class="card" style="max-height: 400px; display:flex; justify-content:center;">
-                    <canvas id="statusChart"></canvas>
+                <div class="grid grid-2 mb-5">
+                    <div class="card" style="height: 350px;">
+                        <h3 class="mb-3 text-sm font-bold text-gray">Trạng thái lịch hẹn</h3>
+                        <div style="height: calc(100% - 40px); display:flex; justify-content:center;">
+                            <canvas id="statusChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="card" style="height: 350px;">
+                        <h3 class="mb-3 text-sm font-bold text-gray">Xu hướng 30 ngày qua</h3>
+                        <div style="height: calc(100% - 40px);">
+                            <canvas id="historyChart"></canvas>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -182,7 +193,8 @@
     <script src="../js/api.js"></script>
     <script src="../js/auth.js"></script>
     <script>
-        let myChart = null;
+        let statusChart = null;
+        let historyChart = null;
 
         if (guardRoute('admin')) {
             document.addEventListener('DOMContentLoaded', () => {
@@ -213,44 +225,69 @@
                 document.getElementById('stat-doctors').textContent = data.total_doctors;
                 document.getElementById('stat-appts').textContent = data.total_appointments;
                 
-                renderChart(data.appointments_by_status);
+                renderStatusChart(data.appointments_by_status);
+                renderHistoryChart(data.appointments_history);
             } catch(e) {
                 console.error("Lỗi lấy thống kê", e);
             }
         }
 
-        function renderChart(statusData) {
+        function renderStatusChart(statusData) {
             const ctx = document.getElementById('statusChart').getContext('2d');
-            
-            if (myChart) myChart.destroy();
+            if (statusChart) statusChart.destroy();
             
             const labels = ['PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED'];
             const dataArr = labels.map(l => statusData[l] || 0);
-            const bgColors = [
-                '#f59e0b', // warning
-                '#667eea', // primary
-                '#22c55e', // success
-                '#ef4444'  // danger
-            ];
-
-            myChart = new Chart(ctx, {
+            
+            statusChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Số lượngịch hẹn',
                         data: dataArr,
-                        backgroundColor: bgColors,
+                        backgroundColor: ['#f59e0b', '#667eea', '#22c55e', '#ef4444'],
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'right' }
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        }
+        
+        function renderHistoryChart(historyData) {
+            const ctx = document.getElementById('historyChart').getContext('2d');
+            if (historyChart) historyChart.destroy();
+            
+            historyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: historyData.map(d => formatDateShort(d.date)),
+                    datasets: [{
+                        label: 'Số ca khám',
+                        data: historyData.map(d => d.count),
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { stepSize: 1 } },
+                        x: { grid: { display: false } }
                     }
                 }
             });
+        }
+
+        function formatDateShort(dateStr) {
+            const d = new Date(dateStr);
+            return `${d.getDate()}/${d.getMonth() + 1}`;
         }
 
         // --- Doctors ---

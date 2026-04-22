@@ -343,6 +343,43 @@ async def create_leave_request(
         status="APPROVED"  # Auto-approved as requested
     )
     db.add(leave)
+    
+    # Auto-cancel existing appointments for this doctor on this day
+    from app.models.appointment import Appointment
+    from app.core.email import send_appointment_email
+    import asyncio
+    
+    appt_result = await db.execute(
+        select(Appointment).where(
+            Appointment.doctor_id == doctor.id,
+            Appointment.scheduled_date == data.leave_date,
+            Appointment.status.in_(["PENDING", "CONFIRMED"])
+        )
+    )
+    to_cancel = appt_result.scalars().all()
+    
+    cancel_reason = f"Bác sĩ xin nghỉ phép: {data.reason or 'Có việc bận đột xuất'}"
+    for appt in to_cancel:
+        appt.status = "CANCELLED"
+        appt.doctor_notes = cancel_reason
+        
+        # Notify patient
+        pt_res = await db.execute(select(User).where(User.id == appt.patient_id))
+        patient = pt_res.scalar_one_or_none()
+        if patient:
+            asyncio.create_task(
+                send_appointment_email(
+                    to_email=patient.email,
+                    title="Lịch hẹn bị hủy do bác sĩ nghỉ phép",
+                    message=f"Rất tiếc, bác sĩ đã đăng ký nghỉ vào ngày {data.leave_date}. Lịch hẹn của bạn đã bị hủy.",
+                    patient_name=patient.full_name,
+                    doctor_name=current_user.full_name,
+                    scheduled_date=str(appt.scheduled_date),
+                    scheduled_time=str(appt.scheduled_time),
+                    doctor_notes=cancel_reason
+                )
+            )
+
     await db.commit()
     await db.refresh(leave)
     return leave

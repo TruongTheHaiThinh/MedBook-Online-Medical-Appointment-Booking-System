@@ -66,7 +66,7 @@ Sau khi cả hai server đã chạy, bạn mở trình duyệt và truy cập **
 *   **Tài khoản**: `0912345678` (hoặc `patient1@gmail.com`)
 *   **Mật khẩu**: `Patient@123`
 
-### 2. Vai trò Bác sĩ (Bệnh viện 175)
+### 2. Vai trò Bác sĩ (Bệnh viện MedBook)
 Tài khoản đăng nhập chung cho các bác sĩ:
 *   **Mật khẩu**: `Doctor@123` (Cho tất cả các khoa bên dưới)
 *   **Danh sách tài khoản theo khoa**:
@@ -89,14 +89,14 @@ Tài khoản đăng nhập chung cho các bác sĩ:
 
 ### 3. Vai trò Quản trị viên (Màu Cam)
 *   **Tài khoản**: `admin@medbook.com` (hoặc `0000000000`)
-*   **Mật khẩu**: `Admin@123`
+*   **Mật khẩu**: `123y`
 
 ---
 ## 🧪 Thư mục `scratch` là gì?
 Thư mục `scratch` (trong `backend/scratch`) là nơi chứa các **"kịch bản nháp"** hoặc **"kịch bản chạy một lần"**.
 *   Nó không phải là code chính của ứng dụng.
 *   Nó dùng để: Khởi tạo dữ liệu (Seeding), dọn dẹp database, chạy thử các đoạn code test nhỏ.
-*   Ví dụ: `seed_175.py` dùng để tạo hàng loạt bác sĩ và lịch hẹn mẫu cho BV 175 một cách tự động.
+*   Ví dụ: `seed_medbook.py` dùng để tạo hàng loạt bác sĩ và lịch hẹn mẫu cho BV MedBook một cách tự động.
 
 ---
 *Chúc bạn có trải nghiệm tốt với dự án MedBook!*

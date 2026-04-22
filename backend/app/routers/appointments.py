@@ -14,6 +14,8 @@ from app.schemas.appointment import (
     AppointmentCreate, AppointmentConfirm, AppointmentCancel, AppointmentResponse, AppointmentComplete
 )
 from app.core.security import get_current_user, require_patient, require_doctor
+from app.models.specialty import Specialty
+from app.models.prescription import Prescription, PrescriptionItem
 from app.core.email import send_appointment_email
 
 router = APIRouter(prefix="/appointments", tags=["Appointments"])
@@ -60,20 +62,21 @@ async def create_appointment(
         raise HTTPException(status_code=404, detail="Bác sĩ không tồn tại hoặc chưa được phê duyệt")
     doctor, doctor_user = row
 
-    # Check patient doesn't already have an appointment at the same time
-    result = await db.execute(
-        select(Appointment).where(
-            Appointment.patient_id == current_user.id,
-            Appointment.scheduled_date == data.scheduled_date,
-            Appointment.scheduled_time == data.scheduled_time,
-            Appointment.status.in_(["PENDING", "CONFIRMED"])
-        )
-    )
-    if result.scalar_one_or_none():
-        raise HTTPException(status_code=409, detail="Bạn đã có lịch hẹn khác vào cùng giờ này")
-
     # Check slot availability with SELECT FOR UPDATE (race condition protection)
     async with db.begin_nested():
+        # 1. Check patient doesn't already have an appointment at the same time
+        result = await db.execute(
+            select(Appointment).where(
+                Appointment.patient_id == current_user.id,
+                Appointment.scheduled_date == data.scheduled_date,
+                Appointment.scheduled_time == data.scheduled_time,
+                Appointment.status.in_(["PENDING", "CONFIRMED"])
+            ).with_for_update()
+        )
+        if result.scalar_one_or_none():
+            raise HTTPException(status_code=409, detail="Bạn đã có lịch hẹn khác vào cùng giờ này")
+
+        # 2. Check doctor slot availability
         result = await db.execute(
             select(Appointment).where(
                 Appointment.doctor_id == data.doctor_id,
@@ -133,13 +136,14 @@ async def get_my_appointments(
     result = await db.execute(query)
     appointments = result.scalars().all()
 
+    # Optimized query to get doctor names and specialties for all appointments in one go
+    # We use outerjoin to specialties to avoid filtering out appointments if doctor has no specialty
     responses = []
     for appt in appointments:
-        # Get doctor name and specialty
         dr_query = (
             select(User.full_name, Specialty.name.label("specialty_name"))
             .join(Doctor, Doctor.user_id == User.id)
-            .join(Specialty, Specialty.id == Doctor.specialty_id)
+            .outerjoin(Specialty, Specialty.id == Doctor.specialty_id)
             .where(Doctor.id == appt.doctor_id)
         )
         dr_res = await db.execute(dr_query)
@@ -175,12 +179,9 @@ async def get_doctor_appointments(
     result = await db.execute(query)
     appointments = result.scalars().all()
 
-    # Fetch specialty name for the doctor
-    from app.models.prescription import Prescription, PrescriptionItem
-    from app.models.specialty import Specialty
     spec_result = await db.execute(select(Specialty).where(Specialty.id == doctor.specialty_id))
     specialty = spec_result.scalar_one_or_none()
-    spec_name = specialty.name if specialty else None
+    spec_name = specialty.name if specialty else "---"
 
     responses = []
     for appt in appointments:

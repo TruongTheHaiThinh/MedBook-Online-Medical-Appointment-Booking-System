@@ -297,4 +297,4 @@ MedBook/
 * **Về Smart Scheduling Engine:** Nhóm thiết kế slot generation chạy on-demand (không lưu từng slot vào DB). Với quy mô đồ án (vài trăm appointment), approach nào phù hợp hơn để chấm điểm thiết kế DB?
 * **Về phạm vi kiểm thử:** Nhóm viết Pytest (integration test) cho ~70% endpoint quan trọng kết hợp manual test giao diện. Mức độ này đã đủ chưa, hay cần bổ sung thêm dạng test khác (VD: load test, contract test)?
 * **Về vai trò Admin Thu ngân:** Nghiệp vụ thu ngân xác nhận lịch hẹn và xử lý đơn thuốc trong một workflow liên tục. Nhóm có nên tách thành 2 endpoint riêng (xác nhận lịch và xử lý thuốc) hay gộp chung vào một flow duy nhất?
-```
+

@@ -226,9 +226,32 @@ async def get_stats(
         )
         status_counts[status] = count_result.scalar()
 
+    # Last 30 days appointments history (line chart)
+    from datetime import date, timedelta
+    thirty_days_ago = date.today() - timedelta(days=30)
+    
+    history_result = await db.execute(
+        select(Appointment.scheduled_date, func.count(Appointment.id))
+        .where(Appointment.scheduled_date >= thirty_days_ago)
+        .group_by(Appointment.scheduled_date)
+        .order_by(Appointment.scheduled_date.asc())
+    )
+    history_data = history_result.all()
+    
+    # Fill gaps for days with 0 appointments
+    history_map = {row[0]: row[1] for row in history_data}
+    chart_data = []
+    for i in range(31):
+        d = thirty_days_ago + timedelta(days=i)
+        chart_data.append({
+            "date": str(d),
+            "count": history_map.get(d, 0)
+        })
+
     return {
         "total_patients": total_patients.scalar(),
         "total_doctors": total_doctors.scalar(),
         "total_appointments": total_appointments.scalar(),
         "appointments_by_status": status_counts,
+        "appointments_history": chart_data,
     }
