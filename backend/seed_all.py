@@ -7,6 +7,11 @@ from datetime import date, time
 # Thiết lập đường dẫn để có thể import từ app
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
+# Đảm bảo in được tiếng Việt trên Terminal Windows
+if sys.platform == "win32":
+    import io
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+
 from app.database import AsyncSessionLocal, engine, Base
 from app.models.user import User
 from app.models.specialty import Specialty
@@ -17,14 +22,14 @@ from app.core.security import hash_password
 from sqlalchemy import select
 
 async def init_db():
-    print("--- Khởi tạo Database và các bảng ---")
+    print("--- Khoi tao Database va cac bang ---")
     async with engine.begin() as conn:
         # Tạo tất cả các bảng nếu chưa tồn tại
         await conn.run_sync(Base.metadata.create_all)
-    print("Database đã được khởi tạo thành công.")
+    print("Database da duoc khoi tao thanh cong.")
 
 async def seed_data():
-    print("--- Đang đổ dữ liệu mẫu ---")
+    print("--- Dang do du lieu mau ---")
     async with AsyncSessionLocal() as db:
         # 1. Tạo các Chuyên khoa
         specs_data = [
@@ -46,10 +51,10 @@ async def seed_data():
                 db.add(new_spec)
                 await db.flush()
                 specs[s["name"]] = new_spec
-                print(f"Đã tạo chuyên khoa: {s['name']}")
+                print(f"Da tao chuyen khoa: {s['name']}")
             else:
                 specs[s["name"]] = existing
-                print(f"Chuyên khoa đã tồn tại: {s['name']}")
+                print(f"Chuyen khoa da ton tai: {s['name']}")
 
         # 2. Tạo ROLE: HR ADMIN (Quản lý)
         hr_email = "admin@medbook.vn"
@@ -61,7 +66,7 @@ async def seed_data():
                 phone="0901234567",
                 role="hr_admin"
             ))
-            print(f"Đã tạo Admin: {hr_email}")
+            print(f"Da tao Admin: {hr_email}")
 
         # 3. Tạo ROLE: CASHIER ADMIN (Thu ngân)
         cash_email = "cashier@medbook.vn"
@@ -73,7 +78,7 @@ async def seed_data():
                 phone="0907654321",
                 role="cashier_admin"
             ))
-            print(f"Đã tạo Thu ngân: {cash_email}")
+            print(f"Da tao Thu ngan: {cash_email}")
 
         # 4. Tạo DOCTORS (Mỗi bác sĩ 1 tài khoản)
         doctors_list = [
@@ -86,7 +91,7 @@ async def seed_data():
 
         for d in doctors_list:
             if (await db.execute(select(User).where(User.email == d["email"]))).first(): 
-                print(f"Bác sĩ đã tồn tại: {d['email']}")
+                print(f"Bac si da ton tai: {d['email']}")
                 continue
 
             u = User(
@@ -103,7 +108,7 @@ async def seed_data():
             doc = Doctor(
                 user_id=u.id,
                 specialty_id=specs[d["spec"]].id,
-                bio=f"Bác sĩ chuyên khoa tại Bệnh viện Medbook. Kinh nghiệm {d['exp']} năm.",
+                bio=f"Bac si chuyen khoa tai Benh vien Medbook. Kinh nghiem {d['exp']} nam.",
                 experience_years=d["exp"],
                 is_approved=True
             )
@@ -120,7 +125,7 @@ async def seed_data():
                     slot_duration_min=30,
                     max_slots=20
                 ))
-            print(f"Đã tạo bác sĩ và lịch: {d['name']}")
+            print(f"Da tao bac si va lich: {d['name']}")
 
         # 5. Tạo PATIENTS (Bệnh nhân mẫu)
         patients = [
@@ -136,32 +141,35 @@ async def seed_data():
                 phone="0922000" + str(patients.index(p)),
                 role="patient"
             ))
-            print(f"Đã tạo bệnh nhân mẫu: {p['name']}")
+            print(f"Da tao benh nhan mau: {p['name']}")
 
         # 6. Nhập dữ liệu Thuốc từ CSV
         csv_path = os.path.join(os.path.dirname(__file__), "medicine_dataset.csv")
         if os.path.exists(csv_path):
-            print("Đang nhập dữ liệu thuốc từ CSV...")
+            print("Dang nhap du lieu thuoc tu CSV...")
             with open(csv_path, mode='r', encoding='utf-8') as f:
                 reader = csv.DictReader(f)
                 count = 0
                 for row in reader:
-                    # Kiểm tra xem thuốc đã tồn tại chưa
-                    stmt = select(Medicine).where(Medicine.name == row['name'])
+                    # Kiểm tra xem thuốc đã tồn tại chưa (Case-sensitive fix: dùng row['Name'])
+                    stmt = select(Medicine).where(Medicine.name == row['Name'])
                     existing = (await db.execute(stmt)).scalar_one_or_none()
                     if not existing:
                         db.add(Medicine(
-                            name=row['name'],
-                            unit=row['unit'],
-                            price=float(row['price']),
-                            description=row.get('description', '')
+                            name=row['Name'],
+                            category=row.get('Category'),
+                            dosage_form=row.get('Dosage Form'),
+                            strength=row.get('Strength'),
+                            manufacturer=row.get('Manufacturer'),
+                            indication=row.get('Indication'),
+                            classification=row.get('Classification')
                         ))
                         count += 1
                         if count % 100 == 0: await db.flush()
-            print(f"Đã nhập {count} loại thuốc.")
+            print(f"Da nhap {count} loai thuoc.")
 
         await db.commit()
-        print("--- Hoàn tất đổ dữ liệu mẫu ---")
+        print("--- Hoan tat do du lieu mau ---")
 
 async def main():
     await init_db()
