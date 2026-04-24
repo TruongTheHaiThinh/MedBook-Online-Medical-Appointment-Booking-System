@@ -549,11 +549,11 @@ MedBook/                          ← GitHub repository root
 | **Module** | **Thịnh** | **Trang** |
 | :--- | :---: | :---: |
 | Module 1 – Auth & Phân quyền | ✔ Chính | – Hỗ trợ |
-| Module 2 – Bác sĩ & Chuyên khoa | – Hỗ trợ | ✔ Chính |
+| Module 2 – Bác sĩ & Chuyên khoa | ✔ Chính | – Hỗ trợ |
 | Module 3 – Đặt lịch & State Machine | ✔ Chính | – Hỗ trợ |
 | Module 4 – HR Admin & Thống kê | – Hỗ trợ | ✔ Chính |
-| Module 5 – Hồ sơ & Sổ khám điện tử | ✔ Chính | – Hỗ trợ |
-| Module 6 – Đơn thuốc & Thanh toán (Cashier) | – Hỗ trợ | ✔ Chính |
+| Module 5 – Hồ sơ & Sổ khám điện tử | – Hỗ trợ | ✔ Chính |
+| Module 6 – Đơn thuốc & Thanh toán (Cashier) | ✔ Chính | ✔ Chính |
 
 **4. Các chức năng dự kiến thực hiện ở Phase tiếp theo**
 - **Email nhắc lịch tự động:** Background job APScheduler quét và gửi email 24h trước ca khám.
