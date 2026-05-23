@@ -14,7 +14,7 @@ from app.models.schedule import Schedule
 from app.models.appointment import Appointment
 from app.models.leave_request import LeaveRequest
 from app.models.user import User
-from app.models.prescription import Prescription
+from app.models.appointment import MedicalRecord
 from app.schemas.doctor import (
     DoctorProfileResponse, DoctorProfileUpdate, SpecialtyResponse,
     LeaveRequestCreate, LeaveRequestResponse
@@ -456,9 +456,9 @@ async def get_patient_history(
         )
         doctor_user = dr_result.scalar_one_or_none()
         
-        # Get prescription clinical data
-        presc_result = await db.execute(select(Prescription).where(Prescription.appointment_id == appt.id))
-        presc = presc_result.scalar_one_or_none()
+        # Get medical record
+        rec_result = await db.execute(select(MedicalRecord).where(MedicalRecord.appointment_id == appt.id))
+        record = rec_result.scalar_one_or_none()
         
         history.append({
             "id": appt.id,
@@ -467,13 +467,11 @@ async def get_patient_history(
             "reason": appt.reason,
             "doctor_notes": appt.doctor_notes,
             "doctor_name": doctor_user.full_name if doctor_user else "Bác sĩ",
-            "clinical_data": {
-                "age": presc.patient_age if presc else None,
-                "weight": presc.patient_weight if presc else None,
-                "height": presc.patient_height if presc else None,
-                "address": presc.patient_address if presc else None,
-                "diagnosis": presc.diagnosis if presc else None,
-                "advice": presc.advice if presc else None
-            } if presc else None
+            "medical_record": {
+                "diagnosis": record.diagnosis if record else None,
+                "notes": record.notes if record else None,
+                "revisit_required": record.revisit_required if record else False,
+                "revisit_date": str(record.revisit_date) if record and record.revisit_date else None,
+            } if record else None
         })
     return history

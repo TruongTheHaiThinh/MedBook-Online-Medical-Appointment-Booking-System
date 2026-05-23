@@ -49999,3 +49999,367 @@ Ibuprophen,Antiseptic,Tablet,633 mg,CSL Limited,Pain,Prescription
 Dextrovir,Antibiotic,Injection,327 mg,"Gilead Sciences, Inc.",Fever,Over-the-Counter
 Dextrostatin,Antibiotic,Inhaler,885 mg,AbbVie Inc.,Wound,Over-the-Counter
 Dolomet,Antipyretic,Ointment,426 mg,Teva Pharmaceutical Industries Ltd.,Fever,Over-the-Counter
+Amoxicillin,Antibiotic,Capsule,500 mg,Mekophar,Infection,Prescription
+Amoxicillin,Antibiotic,Tablet,250 mg,DHG Pharma,Infection,Prescription
+Amoxicillin + Clavulanate,Antibiotic,Tablet,875 mg,Stada Vietnam,Infection,Prescription
+Azithromycin,Antibiotic,Tablet,500 mg,Pymepharco,Infection,Prescription
+Azithromycin,Antibiotic,Capsule,250 mg,DHG Pharma,Infection,Prescription
+Ciprofloxacin,Antibiotic,Tablet,500 mg,Mekophar,Infection,Prescription
+Cefuroxime,Antibiotic,Tablet,500 mg,Stada Vietnam,Infection,Prescription
+Cefixime,Antibiotic,Capsule,200 mg,Pymepharco,Infection,Prescription
+Metronidazole,Antibiotic,Tablet,500 mg,DHG Pharma,Infection,Prescription
+Doxycycline,Antibiotic,Capsule,100 mg,Mekophar,Infection,Prescription
+Erythromycin,Antibiotic,Tablet,500 mg,Imexpharm,Infection,Prescription
+Tetracycline,Antibiotic,Capsule,500 mg,Pharmedic,Infection,Prescription
+Clarithromycin,Antibiotic,Tablet,500 mg,Stada Vietnam,Infection,Prescription
+Levofloxacin,Antibiotic,Tablet,500 mg,DHG Pharma,Infection,Prescription
+Cotrimoxazole,Antibiotic,Tablet,480 mg,Mekophar,Infection,Prescription
+Ampicillin,Antibiotic,Capsule,500 mg,Pymepharco,Infection,Prescription
+Clindamycin,Antibiotic,Capsule,300 mg,Imexpharm,Infection,Prescription
+Ofloxacin,Antibiotic,Tablet,200 mg,Pharmedic,Infection,Prescription
+Cephalexin,Antibiotic,Capsule,500 mg,DHG Pharma,Infection,Prescription
+Cefaclor,Antibiotic,Capsule,250 mg,Stada Vietnam,Infection,Prescription
+Paracetamol,Analgesic,Tablet,500 mg,DHG Pharma,Fever,Over-the-Counter
+Paracetamol,Antipyretic,Syrup,120 mg/5ml,Mekophar,Fever,Over-the-Counter
+Paracetamol,Analgesic,Tablet,650 mg,Pymepharco,Pain,Over-the-Counter
+Ibuprofen,Analgesic,Tablet,400 mg,DHG Pharma,Pain,Over-the-Counter
+Ibuprofen,Analgesic,Tablet,200 mg,Stada Vietnam,Pain,Over-the-Counter
+Aspirin,Analgesic,Tablet,500 mg,Mekophar,Pain,Over-the-Counter
+Aspirin,Analgesic,Tablet,81 mg,DHG Pharma,Pain,Over-the-Counter
+Diclofenac,Analgesic,Tablet,50 mg,Stada Vietnam,Pain,Prescription
+Diclofenac,Analgesic,Cream,1%,Pymepharco,Wound,Over-the-Counter
+Mefenamic Acid,Analgesic,Capsule,500 mg,Imexpharm,Pain,Prescription
+Ketoprofen,Analgesic,Tablet,100 mg,DHG Pharma,Pain,Prescription
+Naproxen,Analgesic,Tablet,500 mg,Mekophar,Pain,Prescription
+Tramadol,Analgesic,Capsule,50 mg,Stada Vietnam,Pain,Prescription
+Codeine + Paracetamol,Analgesic,Tablet,500/10 mg,Pymepharco,Pain,Prescription
+Efferalgan,Antipyretic,Tablet,500 mg,DHG Pharma,Fever,Over-the-Counter
+Hapacol,Antipyretic,Tablet,500 mg,DHG Pharma,Fever,Over-the-Counter
+Hapacol,Antipyretic,Syrup,250 mg/5ml,DHG Pharma,Fever,Over-the-Counter
+Oseltamivir,Antiviral,Capsule,75 mg,Stada Vietnam,Virus,Prescription
+Acyclovir,Antiviral,Tablet,400 mg,Mekophar,Virus,Prescription
+Acyclovir,Antiviral,Cream,5%,DHG Pharma,Wound,Over-the-Counter
+Valacyclovir,Antiviral,Tablet,500 mg,Stada Vietnam,Virus,Prescription
+Famciclovir,Antiviral,Tablet,250 mg,Pymepharco,Virus,Prescription
+Ribavirin,Antiviral,Capsule,200 mg,Imexpharm,Virus,Prescription
+Tenofovir,Antiviral,Tablet,300 mg,DHG Pharma,Virus,Prescription
+Lamivudine,Antiviral,Tablet,150 mg,Mekophar,Virus,Prescription
+Entecavir,Antiviral,Tablet,0.5 mg,Stada Vietnam,Virus,Prescription
+Sofosbuvir,Antiviral,Tablet,400 mg,Pymepharco,Virus,Prescription
+Fluconazole,Antifungal,Capsule,150 mg,DHG Pharma,Fungus,Prescription
+Fluconazole,Antifungal,Tablet,50 mg,Mekophar,Fungus,Prescription
+Ketoconazole,Antifungal,Tablet,200 mg,Stada Vietnam,Fungus,Prescription
+Ketoconazole,Antifungal,Cream,2%,Pymepharco,Fungus,Over-the-Counter
+Itraconazole,Antifungal,Capsule,100 mg,Imexpharm,Fungus,Prescription
+Terbinafine,Antifungal,Tablet,250 mg,DHG Pharma,Fungus,Prescription
+Terbinafine,Antifungal,Cream,1%,Mekophar,Fungus,Over-the-Counter
+Clotrimazole,Antifungal,Cream,1%,Stada Vietnam,Fungus,Over-the-Counter
+Miconazole,Antifungal,Cream,2%,Pymepharco,Fungus,Over-the-Counter
+Nystatin,Antifungal,Tablet,500000 IU,Imexpharm,Fungus,Prescription
+Griseofulvin,Antifungal,Tablet,500 mg,DHG Pharma,Fungus,Prescription
+Voriconazole,Antifungal,Tablet,200 mg,Mekophar,Fungus,Prescription
+Metformin,Antidiabetic,Tablet,500 mg,DHG Pharma,Diabetes,Prescription
+Metformin,Antidiabetic,Tablet,850 mg,Stada Vietnam,Diabetes,Prescription
+Metformin,Antidiabetic,Tablet,1000 mg,Mekophar,Diabetes,Prescription
+Glibenclamide,Antidiabetic,Tablet,5 mg,Pymepharco,Diabetes,Prescription
+Glipizide,Antidiabetic,Tablet,5 mg,DHG Pharma,Diabetes,Prescription
+Gliclazide,Antidiabetic,Tablet,80 mg,Stada Vietnam,Diabetes,Prescription
+Glimepiride,Antidiabetic,Tablet,2 mg,Mekophar,Diabetes,Prescription
+Sitagliptin,Antidiabetic,Tablet,100 mg,Imexpharm,Diabetes,Prescription
+Vildagliptin,Antidiabetic,Tablet,50 mg,DHG Pharma,Diabetes,Prescription
+Pioglitazone,Antidiabetic,Tablet,30 mg,Pymepharco,Diabetes,Prescription
+Insulin Glargine,Antidiabetic,Injection,100 IU/ml,Stada Vietnam,Diabetes,Prescription
+Insulin Regular,Antidiabetic,Injection,100 IU/ml,DHG Pharma,Diabetes,Prescription
+Acarbose,Antidiabetic,Tablet,50 mg,Mekophar,Diabetes,Prescription
+Dapagliflozin,Antidiabetic,Tablet,10 mg,Imexpharm,Diabetes,Prescription
+Empagliflozin,Antidiabetic,Tablet,10 mg,Pymepharco,Diabetes,Prescription
+Amitriptyline,Antidepressant,Tablet,25 mg,DHG Pharma,Depression,Prescription
+Sertraline,Antidepressant,Tablet,50 mg,Mekophar,Depression,Prescription
+Fluoxetine,Antidepressant,Capsule,20 mg,Stada Vietnam,Depression,Prescription
+Paroxetine,Antidepressant,Tablet,20 mg,Pymepharco,Depression,Prescription
+Escitalopram,Antidepressant,Tablet,10 mg,Imexpharm,Depression,Prescription
+Venlafaxine,Antidepressant,Capsule,75 mg,DHG Pharma,Depression,Prescription
+Mirtazapine,Antidepressant,Tablet,30 mg,Mekophar,Depression,Prescription
+Clomipramine,Antidepressant,Tablet,25 mg,Stada Vietnam,Depression,Prescription
+Imipramine,Antidepressant,Tablet,25 mg,Pymepharco,Depression,Prescription
+Alprazolam,Antidepressant,Tablet,0.5 mg,DHG Pharma,Depression,Prescription
+Diazepam,Antidepressant,Tablet,5 mg,Mekophar,Depression,Prescription
+Clonazepam,Antidepressant,Tablet,2 mg,Imexpharm,Depression,Prescription
+Quetiapine,Antidepressant,Tablet,100 mg,Stada Vietnam,Depression,Prescription
+Olanzapine,Antidepressant,Tablet,10 mg,Pymepharco,Depression,Prescription
+Povidone Iodine,Antiseptic,Ointment,10%,DHG Pharma,Wound,Over-the-Counter
+Povidone Iodine,Antiseptic,Drops,5%,Mekophar,Wound,Over-the-Counter
+Chlorhexidine,Antiseptic,Ointment,0.5%,Stada Vietnam,Wound,Over-the-Counter
+Hydrogen Peroxide,Antiseptic,Drops,3%,Pymepharco,Wound,Over-the-Counter
+Betadine,Antiseptic,Ointment,10%,Imexpharm,Wound,Over-the-Counter
+Silver Sulfadiazine,Antiseptic,Cream,1%,DHG Pharma,Wound,Prescription
+Benzalkonium Chloride,Antiseptic,Drops,0.1%,Mekophar,Wound,Over-the-Counter
+Mupirocin,Antiseptic,Ointment,2%,Stada Vietnam,Infection,Prescription
+Fusidic Acid,Antiseptic,Cream,2%,Pymepharco,Infection,Prescription
+Neomycin + Polymyxin B,Antiseptic,Ointment,3500 IU/g,DHG Pharma,Wound,Over-the-Counter
+Thuốc bổ gan Boganic,Antiviral,Tablet,500 mg,Traphaco,Virus,Over-the-Counter
+Hoạt huyết dưỡng não,Analgesic,Tablet,362 mg,Traphaco,Pain,Over-the-Counter
+Berberin,Antibiotic,Tablet,100 mg,DHG Pharma,Infection,Over-the-Counter
+Smecta,Analgesic,Syrup,3 g/sachet,OPG Vietnam,Pain,Over-the-Counter
+Phosphalugel,Analgesic,Syrup,20 g/sachet,Sanofi Vietnam,Pain,Over-the-Counter
+Omeprazole,Analgesic,Capsule,20 mg,Stada Vietnam,Pain,Prescription
+Omeprazole,Analgesic,Capsule,40 mg,DHG Pharma,Pain,Prescription
+Esomeprazole,Analgesic,Tablet,40 mg,Mekophar,Pain,Prescription
+Pantoprazole,Analgesic,Tablet,40 mg,Pymepharco,Pain,Prescription
+Lansoprazole,Analgesic,Capsule,30 mg,Imexpharm,Pain,Prescription
+Domperidone,Analgesic,Tablet,10 mg,DHG Pharma,Pain,Over-the-Counter
+Motilium-M,Analgesic,Tablet,10 mg,Stada Vietnam,Pain,Over-the-Counter
+Metoclopramide,Analgesic,Tablet,10 mg,Mekophar,Pain,Over-the-Counter
+Ranitidine,Analgesic,Tablet,150 mg,DHG Pharma,Pain,Over-the-Counter
+Famotidine,Analgesic,Tablet,20 mg,Pymepharco,Pain,Over-the-Counter
+Loperamide,Analgesic,Capsule,2 mg,Stada Vietnam,Infection,Over-the-Counter
+Oresol,Antipyretic,Syrup,27.9 g/sachet,DHG Pharma,Fever,Over-the-Counter
+Hydrite,Antipyretic,Syrup,13.95 g/sachet,Mekophar,Fever,Over-the-Counter
+Zinc Sulfate,Antidiabetic,Tablet,70 mg,Pymepharco,Diabetes,Over-the-Counter
+Vitamin C,Antipyretic,Tablet,500 mg,DHG Pharma,Fever,Over-the-Counter
+Vitamin B1,Analgesic,Tablet,100 mg,Mekophar,Pain,Over-the-Counter
+Vitamin B12,Analgesic,Tablet,500 mcg,Stada Vietnam,Pain,Over-the-Counter
+Vitamin B complex,Analgesic,Tablet,500 mg,Imexpharm,Pain,Over-the-Counter
+Calcium Carbonate,Analgesic,Tablet,500 mg,DHG Pharma,Pain,Over-the-Counter
+Folic Acid,Antidiabetic,Tablet,5 mg,Mekophar,Diabetes,Over-the-Counter
+Iron Fumarate,Antidiabetic,Tablet,200 mg,Pymepharco,Diabetes,Over-the-Counter
+Atorvastatin,Antidiabetic,Tablet,20 mg,DHG Pharma,Diabetes,Prescription
+Rosuvastatin,Antidiabetic,Tablet,10 mg,Stada Vietnam,Diabetes,Prescription
+Amlodipine,Antidiabetic,Tablet,5 mg,Mekophar,Diabetes,Prescription
+Lisinopril,Antidiabetic,Tablet,10 mg,Imexpharm,Diabetes,Prescription
+Losartan,Antidiabetic,Tablet,50 mg,DHG Pharma,Diabetes,Prescription
+Valsartan,Antidiabetic,Tablet,80 mg,Pymepharco,Diabetes,Prescription
+Bisoprolol,Antidiabetic,Tablet,5 mg,Stada Vietnam,Diabetes,Prescription
+Carvedilol,Antidiabetic,Tablet,25 mg,Mekophar,Diabetes,Prescription
+Furosemide,Antidiabetic,Tablet,40 mg,DHG Pharma,Diabetes,Prescription
+Spironolactone,Antidiabetic,Tablet,25 mg,Imexpharm,Diabetes,Prescription
+Digoxin,Antidiabetic,Tablet,0.25 mg,Pymepharco,Diabetes,Prescription
+Warfarin,Antidiabetic,Tablet,5 mg,DHG Pharma,Diabetes,Prescription
+Clopidogrel,Antidiabetic,Tablet,75 mg,Stada Vietnam,Diabetes,Prescription
+Levothyroxine,Antidiabetic,Tablet,50 mcg,Mekophar,Diabetes,Prescription
+Prednisolone,Antiseptic,Tablet,5 mg,DHG Pharma,Infection,Prescription
+Dexamethasone,Antiseptic,Tablet,0.5 mg,Pymepharco,Infection,Prescription
+Methylprednisolone,Antiseptic,Tablet,4 mg,Stada Vietnam,Infection,Prescription
+Betamethasone,Antiseptic,Cream,0.1%,Imexpharm,Infection,Prescription
+Hydrocortisone,Antiseptic,Cream,1%,DHG Pharma,Infection,Over-the-Counter
+Loratadine,Antipyretic,Tablet,10 mg,Mekophar,Fever,Over-the-Counter
+Cetirizine,Antipyretic,Tablet,10 mg,Stada Vietnam,Fever,Over-the-Counter
+Fexofenadine,Antipyretic,Tablet,120 mg,Pymepharco,Fever,Over-the-Counter
+Chlorphenamine,Antipyretic,Tablet,4 mg,DHG Pharma,Fever,Over-the-Counter
+Diphenhydramine,Antipyretic,Capsule,25 mg,Mekophar,Fever,Over-the-Counter
+Montelukast,Antipyretic,Tablet,10 mg,Imexpharm,Fever,Prescription
+Salbutamol,Antipyretic,Inhaler,100 mcg/dose,DHG Pharma,Infection,Prescription
+Budesonide,Antipyretic,Inhaler,200 mcg/dose,Stada Vietnam,Infection,Prescription
+Formoterol,Antipyretic,Inhaler,12 mcg/dose,Pymepharco,Infection,Prescription
+Tiotropium,Antipyretic,Inhaler,18 mcg/dose,Mekophar,Infection,Prescription
+Acetylcysteine,Antipyretic,Syrup,200 mg/5ml,DHG Pharma,Infection,Over-the-Counter
+Bromhexine,Antipyretic,Syrup,4 mg/5ml,Stada Vietnam,Infection,Over-the-Counter
+Ambroxol,Antipyretic,Syrup,30 mg/5ml,Mekophar,Infection,Over-the-Counter
+Guaifenesin,Antipyretic,Syrup,100 mg/5ml,Pymepharco,Fever,Over-the-Counter
+Dextromethorphan,Antipyretic,Syrup,15 mg/5ml,Imexpharm,Fever,Over-the-Counter
+Noscapine,Antipyretic,Tablet,30 mg,DHG Pharma,Fever,Over-the-Counter
+Theophylline,Antipyretic,Tablet,200 mg,Mekophar,Infection,Prescription
+Doxylamine + Vitamin B6,Antipyretic,Tablet,10/10 mg,Stada Vietnam,Fever,Prescription
+Tetracaine,Antiseptic,Drops,0.5%,DHG Pharma,Wound,Prescription
+Tobramycin,Antiseptic,Drops,0.3%,Pymepharco,Infection,Prescription
+Ciprofloxacin,Antiseptic,Drops,0.3%,Mekophar,Infection,Prescription
+Dexamethasone + Tobramycin,Antiseptic,Drops,0.1/0.3%,Stada Vietnam,Infection,Prescription
+Timolol,Antidiabetic,Drops,0.5%,Imexpharm,Diabetes,Prescription
+Latanoprost,Antidiabetic,Drops,0.005%,DHG Pharma,Diabetes,Prescription
+Tropicamide,Antiseptic,Drops,1%,Mekophar,Wound,Prescription
+Atropine,Antiseptic,Drops,1%,Pymepharco,Wound,Prescription
+Panadol,Analgesic,Tablet,500 mg,GSK Vietnam,Pain,Over-the-Counter
+Panadol Extra,Analgesic,Tablet,500/65 mg,GSK Vietnam,Pain,Over-the-Counter
+Panadol Extend,Analgesic,Tablet,665 mg,GSK Vietnam,Pain,Over-the-Counter
+Panadol CF,Antipyretic,Tablet,500 mg,GSK Vietnam,Fever,Over-the-Counter
+Panadol Night,Antipyretic,Tablet,500 mg,GSK Vietnam,Fever,Over-the-Counter
+Panadol Baby,Antipyretic,Syrup,120 mg/5ml,GSK Vietnam,Fever,Over-the-Counter
+Panadol Actifast,Analgesic,Tablet,500 mg,GSK Vietnam,Pain,Over-the-Counter
+Hapacol 150,Antipyretic,Syrup,150 mg/5ml,DHG Pharma,Fever,Over-the-Counter
+Hapacol 250,Antipyretic,Syrup,250 mg/5ml,DHG Pharma,Fever,Over-the-Counter
+Hapacol 500,Analgesic,Tablet,500 mg,DHG Pharma,Pain,Over-the-Counter
+Hapacol 650,Analgesic,Tablet,650 mg,DHG Pharma,Pain,Over-the-Counter
+Hapacol Cảm Cúm,Antipyretic,Tablet,500 mg,DHG Pharma,Fever,Over-the-Counter
+Hapacol Dạng Gói,Antipyretic,Syrup,250 mg/gói,DHG Pharma,Fever,Over-the-Counter
+Efferalgan 500,Analgesic,Tablet,500 mg,Bristol Myers Squibb Vietnam,Pain,Over-the-Counter
+Efferalgan 1g,Analgesic,Tablet,1000 mg,Bristol Myers Squibb Vietnam,Pain,Over-the-Counter
+Efferalgan Codeine,Analgesic,Tablet,500/30 mg,Bristol Myers Squibb Vietnam,Pain,Prescription
+Efferalgan sủi,Antipyretic,Tablet,500 mg,Bristol Myers Squibb Vietnam,Fever,Over-the-Counter
+Tiffy,Antipyretic,Tablet,500 mg,Daewoong Vietnam,Fever,Over-the-Counter
+Tiffy Trẻ Em,Antipyretic,Syrup,120 mg/5ml,Daewoong Vietnam,Fever,Over-the-Counter
+Decolgen,Antipyretic,Tablet,325 mg,United Pharma Vietnam,Fever,Over-the-Counter
+Decolgen Forte,Antipyretic,Tablet,500 mg,United Pharma Vietnam,Fever,Over-the-Counter
+Coldacmin,Antipyretic,Tablet,500 mg,Mekophar,Fever,Over-the-Counter
+Rinasec,Antipyretic,Tablet,4 mg,DHG Pharma,Fever,Over-the-Counter
+Theraflu,Antipyretic,Syrup,500 mg/gói,Haleon Vietnam,Fever,Over-the-Counter
+NyQuil,Antipyretic,Syrup,325 mg/15ml,Procter & Gamble Vietnam,Fever,Over-the-Counter
+Contac,Antipyretic,Capsule,500 mg,GSK Vietnam,Fever,Over-the-Counter
+Siro Ho Bổ Phế,Antipyretic,Syrup,100 mg/5ml,Traphaco,Fever,Over-the-Counter
+Phosphalugel,Analgesic,Syrup,20 g/gói,Sanofi Vietnam,Pain,Over-the-Counter
+Gastropulgite,Analgesic,Syrup,2.5 g/gói,Beaufour Ipsen Vietnam,Pain,Over-the-Counter
+Maalox,Analgesic,Tablet,400/400 mg,Sanofi Vietnam,Pain,Over-the-Counter
+Kremil-S,Analgesic,Tablet,178/233 mg,Unilab Vietnam,Pain,Over-the-Counter
+Yumangel,Analgesic,Syrup,500 mg/10ml,Pharmedic,Pain,Over-the-Counter
+Smecta,Analgesic,Syrup,3 g/gói,Ipsen Vietnam,Pain,Over-the-Counter
+Nexium,Analgesic,Tablet,20 mg,AstraZeneca Vietnam,Pain,Prescription
+Nexium Mups,Analgesic,Tablet,40 mg,AstraZeneca Vietnam,Pain,Prescription
+Losec,Analgesic,Capsule,20 mg,AstraZeneca Vietnam,Pain,Prescription
+Motilium-M,Analgesic,Tablet,10 mg,Janssen Vietnam,Pain,Over-the-Counter
+Ganaton,Analgesic,Tablet,50 mg,Abbott Vietnam,Pain,Prescription
+Primperan,Analgesic,Tablet,10 mg,Sanofi Vietnam,Pain,Over-the-Counter
+Duspatalin,Analgesic,Tablet,200 mg,Abbott Vietnam,Pain,Prescription
+Buscopan,Analgesic,Tablet,10 mg,Boehringer Ingelheim Vietnam,Pain,Over-the-Counter
+Buscopan,Analgesic,Injection,20 mg/ml,Boehringer Ingelheim Vietnam,Pain,Prescription
+Claritin,Antipyretic,Tablet,10 mg,Bayer Vietnam,Fever,Over-the-Counter
+Zyrtec,Antipyretic,Tablet,10 mg,UCB Vietnam,Fever,Over-the-Counter
+Telfast,Antipyretic,Tablet,180 mg,Sanofi Vietnam,Fever,Over-the-Counter
+Phenergan,Antipyretic,Tablet,25 mg,Sanofi Vietnam,Fever,Prescription
+Aerius,Antipyretic,Tablet,5 mg,MSD Vietnam,Fever,Prescription
+Clarityne,Antipyretic,Syrup,5 mg/5ml,Bayer Vietnam,Fever,Over-the-Counter
+Polaramine,Antipyretic,Tablet,2 mg,MSD Vietnam,Fever,Over-the-Counter
+Tavegyl,Antipyretic,Tablet,1 mg,Novartis Vietnam,Fever,Over-the-Counter
+Pharmaton,Analgesic,Capsule,500 mg,Boehringer Ingelheim Vietnam,Pain,Over-the-Counter
+Centrum,Antidiabetic,Tablet,500 mg,Pfizer Vietnam,Diabetes,Over-the-Counter
+Vitamin C Upsa,Antipyretic,Tablet,1000 mg,UPSA Vietnam,Fever,Over-the-Counter
+Vitamin C sủi,Antipyretic,Tablet,1000 mg,DHG Pharma,Fever,Over-the-Counter
+Redoxon,Antipyretic,Tablet,1000 mg,Bayer Vietnam,Fever,Over-the-Counter
+Cebion,Antipyretic,Tablet,500 mg,Merck Vietnam,Fever,Over-the-Counter
+Scott's Emulsion,Antidiabetic,Syrup,10 ml/dose,GSK Vietnam,Diabetes,Over-the-Counter
+Calcimagne,Analgesic,Tablet,500 mg,Sanofi Vietnam,Pain,Over-the-Counter
+Calcium Sandoz,Analgesic,Tablet,500 mg,Sandoz Vietnam,Pain,Over-the-Counter
+Oraferon,Antidiabetic,Tablet,100 mg,DHG Pharma,Diabetes,Over-the-Counter
+Obimin,Antidiabetic,Tablet,500 mg,DHG Pharma,Diabetes,Over-the-Counter
+Elevit,Antidiabetic,Tablet,500 mg,Bayer Vietnam,Diabetes,Over-the-Counter
+Blackmores,Antidiabetic,Capsule,1000 mg,Blackmores Vietnam,Diabetes,Over-the-Counter
+Omega-3 Fish Oil,Antidiabetic,Capsule,1000 mg,DHG Pharma,Diabetes,Over-the-Counter
+Ostelin Calcium D3,Antidiabetic,Tablet,600/400 IU,Bayer Vietnam,Diabetes,Over-the-Counter
+Voltaren Emulgel,Analgesic,Cream,1%,Novartis Vietnam,Pain,Over-the-Counter
+Salonpas,Analgesic,Ointment,30 mg,Hisamitsu Vietnam,Pain,Over-the-Counter
+Tiger Balm,Analgesic,Ointment,25 mg,Haw Par Vietnam,Pain,Over-the-Counter
+Profenid Gel,Analgesic,Cream,2.5%,Sanofi Vietnam,Pain,Over-the-Counter
+Counterpain,Analgesic,Cream,1%,Taisho Vietnam,Pain,Over-the-Counter
+Ben-Gay,Analgesic,Cream,15%,Johnson & Johnson Vietnam,Pain,Over-the-Counter
+Hirudoid,Antiseptic,Cream,0.3%,Stiefel Vietnam,Wound,Over-the-Counter
+Bepanthen,Antiseptic,Ointment,5%,Bayer Vietnam,Wound,Over-the-Counter
+Biafine,Antiseptic,Cream,1%,Janssen Vietnam,Wound,Over-the-Counter
+Flammazine,Antiseptic,Cream,1%,Smith & Nephew Vietnam,Wound,Prescription
+Gentrisone,Antiseptic,Cream,0.1%,MSD Vietnam,Infection,Prescription
+Fucicort,Antiseptic,Cream,2%,Leo Pharma Vietnam,Infection,Prescription
+Fucidin,Antiseptic,Cream,2%,Leo Pharma Vietnam,Infection,Prescription
+Eumovate,Antiseptic,Cream,0.05%,GSK Vietnam,Infection,Prescription
+Canesten,Antifungal,Cream,1%,Bayer Vietnam,Fungus,Over-the-Counter
+Lamisil,Antifungal,Cream,1%,Novartis Vietnam,Fungus,Over-the-Counter
+Nizoral,Antifungal,Cream,2%,Janssen Vietnam,Fungus,Over-the-Counter
+Nizoral Shampoo,Antifungal,Syrup,2%,Janssen Vietnam,Fungus,Over-the-Counter
+Daktarin,Antifungal,Cream,2%,Janssen Vietnam,Fungus,Over-the-Counter
+Rohto,Antiseptic,Drops,0.5%,Rohto Vietnam,Wound,Over-the-Counter
+Visine,Antiseptic,Drops,0.05%,Johnson & Johnson Vietnam,Wound,Over-the-Counter
+Systane,Antiseptic,Drops,0.4%,Alcon Vietnam,Wound,Over-the-Counter
+Refresh Tears,Antiseptic,Drops,0.5%,Allergan Vietnam,Wound,Over-the-Counter
+V-Rohto,Antiseptic,Drops,0.4%,Rohto Vietnam,Wound,Over-the-Counter
+Hydrite,Antipyretic,Syrup,13.95 g/gói,Mekophar,Fever,Over-the-Counter
+Oresol DHG,Antipyretic,Syrup,27.9 g/gói,DHG Pharma,Fever,Over-the-Counter
+Pocari Sweat,Antipyretic,Syrup,74 g/gói,Otsuka Vietnam,Fever,Over-the-Counter
+Pedialyte,Antipyretic,Syrup,33.8 g/gói,Abbott Vietnam,Fever,Over-the-Counter
+Augmentin,Antibiotic,Tablet,625 mg,GSK Vietnam,Infection,Prescription
+Augmentin,Antibiotic,Syrup,457 mg/5ml,GSK Vietnam,Infection,Prescription
+Zinnat,Antibiotic,Tablet,500 mg,GSK Vietnam,Infection,Prescription
+Zinnat,Antibiotic,Syrup,125 mg/5ml,GSK Vietnam,Infection,Prescription
+Klacid,Antibiotic,Tablet,500 mg,Abbott Vietnam,Infection,Prescription
+Zithromax,Antibiotic,Capsule,250 mg,Pfizer Vietnam,Infection,Prescription
+Amoxil,Antibiotic,Capsule,500 mg,GSK Vietnam,Infection,Prescription
+Ospen,Antibiotic,Tablet,1.5 MIU,Sandoz Vietnam,Infection,Prescription
+Ceclor,Antibiotic,Capsule,500 mg,Eli Lilly Vietnam,Infection,Prescription
+Suprax,Antibiotic,Tablet,200 mg,Sanofi Vietnam,Infection,Prescription
+Tavanic,Antibiotic,Tablet,500 mg,Sanofi Vietnam,Infection,Prescription
+Avelox,Antibiotic,Tablet,400 mg,Bayer Vietnam,Infection,Prescription
+Ciprobay,Antibiotic,Tablet,500 mg,Bayer Vietnam,Infection,Prescription
+Flagyl,Antibiotic,Tablet,500 mg,Sanofi Vietnam,Infection,Prescription
+Fasigyn,Antibiotic,Tablet,500 mg,Pfizer Vietnam,Infection,Prescription
+Klion-D,Antifungal,Tablet,500 mg,Gedeon Richter Vietnam,Fungus,Prescription
+Voltaren,Analgesic,Tablet,50 mg,Novartis Vietnam,Pain,Prescription
+Feldene,Analgesic,Capsule,20 mg,Pfizer Vietnam,Pain,Prescription
+Celebrex,Analgesic,Capsule,200 mg,Pfizer Vietnam,Pain,Prescription
+Arcoxia,Analgesic,Tablet,90 mg,MSD Vietnam,Pain,Prescription
+Mobic,Analgesic,Tablet,15 mg,Boehringer Ingelheim Vietnam,Pain,Prescription
+Ultracet,Analgesic,Tablet,325/37.5 mg,Janssen Vietnam,Pain,Prescription
+Lyrica,Analgesic,Capsule,75 mg,Pfizer Vietnam,Pain,Prescription
+Neurontin,Analgesic,Capsule,300 mg,Pfizer Vietnam,Pain,Prescription
+Myonal,Analgesic,Tablet,50 mg,Eisai Vietnam,Pain,Prescription
+Mydocalm,Analgesic,Tablet,150 mg,Gedeon Richter Vietnam,Pain,Prescription
+Tamiflu,Antiviral,Capsule,75 mg,Roche Vietnam,Virus,Prescription
+Zovirax,Antiviral,Tablet,400 mg,GSK Vietnam,Virus,Prescription
+Zovirax,Antiviral,Cream,5%,GSK Vietnam,Wound,Over-the-Counter
+Valtrex,Antiviral,Tablet,500 mg,GSK Vietnam,Virus,Prescription
+Epivir,Antiviral,Tablet,150 mg,GSK Vietnam,Virus,Prescription
+Hepbest,Antiviral,Tablet,25 mg,Mylan Vietnam,Virus,Prescription
+Baraclude,Antiviral,Tablet,0.5 mg,Bristol Myers Squibb Vietnam,Virus,Prescription
+Viread,Antiviral,Tablet,300 mg,Gilead Vietnam,Virus,Prescription
+Sovaldi,Antiviral,Tablet,400 mg,Gilead Vietnam,Virus,Prescription
+Glucophage,Antidiabetic,Tablet,500 mg,Merck Vietnam,Diabetes,Prescription
+Glucophage XR,Antidiabetic,Tablet,750 mg,Merck Vietnam,Diabetes,Prescription
+Diamicron MR,Antidiabetic,Tablet,60 mg,Servier Vietnam,Diabetes,Prescription
+Amaryl,Antidiabetic,Tablet,2 mg,Sanofi Vietnam,Diabetes,Prescription
+Januvia,Antidiabetic,Tablet,100 mg,MSD Vietnam,Diabetes,Prescription
+Galvus,Antidiabetic,Tablet,50 mg,Novartis Vietnam,Diabetes,Prescription
+Jardiance,Antidiabetic,Tablet,10 mg,Boehringer Ingelheim Vietnam,Diabetes,Prescription
+Forxiga,Antidiabetic,Tablet,10 mg,AstraZeneca Vietnam,Diabetes,Prescription
+Lantus,Antidiabetic,Injection,100 IU/ml,Sanofi Vietnam,Diabetes,Prescription
+NovoRapid,Antidiabetic,Injection,100 IU/ml,Novo Nordisk Vietnam,Diabetes,Prescription
+Levemir,Antidiabetic,Injection,100 IU/ml,Novo Nordisk Vietnam,Diabetes,Prescription
+Actos,Antidiabetic,Tablet,15 mg,Takeda Vietnam,Diabetes,Prescription
+Glucobay,Antidiabetic,Tablet,50 mg,Bayer Vietnam,Diabetes,Prescription
+Zoloft,Antidepressant,Tablet,50 mg,Pfizer Vietnam,Depression,Prescription
+Prozac,Antidepressant,Capsule,20 mg,Eli Lilly Vietnam,Depression,Prescription
+Lexapro,Antidepressant,Tablet,10 mg,Lundbeck Vietnam,Depression,Prescription
+Cipralex,Antidepressant,Tablet,10 mg,Lundbeck Vietnam,Depression,Prescription
+Effexor,Antidepressant,Capsule,75 mg,Pfizer Vietnam,Depression,Prescription
+Remeron,Antidepressant,Tablet,30 mg,MSD Vietnam,Depression,Prescription
+Paxil,Antidepressant,Tablet,20 mg,GSK Vietnam,Depression,Prescription
+Rivotril,Antidepressant,Tablet,2 mg,Roche Vietnam,Depression,Prescription
+Valium,Antidepressant,Tablet,5 mg,Roche Vietnam,Depression,Prescription
+Xanax,Antidepressant,Tablet,0.5 mg,Pfizer Vietnam,Depression,Prescription
+Stilnox,Antidepressant,Tablet,10 mg,Sanofi Vietnam,Depression,Prescription
+Dogmatil,Antidepressant,Tablet,50 mg,Sanofi Vietnam,Depression,Prescription
+Seroquel,Antidepressant,Tablet,100 mg,AstraZeneca Vietnam,Depression,Prescription
+Zyprexa,Antidepressant,Tablet,10 mg,Eli Lilly Vietnam,Depression,Prescription
+Prospan,Antipyretic,Syrup,7 mg/5ml,Engelhard Vietnam,Fever,Over-the-Counter
+Bổ Phế Nam Hà,Antipyretic,Syrup,100 mg/5ml,Nam Ha Pharma,Fever,Over-the-Counter
+Astex,Antipyretic,Syrup,15 mg/5ml,DHG Pharma,Fever,Over-the-Counter
+Atussin,Antipyretic,Syrup,10 mg/5ml,Pymepharco,Fever,Over-the-Counter
+Mucosolvon,Antipyretic,Syrup,30 mg/5ml,Boehringer Ingelheim Vietnam,Infection,Over-the-Counter
+ACC 200,Antipyretic,Syrup,200 mg/gói,Sandoz Vietnam,Infection,Over-the-Counter
+Bisolvon,Antipyretic,Syrup,4 mg/5ml,Boehringer Ingelheim Vietnam,Infection,Over-the-Counter
+Codein Phosphate,Antipyretic,Syrup,10 mg/5ml,DHG Pharma,Fever,Prescription
+Hoạt Huyết Dưỡng Não Traphaco,Analgesic,Tablet,300 mg,Traphaco,Pain,Over-the-Counter
+Boganic,Antiviral,Tablet,500 mg,Traphaco,Virus,Over-the-Counter
+Cebraton,Analgesic,Capsule,500 mg,Traphaco,Pain,Over-the-Counter
+Kim Tiền Thảo,Analgesic,Tablet,500 mg,Traphaco,Pain,Over-the-Counter
+Bổ Gan Tuệ Linh,Antiviral,Tablet,500 mg,Tuệ Linh Pharma,Virus,Over-the-Counter
+Tràng Phục Linh,Analgesic,Tablet,500 mg,Nam Ha Pharma,Pain,Over-the-Counter
+An Thần Nam Dược,Antidepressant,Tablet,500 mg,Nam Duoc Pharma,Depression,Over-the-Counter
+Betadine,Antiseptic,Ointment,10%,Mundipharma Vietnam,Wound,Over-the-Counter
+Betadine,Antiseptic,Drops,10%,Mundipharma Vietnam,Wound,Over-the-Counter
+Dizigone,Antiseptic,Drops,0.05%,Imexpharm,Wound,Over-the-Counter
+Octenisept,Antiseptic,Drops,0.1%,Schülke Vietnam,Wound,Over-the-Counter
+Povidine,Antiseptic,Ointment,10%,DHG Pharma,Wound,Over-the-Counter
+Dung Dịch Oxy Già,Antiseptic,Drops,3%,Mekophar,Wound,Over-the-Counter
+Cồn Y Tế 70 Độ,Antiseptic,Drops,70%,DHG Pharma,Wound,Over-the-Counter
+Nước Muối Sinh Lý 0.9%,Antiseptic,Drops,0.9%,Mekophar,Wound,Over-the-Counter
+Xịt Mũi Sterimar,Antiseptic,Drops,0.9%,Brothier Vietnam,Infection,Over-the-Counter
+Rhinex,Antiseptic,Drops,0.05%,DHG Pharma,Infection,Over-the-Counter
+Coversyl,Antidiabetic,Tablet,5 mg,Servier Vietnam,Diabetes,Prescription
+Micardis,Antidiabetic,Tablet,80 mg,Boehringer Ingelheim Vietnam,Diabetes,Prescription
+Diovan,Antidiabetic,Tablet,160 mg,Novartis Vietnam,Diabetes,Prescription
+Norvasc,Antidiabetic,Tablet,5 mg,Pfizer Vietnam,Diabetes,Prescription
+Concor,Antidiabetic,Tablet,5 mg,Merck Vietnam,Diabetes,Prescription
+Betaloc ZOK,Antidiabetic,Tablet,50 mg,AstraZeneca Vietnam,Diabetes,Prescription
+Indapamide,Antidiabetic,Tablet,2.5 mg,Servier Vietnam,Diabetes,Prescription
+Lasix,Antidiabetic,Tablet,40 mg,Sanofi Vietnam,Diabetes,Prescription
+Aldactone,Antidiabetic,Tablet,25 mg,Pfizer Vietnam,Diabetes,Prescription
+Crestor,Antidiabetic,Tablet,10 mg,AstraZeneca Vietnam,Diabetes,Prescription
+Lipitor,Antidiabetic,Tablet,20 mg,Pfizer Vietnam,Diabetes,Prescription
+Plavix,Antidiabetic,Tablet,75 mg,Sanofi Vietnam,Diabetes,Prescription
+Sintrom,Antidiabetic,Tablet,4 mg,Novartis Vietnam,Diabetes,Prescription
+Xarelto,Antidiabetic,Tablet,20 mg,Bayer Vietnam,Diabetes,Prescription
+Eliquis,Antidiabetic,Tablet,5 mg,Bristol Myers Squibb Vietnam,Diabetes,Prescription

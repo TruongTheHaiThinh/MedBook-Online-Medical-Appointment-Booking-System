@@ -15,6 +15,7 @@ class Doctor(Base):
     bio = Column(Text, nullable=True)
     experience_years = Column(Integer, default=0, nullable=False)
     avatar_url = Column(String(500), nullable=True)
+    room_number = Column(String(20), nullable=True, default="Phòng 101")
     is_approved = Column(Boolean, default=False, nullable=False)
 
     # Relationships

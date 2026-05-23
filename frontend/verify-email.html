@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác thực Email | MedBook</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css?v=2.0.0">
+    <style>
+        .verify-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .verify-card {
+            width: 100%;
+            max-width: 480px;
+            border-radius: var(--radius-lg);
+            padding: 3rem 2rem;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.06);
+            transition: all 0.4s var(--ease-out-expo);
+        }
+        .verify-card:hover {
+            transform: translateY(-5px);
+        }
+        .status-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+            font-size: 2.2rem;
+        }
+        .status-icon.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 2px solid rgba(16, 185, 129, 0.2);
+        }
+        .status-icon.error {
+            background: rgba(244, 63, 94, 0.1);
+            color: var(--danger);
+            border: 2px solid rgba(244, 63, 94, 0.2);
+        }
+        .status-icon.loading {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--secondary);
+            border: 2px solid rgba(59, 130, 246, 0.2);
+        }
+        .btn-home {
+            margin-top: 2.5rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 0 10px 20px var(--primary-glow);
+            transition: all 0.3s ease;
+        }
+        .btn-home:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(59, 130, 246, 0.4);
+            opacity: 0.95;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="verify-container">
+        <div class="verify-card glass-heavy">
+            
+            <div id="loading-box">
+                <div class="status-icon loading">
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+                </div>
+                <h2 class="font-bold text-2xl mb-3">Đang xác thực tài khoản</h2>
+                <p class="text-gray text-sm">Vui lòng chờ trong giây lát để hệ thống hoàn tất thủ tục xác thực email của bạn...</p>
+            </div>
+
+            <div id="success-box" style="display: none;">
+                <div class="status-icon success">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <h2 class="font-bold text-2xl mb-3 text-primary">Xác thực thành công!</h2>
+                <p class="text-gray text-sm id-msg">Tài khoản MedBook của bạn đã được xác thực thành công. Bây giờ bạn có thể trải nghiệm đầy đủ tính năng chăm sóc sức khỏe thông minh.</p>
+                <a href="index.html" class="btn-home">
+                    <i class="fa-solid fa-right-to-bracket"></i> Đăng nhập ngay
+                </a>
+            </div>
+
+            <div id="error-box" style="display: none;">
+                <div class="status-icon error">
+                    <i class="fa-solid fa-circle-xmark"></i>
+                </div>
+                <h2 class="font-bold text-2xl mb-3 text-danger">Xác thực thất bại</h2>
+                <p class="text-gray text-sm err-msg">Liên kết xác thực đã hết hạn hoặc không chính xác. Vui lòng kiểm tra lại email hoặc đăng nhập để gửi lại link xác thực.</p>
+                <a href="index.html" class="btn-home" style="background: var(--gray-800); box-shadow: none;">
+                    <i class="fa-solid fa-arrow-left"></i> Quay lại trang chủ
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/config.js?v=2.0.0"></script>
+    <script src="js/api.js?v=2.0.0"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+
+            const loadingBox = document.getElementById('loading-box');
+            const successBox = document.getElementById('success-box');
+            const errorBox = document.getElementById('error-box');
+
+            if (!token) {
+                loadingBox.style.display = 'none';
+                errorBox.style.display = 'block';
+                errorBox.querySelector('.err-msg').textContent = 'Không tìm thấy token xác thực trong URL. Vui lòng nhấp vào liên kết chính xác từ email của bạn.';
+                return;
+            }
+
+            try {
+                const res = await api.post('/auth/verify-email', { token: token });
+                loadingBox.style.display = 'none';
+                successBox.style.display = 'block';
+                if (res && res.message) {
+                    successBox.querySelector('.id-msg').textContent = res.message;
+                }
+            } catch (e) {
+                loadingBox.style.display = 'none';
+                errorBox.style.display = 'block';
+                if (e.message) {
+                    errorBox.querySelector('.err-msg').textContent = e.message;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

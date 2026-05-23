@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khám bệnh - MedBook Premium</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <style>
+        :root {
+            --sidebar-width: 300px;
+            --primary-gradient: linear-gradient(135deg, #0fb981, #059669);
+            --glass-white: rgba(255, 255, 255, 0.7);
+        }
+
+        .exam-page-container {
+            max-width: 1300px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: var(--sidebar-width) 1fr;
+            gap: 2rem;
+            padding: 1.5rem 1.5rem 4rem;
+        }
+
+        .sticky-sidebar {
+            position: sticky;
+            top: 1.5rem;
+            height: fit-content;
+        }
+
+        /* Patient Sidebar Redesign (Compact) */
+        .patient-card-v2 {
+            background: #f8fafc;
+            border-radius: 2rem;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.04);
+            border: 1px solid rgba(255,255,255,0.8);
+        }
+
+        .banner-v2 {
+            background: #0fb981;
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            color: white;
+            position: relative;
+        }
+        .banner-v2 .icon-circle {
+            width: 40px; height: 40px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 1rem;
+        }
+        .banner-v2 h2 { font-size: 1.5rem; font-weight: 900; margin-bottom: 0.25rem; line-height: 1.2; }
+        .banner-v2 p { font-size: 0.8rem; font-weight: 900; letter-spacing: 0.05em; opacity: 0.9; }
+
+        .info-section-v2 {
+            padding: 2rem 1.5rem;
+        }
+
+        .info-group { margin-bottom: 1.5rem; }
+        .info-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: 900;
+            color: #1e293b;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            margin-bottom: 0.5rem;
+        }
+        .info-label i { color: #0fb981; font-size: 0.85rem; }
+        .info-value {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #64748b;
+            line-height: 1.4;
+            padding-left: 1.35rem;
+        }
+
+        .status-box-v2 {
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+        .status-label { font-size: 0.85rem; font-weight: 900; color: #1e293b; text-transform: uppercase; margin-bottom: 0.25rem; }
+        .status-value { font-size: 0.85rem; font-weight: 900; color: #0fb981; text-transform: uppercase; }
+
+        .history-btn-v2 {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            font-size: 0.85rem;
+            font-weight: 900;
+            color: #475569;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s;
+            padding: 0.75rem;
+        }
+        .history-btn-v2:hover { color: #0fb981; }
+
+        /* Main Content Cards */
+        .content-section { margin-bottom: 3rem; }
+        .content-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .header-bar { width: 6px; height: 30px; background: #0fb981; border-radius: 3px; }
+        .header-title { font-size: 1.8rem; font-weight: 900; color: #0f172a; }
+
+        .card-body {
+            background: white;
+            border-radius: 2.5rem;
+            padding: 2.5rem;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.03);
+            border: 1px solid #f1f5f9;
+        }
+
+        .custom-textarea {
+            width: 100%;
+            padding: 1.5rem;
+            border: 2px solid #f1f5f9;
+            border-radius: 1.5rem;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #334155;
+            transition: all 0.3s;
+            background: #f8fafc;
+        }
+        .custom-textarea:focus { border-color: #0fb981; outline: none; background: white; }
+
+        /* Medicine Rows */
+        .med-row {
+            background: #f8fafc;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            display: grid;
+            grid-template-columns: 2.5fr 1fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 1fr auto;
+            gap: 0.75rem;
+            align-items: flex-end;
+            border: 1px solid #f1f5f9;
+        }
+        .med-row:hover { background: white; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border-color: #0fb981; }
+        .med-label { font-size: 0.7rem; font-weight: 900; color: #94a3b8; text-transform: uppercase; margin-bottom: 0.5rem; display: block; }
+        
+        /* ── A5 Prescription Slip (Print Only) ── */
+        #prescription-slip {
+            display: none;
+            width: 148mm; /* A5 Width */
+            padding: 10mm;
+            background: white;
+            color: black;
+            font-family: 'Times New Roman', serif;
+            line-height: 1.4;
+        }
+
+        @media print {
+            body * { visibility: hidden; }
+            #prescription-slip, #prescription-slip * { visibility: visible; }
+            #prescription-slip { 
+                display: block !important;
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            .no-print { display: none !important; }
+        }
+
+        .slip-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 20px; }
+        .slip-title { font-size: 24px; font-weight: bold; margin: 10px 0; text-transform: uppercase; }
+        .patient-info-table { width: 100%; margin-bottom: 20px; }
+        .patient-info-table td { padding: 5px 0; font-size: 14px; }
+        .med-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .med-table th { border-bottom: 1.5px solid #000; text-align: left; padding: 8px 0; font-size: 13px; }
+        .med-table td { border-bottom: 1px dotted #ccc; padding: 10px 0; font-size: 13px; }
+        .slip-footer { margin-top: 40px; display: flex; justify-content: space-between; }
+        .signature-box { text-align: center; width: 200px; }
+
+        .med-input-field {
+            width: 100%;
+            padding: 0.75rem;
+            background: white;
+            border: 2px solid transparent;
+            border-radius: 0.75rem;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #1e293b;
+        }
+        .med-input-field:focus { border-color: #0fb981; outline: none; }
+
+        /* Toast & General */
+        .text-danger { color: #f43f5e; }
+        .suggestions-list {
+            position: absolute;
+            background: white;
+            width: 100%;
+            z-index: 100;
+            border-radius: 1rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+        .suggestion-item { padding: 1rem; cursor: pointer; border-bottom: 1px solid #f1f5f9; }
+        .suggestion-item:hover { background: #f0fdf4; }
+        .debug-panel { display: none !important; }
+        
+        /* Custom Scrollbar for History */
+        #history-content::-webkit-scrollbar { width: 5px; }
+        #history-content::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
+        #history-content::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        #history-content::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .modal-content { padding: 1.5rem !important; border-radius: 2rem !important; }
+        #history-content { max-height: 50vh !important; overflow-y: auto !important; padding-right: 10px; }
+        
+        /* Responsive Adjustments */
+        @media (max-width: 1024px) {
+            .exam-page-container {
+                grid-template-columns: 1fr;
+            }
+            .sticky-sidebar {
+                position: relative;
+                top: 0;
+            }
+            header {
+                flex-direction: column;
+                align-items: flex-start !important;
+                gap: 1.5rem;
+            }
+            header .flex:last-child {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+            header button {
+                flex: 1;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .med-row {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.5rem;
+            }
+            .med-row > div:first-child { grid-column: span 2; }
+            .med-row > div:last-of-type { grid-column: span 2; }
+            .med-row button { grid-column: span 2; padding: 1rem; background: #fee2e2; border-radius: 1rem; }
+            
+            .card-body { padding: 1.5rem; }
+            .header-title { font-size: 1.4rem; }
+            .modal-content { width: 95% !important; padding: 1.5rem !important; }
+        }
+    </style>
+</head>
+<body class="theme-doctor" style="background: #f1f5f9;">
+    <!-- Critical Verification Banner (Hidden by JS) -->
+    <div id="js-warning" style="background:#ef4444; color:white; padding:1.5rem; text-align:center; font-weight:900; font-size:1.2rem; position:fixed; top:0; left:0; width:100%; z-index:99999;">
+        <i class="fa-solid fa-triangle-exclamation mr-2"></i> 
+        HỆ THỐNG ĐANG KHỞI TẠO... (Nhấn Ctrl + F5 nếu đứng máy)
+    </div>
+
+    <div class="container" style="max-width: 1300px; padding: 2rem 2rem 0;">
+        <header class="flex justify-between items-center mb-8">
+            <div class="flex items-center gap-6">
+                <button class="btn btn-ghost p-3 bg-white shadow-sm rounded-2xl" onclick="history.back()">
+                    <i class="fa-solid fa-chevron-left text-gray-900"></i>
+                </button>
+                <h1 class="text-3xl font-black text-gray-900">Phiếu Khám Bệnh</h1>
+            </div>
+            <div class="flex gap-4">
+                <button class="btn bg-white shadow-sm px-6 py-3 rounded-2xl font-black text-gray-600" onclick="history.back()">Hủy bỏ</button>
+                <button class="btn bg-white shadow-sm px-6 py-3 rounded-2xl font-black text-primary border-2 border-primary" onclick="prepareSlip(); window.print();">
+                    <i class="fa-solid fa-print mr-2"></i> In đơn thuốc
+                </button>
+                <button class="btn shadow-xl px-10 py-3 rounded-2xl font-black text-white" id="submit-btn" style="background: #0fb981;" onclick="submitExamination()">
+                    <i class="fa-solid fa-file-export mr-2"></i> Hoàn tất & Gửi đơn
+                </button>
+            </div>
+        </header>
+
+        <div class="exam-page-container">
+            <!-- Sidebar -->
+            <aside class="sticky-sidebar">
+                <div class="patient-card-v2">
+                    <div class="banner-v2">
+                        <div class="icon-circle">
+                            <i class="fa-solid fa-user-md text-2xl"></i>
+                        </div>
+                        <h2 id="patient-name">Đang tải...</h2>
+                        <p id="patient-id-badge">PAT-XXXXX</p>
+                    </div>
+                    <div class="info-section-v2">
+                        <div id="patient-info-list">
+                            <div class="text-center py-10 text-gray-400">Đang tải thông tin...</div>
+                        </div>
+
+                        <div class="status-box-v2">
+                            <div class="status-label">TRẠNG THÁI</div>
+                            <div class="status-value">ĐANG KHÁM</div>
+                        </div>
+
+                        <div class="history-btn-v2" onclick="showHistory()">
+                            <i class="fa-solid fa-clock-rotate-left"></i> LỊCH SỬ BỆNH ÁN
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main>
+                <!-- Patient Header removed as requested -->
+
+                <!-- 1. Diagnosis -->
+                <section class="content-section">
+                    <div class="content-header">
+                        <div class="header-bar"></div>
+                        <h3 class="header-title">1. Chẩn đoán & Ghi chú y khoa</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-8">
+                            <label class="block font-black text-gray-800 mb-3 text-sm">Chẩn đoán bệnh lâm sàng <span class="text-danger">*</span></label>
+                            <textarea id="diagnosis" class="custom-textarea" rows="3" placeholder="Nhập kết quả chẩn đoán cuối cùng dựa trên các triệu chứng..."></textarea>
+                        </div>
+                        <div>
+                            <label class="block font-black text-gray-800 mb-3 text-sm">Lời dặn & Ghi chú điều trị</label>
+                            <textarea id="doctor-notes" class="custom-textarea" rows="2" placeholder="Dặn dò chế độ ăn, sinh hoạt, tập luyện và cách sử dụng thuốc..."></textarea>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. Prescription -->
+                <section class="content-section">
+                    <div class="flex justify-between items-center mb-6">
+                        <div class="content-header mb-0">
+                            <div class="header-bar"></div>
+                            <h3 class="header-title">2. Kê đơn thuốc điện tử</h3>
+                        </div>
+                        <button class="btn px-8 py-2 rounded-xl font-black text-white" style="background: #0fb981;" onclick="addMedicineRow()">
+                            <i class="fa-solid fa-plus-circle mr-2"></i> Thêm thuốc
+                        </button>
+                    </div>
+                    <div id="medicine-list">
+                        <!-- Medicine rows added here -->
+                    </div>
+                    <div id="empty-med-msg" class="text-center py-12 bg-white rounded-[2.5rem] border-2 border-dashed border-gray-200">
+                        <i class="fa-solid fa-pills text-4xl text-gray-200 mb-4 block"></i>
+                        <p class="text-gray-400 font-black uppercase text-xs">Chưa có thuốc trong đơn</p>
+                    </div>
+                </section>
+
+                <!-- 3. Revisit -->
+                <section class="content-section">
+                    <div class="content-header">
+                        <div class="header-bar"></div>
+                        <h3 class="header-title">3. Kế hoạch tái khám</h3>
+                    </div>
+                    <div class="card-body flex items-center justify-between">
+                        <div class="flex items-center gap-6">
+                            <div class="w-16 h-16 bg-green-50 rounded-2xl flex items-center justify-center text-[#0fb981] text-2xl border-2 border-green-100">
+                                <i class="fa-solid fa-calendar-check"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-black text-gray-900 text-lg">Yêu cầu bệnh nhân tái khám</h4>
+                                <p class="text-gray-400 text-xs font-bold uppercase tracking-wider">Đánh dấu nếu cần theo dõi lâm sàng</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-6">
+                            <div id="revisit-date-container" style="display: none;">
+                                <input type="date" id="revisit-date" class="custom-textarea py-3" style="width: 200px; border-color: #0fb981;">
+                            </div>
+                            <input type="checkbox" id="revisit-required" onchange="toggleRevisitDate()" class="w-8 h-8 accent-[#0fb981] cursor-pointer">
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+    
+    <!-- Success Modal -->
+    <div class="modal-overlay" id="success-modal">
+        <div class="modal-content glass" style="max-width: 450px; padding: 3rem; text-align: center;">
+            <div class="w-24 h-24 bg-green-50 rounded-full flex items-center justify-center text-[#0fb981] text-4xl mx-auto mb-6 border-4 border-green-100">
+                <i class="fa-solid fa-check-double"></i>
+            </div>
+            <h2 class="text-2xl font-black text-gray-900 mb-2">Hoàn tất thành công!</h2>
+            <p class="text-gray-500 font-bold mb-8">Hồ sơ đã được lưu và đơn thuốc đã được gửi tới bệnh nhân.</p>
+            <div class="flex flex-col gap-3">
+                <button class="btn py-4 rounded-2xl font-black text-white shadow-xl" style="background: #0fb981;" onclick="window.location.href='dashboard.html'">
+                    Quay về trang chủ
+                </button>
+                <button class="btn py-4 rounded-2xl font-black text-primary bg-green-50" onclick="prepareSlip(); window.print();">
+                    <i class="fa-solid fa-print mr-2"></i> In lại đơn thuốc
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Medical History Modal -->
+    <div class="modal-overlay" id="history-modal">
+        <div class="modal-content glass" style="max-width: 900px; padding: 2.5rem; width: 90%;">
+            <button class="close-btn" onclick="document.getElementById('history-modal').classList.remove('active')"><i class="fa-solid fa-xmark"></i></button>
+            <h2 class="mb-6 flex items-center gap-4">
+                <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center text-primary">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                </div>
+                <span class="text-2xl font-black text-gray-900">Lịch sử bệnh án</span>
+            </h2>
+            <div id="history-content" class="space-y-6 overflow-y-auto pr-4" style="max-height: 65vh;">
+                <p class="text-center py-12 text-gray-400 font-bold">Đang tải dữ liệu từ hệ thống...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Printable A5 Slip -->
+    <div id="prescription-slip">
+        <div class="slip-header">
+            <h3 style="margin: 0; font-size: 16px;">PHÒNG KHÁM ĐA KHOA MEDBOOK</h3>
+            <p style="margin: 2px 0; font-size: 11px;">Địa chỉ: Số 1 Đại Cồ Việt, Hai Bà Trưng, Hà Nội - Hotline: 1900 1234</p>
+            <div class="slip-title">ĐƠN THUỐC</div>
+            <div style="text-align: center; margin-bottom: 10px;">
+                <svg id="barcode"></svg>
+            </div>
+            <p id="slip-appt-id" style="font-size: 10px; color: #666; margin: 0;"></p>
+        </div>
+
+        <table class="patient-info-table">
+            <tr>
+                <td colspan="2"><b>Họ và tên:</b> <span id="slip-patient-name" style="font-size: 16px; font-weight: bold; text-transform: uppercase;"></span></td>
+                <td><b>Tuổi:</b> <span id="slip-patient-age"></span></td>
+                <td><b>GT:</b> <span id="slip-patient-gender"></span></td>
+            </tr>
+            <tr>
+                <td colspan="2"><b>SĐT:</b> <span id="slip-patient-phone"></span></td>
+                <td colspan="2"><b>Nhóm máu:</b> <span id="slip-patient-blood"></span></td>
+            </tr>
+            <tr>
+                <td colspan="4"><b>Địa chỉ:</b> <span id="slip-patient-address"></span></td>
+            </tr>
+            <tr>
+                <td colspan="4"><b>Chẩn đoán:</b> <span id="slip-diagnosis" style="font-weight: bold;"></span></td>
+            </tr>
+        </table>
+
+        <table class="med-table">
+            <thead>
+                <tr>
+                    <th width="5%">STT</th>
+                    <th width="50%">Tên thuốc / Hàm lượng</th>
+                    <th width="20%">Cách dùng (S-T-C-T)</th>
+                    <th width="15%">Số lượng</th>
+                </tr>
+            </thead>
+            <tbody id="slip-med-list">
+                <!-- Meds here -->
+            </tbody>
+        </table>
+
+        <div style="margin-top: 15px; font-size: 13px;">
+            <p><b>Lời dặn:</b> <span id="slip-notes"></span></p>
+            <p id="slip-revisit" style="font-weight: bold; margin-top: 5px;"></p>
+        </div>
+
+        <div class="slip-footer">
+            <div class="signature-box">
+                <p style="font-size: 11px;">Mã bệnh nhân</p>
+                <div id="slip-id-box" style="border: 1px solid #000; padding: 5px; font-family: monospace; margin-top: 5px;"></div>
+            </div>
+            <div class="signature-box">
+                <p id="slip-date-box" style="font-style: italic; font-size: 12px;"></p>
+                <p style="font-weight: bold; margin-top: 5px;">BÁC SĨ ĐIỀU TRỊ</p>
+                <div style="height: 60px;"></div>
+                <p id="slip-doctor-name" style="font-weight: bold;"></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+    <div id="debug-log" class="debug-panel"></div>
+
+    <script>
+        /** 
+         * MEDBOOK INTEGRATED SYSTEM LOADER v1.1
+         * This script embeds core dependencies to prevent loading failures.
+         */
+        
+        // 1. Immediate UI Fix: Hide the warning banner as soon as this script is reached
+        (function() {
+            const warning = document.getElementById('js-warning');
+            if (warning) {
+                warning.style.display = 'none';
+                console.log("Exam: System bootstrap initiated.");
+            }
+        })();
+
+        // 2. Core Dependencies (Embedded)
+        const CONFIG = { API_URL: 'http://127.0.0.1:8000' };
+
+        const api = {
+            _headers: function() {
+                const h = { 'Content-Type': 'application/json' };
+                const t = localStorage.getItem('medbook_token');
+                if (t) h['Authorization'] = `Bearer ${t}`;
+                return h;
+            },
+            get: async function(url) {
+                try {
+                    logDebug(`GET Request: ${url}`);
+                    const r = await fetch(`${CONFIG.API_URL}${url}`, { headers: this._headers() });
+                    if (r.status === 401) { window.location.href = '../index.html'; throw new Error("Unauthorized"); }
+                    const d = await r.json();
+                    if (!r.ok) throw new Error(d.detail || "API Error");
+                    return d;
+                } catch (err) {
+                    console.error("API GET ERROR:", err);
+                    logDebug("FETCH FAIL: " + err.message);
+                    throw err;
+                }
+            },
+            post: async function(url, body) {
+                const r = await fetch(`${CONFIG.API_URL}${url}`, { method: 'POST', headers: this._headers(), body: JSON.stringify(body) });
+                const d = await r.json();
+                if (!r.ok) throw new Error(d.detail || "API Error");
+                return d;
+            },
+            put: async function(url, body) {
+                const r = await fetch(`${CONFIG.API_URL}${url}`, { method: 'PUT', headers: this._headers(), body: JSON.stringify(body) });
+                const d = await r.json();
+                if (!r.ok) throw new Error(d.detail || "API Error");
+                return d;
+            },
+            patch: async function(url, body) {
+                const r = await fetch(`${CONFIG.API_URL}${url}`, { method: 'PATCH', headers: this._headers(), body: JSON.stringify(body) });
+                const d = await r.json();
+                if (!r.ok) throw new Error(d.detail || "API Error");
+                return d;
+            }
+        };
+
+        function formatDate(d) { return d ? new Date(d).toLocaleDateString('vi-VN') : '---'; }
+        
+        // 3. Application Logic
+        const apptId = new URLSearchParams(window.location.search).get('id');
+        
+        function logDebug(msg) {
+            const p = document.getElementById('debug-log');
+            if (p) p.innerHTML += `<div>[${new Date().toLocaleTimeString()}] ${msg}</div>`;
+            console.log("Exam-Log:", msg);
+        }
+
+        // --- AUTO-SAVE LOGIC ---
+        let autoSaveTimer = null;
+        window.recordCreated = false;
+
+        function triggerAutoSave() {
+            if (autoSaveTimer) clearTimeout(autoSaveTimer);
+            autoSaveTimer = setTimeout(async () => {
+                logDebug("Auto-saving draft...");
+                await performSave(false);
+            }, 2000); // Save after 2 seconds of inactivity
+        }
+
+        async function performSave(isFinal) {
+            const diagnosis = document.getElementById('diagnosis').value.trim();
+            const notes = document.getElementById('doctor-notes').value.trim();
+            
+            // Collect medicines
+            const meds = [];
+            document.querySelectorAll('.med-row').forEach(row => {
+                const name = row.querySelector('.med-name').value.trim();
+                if (name) meds.push({
+                    medicine_name: name,
+                    dosage: row.querySelector('.med-dosage').value,
+                    morning: parseFloat(row.querySelector('.med-morning').value) || 0,
+                    noon: parseFloat(row.querySelector('.med-noon').value) || 0,
+                    afternoon: parseFloat(row.querySelector('.med-afternoon').value) || 0,
+                    evening: parseFloat(row.querySelector('.med-evening').value) || 0,
+                    duration: row.querySelector('.med-dur').value + " ngày",
+                    total_quantity: parseFloat(row.querySelector('.med-total').value) || 0
+                });
+            });
+
+            const payload = {
+                appointment_id: apptId,
+                diagnosis: diagnosis,
+                notes: notes,
+                revisit_required: document.getElementById('revisit-required').checked,
+                revisit_date: document.getElementById('revisit-date').value || null,
+                prescriptions: meds,
+                is_final: isFinal
+            };
+
+            try {
+                if (window.recordCreated) {
+                    await api.put(`/medical-records/${apptId}`, payload);
+                } else {
+                    await api.post('/medical-records', payload);
+                    window.recordCreated = true;
+                }
+                if (!isFinal) logDebug("Draft saved successfully.");
+            } catch (e) {
+                logDebug("Save Error: " + e.message);
+                if (isFinal) throw e; // Rethrow to handle in submit button
+            }
+        }
+
+        window.onload = async function() {
+            logDebug("Initializing examination for ID: " + apptId);
+            
+            // Listen for changes
+            document.getElementById('diagnosis').addEventListener('input', triggerAutoSave);
+            document.getElementById('doctor-notes').addEventListener('input', triggerAutoSave);
+            document.getElementById('revisit-required').addEventListener('change', triggerAutoSave);
+            document.getElementById('revisit-date').addEventListener('change', triggerAutoSave);
+
+            // Basic Auth Check & Doctor Name
+            const token = localStorage.getItem('medbook_token');
+            const userStr = localStorage.getItem('medbook_user');
+            if (!token || !userStr) {
+                window.location.href = '../index.html';
+                return;
+            }
+            const user = JSON.parse(userStr);
+            if (document.getElementById('header-doctor-name')) {
+                document.getElementById('header-doctor-name').textContent = `BS. ${user.full_name}`;
+            }
+
+            if (!apptId) { window.location.href = 'dashboard.html'; return; }
+            
+            try {
+                const data = await api.get(`/appointments/${apptId}`);
+                logDebug("Patient data retrieved: " + data.patient_name);
+                
+                // Update UI Fields
+                document.getElementById('patient-name').textContent = data.patient_name;
+                
+                const displayId = data.patient_code || (data.patient_id ? data.patient_id.substring(0,8).toUpperCase() : 'XXXXX');
+                document.getElementById('patient-id-badge').textContent = displayId.startsWith('MB-') ? displayId : `PAT-${displayId}`;
+
+                let age = '---';
+                if (data.patient_dob) {
+                    age = new Date().getFullYear() - new Date(data.patient_dob).getFullYear();
+                }
+                
+                // Store globally for print
+                window.currentAge = age;
+                window.currentPhone = data.patient_phone;
+                window.currentBlood = data.patient_blood_type;
+                window.currentAddress = data.patient_address;
+                window.currentGender = data.patient_gender;
+
+                // Sidebar Detail List
+                const sidebar = document.getElementById('patient-info-list');
+                sidebar.innerHTML = `
+                    <div class="info-group">
+                        <div class="info-label"><i class="fa-solid fa-phone"></i> SỐ ĐIỆN THOẠI</div>
+                        <div class="info-value font-black">${data.patient_phone || '---'}</div>
+                    </div>
+                    <div class="info-group">
+                        <div class="info-label"><i class="fa-solid fa-venus-mars"></i> GIỚI TÍNH / TUỔI</div>
+                        <div class="info-value font-black">${data.patient_gender || '---'} / ${age} tuổi</div>
+                    </div>
+                    <div class="info-group">
+                        <div class="info-label"><i class="fa-solid fa-droplet"></i> NHÓM MÁU</div>
+                        <div class="info-value font-black text-danger" style="font-size: 1.2rem;">${data.patient_blood_type || '---'}</div>
+                    </div>
+                    <div class="info-group">
+                        <div class="info-label"><i class="fa-solid fa-map-location-dot"></i> ĐỊA CHỈ</div>
+                        <div class="info-value text-xs font-bold">${data.patient_address || 'Chưa cập nhật địa chỉ'}</div>
+                    </div>
+                    <div class="info-group" style="background: #fffbeb; padding: 10px; border-radius: 10px; border: 1px solid #fde68a;">
+                        <div class="info-label text-warning font-black uppercase" style="font-size: 9px;">Lý do khám</div>
+                        <div class="info-value italic text-gray-700" style="font-size: 13px;">"${data.reason || 'Khám tổng quát'}"</div>
+                    </div>
+                `;
+
+                // Load existing diagnosis if any
+                try {
+                    const record = await api.get(`/medical-records/appointment/${apptId}`);
+                    if (record) {
+                        window.recordCreated = true;
+                        document.getElementById('diagnosis').value = record.diagnosis || '';
+                        document.getElementById('doctor-notes').value = record.notes || '';
+                        document.getElementById('revisit-required').checked = record.revisit_required || false;
+                        if (record.revisit_date) {
+                            document.getElementById('revisit-date').value = record.revisit_date.split('T')[0];
+                            toggleRevisitDate();
+                        }
+                        
+                        // Load prescriptions
+                        if (record.prescriptions && record.prescriptions.length > 0) {
+                            document.getElementById('empty-med-msg').style.display = 'none';
+                            const container = document.getElementById('medicine-list');
+                            container.innerHTML = ''; // Clear empty state
+                            record.prescriptions.forEach(p => {
+                                const row = document.createElement('div');
+                                row.className = 'med-row';
+                                const duration = p.duration ? parseInt(p.duration) : 7;
+                                row.innerHTML = `
+                                    <div><input type="text" class="med-input-field med-name" value="${p.medicine_name}" placeholder="Tên thuốc"></div>
+                                    <div><input type="text" class="med-input-field med-dosage" value="${p.dosage || ''}" placeholder="Liều"></div>
+                                    <div><input type="number" value="${p.morning}" class="med-input-field med-morning" oninput="calcTotal(this)"></div>
+                                    <div><input type="number" value="${p.noon}" class="med-input-field med-noon" oninput="calcTotal(this)"></div>
+                                    <div><input type="number" value="${p.afternoon}" class="med-input-field med-afternoon" oninput="calcTotal(this)"></div>
+                                    <div><input type="number" value="${p.evening}" class="med-input-field med-evening" oninput="calcTotal(this)"></div>
+                                    <div><input type="number" value="${duration}" class="med-input-field med-dur" oninput="calcTotal(this)"></div>
+                                    <div><input type="text" class="med-input-field med-total" value="${p.total_quantity}" readonly style="background: #f0fdf4;"></div>
+                                    <button onclick="this.closest('.med-row').remove();" class="text-danger"><i class="fa-solid fa-trash"></i></button>
+                                `;
+                                container.appendChild(row);
+                            });
+                        }
+                    }
+                } catch(e) { logDebug("No previous record: " + e.message); }
+
+                // Auto-print if requested
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('print') === 'true') {
+                    setTimeout(() => {
+                        prepareSlip();
+                        window.print();
+                    }, 1000);
+                }
+
+            } catch (e) {
+                logDebug("LOAD ERROR: " + e.message);
+                const nameEl = document.getElementById('header-patient-name');
+                if (nameEl) nameEl.innerHTML = `<span class="text-danger">LỖI: ${e.message}</span>`;
+            }
+        };
+
+        // Print Logic
+        function prepareSlip() {
+            // Basic Info
+            const userStr = localStorage.getItem('medbook_user');
+            const user = userStr ? JSON.parse(userStr) : { full_name: "Bác sĩ" };
+            
+            document.getElementById('slip-patient-name').textContent = document.getElementById('patient-name').textContent;
+            document.getElementById('slip-patient-age').textContent = window.currentAge || '---';
+            document.getElementById('slip-patient-gender').textContent = window.currentGender || '---';
+            document.getElementById('slip-patient-phone').textContent = window.currentPhone || '---';
+            document.getElementById('slip-patient-blood').textContent = window.currentBlood || '---';
+            document.getElementById('slip-patient-address').textContent = window.currentAddress || '---';
+            
+            document.getElementById('slip-diagnosis').textContent = document.getElementById('diagnosis').value;
+            document.getElementById('slip-notes').textContent = document.getElementById('doctor-notes').value;
+            
+            const revisitReq = document.getElementById('revisit-required').checked;
+            const revisitDate = document.getElementById('revisit-date').value;
+            document.getElementById('slip-revisit').textContent = revisitReq ? `Hẹn tái khám ngày: ${formatDate(revisitDate)}` : "";
+            
+            document.getElementById('slip-doctor-name').textContent = `BS. ${user.full_name}`;
+            document.getElementById('slip-date-box').textContent = `Hà Nội, ngày ${new Date().getDate()} tháng ${new Date().getMonth()+1} năm ${new Date().getFullYear()}`;
+            document.getElementById('slip-id-box').textContent = document.getElementById('patient-id-badge').textContent;
+            document.getElementById('slip-appt-id').textContent = `Mã ca: ${apptId}`;
+
+            // Generate Barcode
+            try {
+                JsBarcode("#barcode", apptId, {
+                    format: "CODE128",
+                    width: 1.5,
+                    height: 40,
+                    displayValue: false
+                });
+            } catch(e) { console.error("Barcode error:", e); }
+
+            // Med List
+            const slipBody = document.getElementById('slip-med-list');
+            slipBody.innerHTML = '';
+            document.querySelectorAll('.med-row').forEach((row, index) => {
+                const name = row.querySelector('.med-name').value;
+                if (!name) return;
+                const m = row.querySelector('.med-morning').value || 0;
+                const n = row.querySelector('.med-noon').value || 0;
+                const a = row.querySelector('.med-afternoon').value || 0;
+                const e = row.querySelector('.med-evening').value || 0;
+                const total = row.querySelector('.med-total').value;
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td><b>${name}</b><br><small><i>Uống: S${m}, T${n}, C${a}, T${e}</i></small></td>
+                    <td>S${m}-T${n}-C${a}-T${e}</td>
+                    <td><b>${total}</b></td>
+                `;
+                slipBody.appendChild(tr);
+            });
+        }
+
+        // UI Handlers
+        async function submitExamination() {
+            const diagnosis = document.getElementById('diagnosis').value.trim();
+            if (!diagnosis) { alert("Vui lòng nhập chẩn đoán!"); return; }
+
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Đang hoàn tất...';
+
+            try {
+                await performSave(true);
+                // Show Success Modal instead of alert
+                document.getElementById('success-modal').classList.add('active');
+            } catch (e) {
+                alert("Lỗi: " + e.message);
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-file-export mr-2"></i> Hoàn tất';
+            }
+        }
+
+        // Add Medicine Logic
+        function addMedicineRow() {
+            document.getElementById('empty-med-msg').style.display = 'none';
+            const container = document.getElementById('medicine-list');
+            const row = document.createElement('div');
+            row.className = 'med-row';
+            row.innerHTML = `
+                <div><input type="text" class="med-input-field med-name" placeholder="Tên thuốc"></div>
+                <div><input type="text" class="med-input-field med-dosage" placeholder="Liều"></div>
+                <div><input type="number" value="1" class="med-input-field med-morning" oninput="calcTotal(this)"></div>
+                <div><input type="number" value="0" class="med-input-field med-noon" oninput="calcTotal(this)"></div>
+                <div><input type="number" value="0" class="med-input-field med-afternoon" oninput="calcTotal(this)"></div>
+                <div><input type="number" value="1" class="med-input-field med-evening" oninput="calcTotal(this)"></div>
+                <div><input type="number" value="7" class="med-input-field med-dur" oninput="calcTotal(this)"></div>
+                <div><input type="text" class="med-input-field med-total" readonly style="background: #f0fdf4;"></div>
+                <button onclick="this.closest('.med-row').remove();" class="text-danger"><i class="fa-solid fa-trash"></i></button>
+            `;
+            container.appendChild(row);
+            calcTotal(row.querySelector('input'));
+        }
+
+        function calcTotal(input) {
+            const row = input.closest('.med-row');
+            const m = parseFloat(row.querySelector('.med-morning').value) || 0;
+            const n = parseFloat(row.querySelector('.med-noon').value) || 0;
+            const a = parseFloat(row.querySelector('.med-afternoon').value) || 0;
+            const e = parseFloat(row.querySelector('.med-evening').value) || 0;
+            const days = parseInt(row.querySelector('.med-dur').value) || 0;
+            row.querySelector('.med-total').value = (m + n + a + e) * days;
+        }
+
+        function toggleRevisitDate() {
+            document.getElementById('revisit-date-container').style.display = document.getElementById('revisit-required').checked ? 'block' : 'none';
+        }
+
+        async function showHistory() {
+            const modal = document.getElementById('history-modal');
+            const content = document.getElementById('history-content');
+            modal.classList.add('active');
+            content.innerHTML = '<div class="text-center py-12"><i class="fa-solid fa-circle-notch fa-spin text-3xl text-primary"></i><p class="mt-4 font-bold text-gray-400">Đang tìm kiếm hồ sơ cũ...</p></div>';
+
+            try {
+                // Get patient ID first
+                const data = await api.get(`/appointments/${apptId}`);
+                const history = await api.get(`/medical-records/patient/${data.patient_id}`);
+                
+                if (!history || history.length === 0) {
+                    content.innerHTML = '<div class="text-center py-12 text-gray-400 font-bold">Bệnh nhân chưa có lịch sử khám bệnh trước đây.</div>';
+                    return;
+                }
+
+                content.innerHTML = history.map(h => `
+                    <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-all mb-4">
+                        <div class="flex justify-between items-center mb-3 pb-3 border-b border-dashed border-gray-100">
+                            <div>
+                                <span class="text-[9px] font-black uppercase tracking-widest text-primary bg-green-50 px-2 py-0.5 rounded-full">Ngày khám: ${formatDate(h.created_at)}</span>
+                            </div>
+                            <div class="text-[9px] font-black text-gray-400 uppercase">BS phụ trách: ${h.doctor_name || 'Đội ngũ MedBook'}</div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <h5 class="text-[9px] font-black uppercase tracking-widest text-primary mb-1">Chẩn đoán</h5>
+                                <p class="text-[12px] font-bold text-gray-800 leading-tight">${h.diagnosis || '---'}</p>
+                            </div>
+                            <div>
+                                <h5 class="text-[9px] font-black uppercase tracking-widest text-[#0fb981] mb-1">Lời dặn</h5>
+                                <p class="text-[12px] font-bold text-gray-600 italic leading-tight">"${h.notes || '---'}"</p>
+                            </div>
+                        </div>
+                        ${h.prescriptions && h.prescriptions.length > 0 ? `
+                            <div class="mt-3 pt-3 border-t border-gray-50">
+                                <div class="flex flex-wrap gap-1.5">
+                                    ${h.prescriptions.map(p => `
+                                        <span class="bg-gray-50 text-[10px] font-bold text-gray-600 px-2 py-1 rounded-lg border border-gray-100">
+                                            ${p.medicine_name} (${p.total_quantity})
+                                        </span>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `).join('');
+            } catch (e) {
+                content.innerHTML = `<div class="text-center py-12 text-danger font-bold">Lỗi khi tải lịch sử: ${e.message}</div>`;
+            }
+        }
+
+        function showToast(msg, type='success') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            const t = document.createElement('div');
+            t.className = `toast toast-${type} shadow-2xl`;
+            t.innerHTML = `<i class="fa-solid ${type==='success'?'fa-check-circle':'fa-exclamation-circle'}"></i> <div>${msg}</div>`;
+            container.appendChild(t);
+            setTimeout(() => { t.classList.add('fade-out'); setTimeout(() => t.remove(), 300); }, 3500);
+        }
+
+        document.addEventListener('click', e => {
+            if (!e.target.closest('.relative')) document.querySelectorAll('.suggestions-list').forEach(s => s.style.display = 'none');
+        });
+    </script>
+</body>
+</html>

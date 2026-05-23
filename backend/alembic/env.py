@@ -20,7 +20,15 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 from app.config import settings
 from app.database import Base
-from app import models  # load all models
+
+# Import ALL models so Alembic can detect them
+from app.models.user import User
+from app.models.specialty import Specialty
+from app.models.doctor import Doctor
+from app.models.schedule import Schedule
+from app.models.appointment import Appointment, MedicalRecord, PrescriptionItem, Payment
+from app.models.leave_request import LeaveRequest
+from app.models.medicine import Medicine
 
 target_metadata = Base.metadata
 

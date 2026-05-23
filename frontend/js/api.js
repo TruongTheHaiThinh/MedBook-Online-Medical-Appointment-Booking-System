@@ -37,20 +37,32 @@ const api = {
     },
 
     get: async function(endpoint) {
-        const res = await fetch(`${CONFIG.API_URL}${endpoint}`, {
-            method: 'GET',
-            headers: this._headers()
-        });
-        return this._handleResponse(res);
+        console.log(`API [GET]: ${CONFIG.API_URL}${endpoint}`);
+        try {
+            const res = await fetch(`${CONFIG.API_URL}${endpoint}`, {
+                method: 'GET',
+                headers: this._headers()
+            });
+            return await this._handleResponse(res);
+        } catch (e) {
+            console.error(`API [GET] Error:`, e);
+            throw e;
+        }
     },
 
     post: async function(endpoint, body) {
-        const res = await fetch(`${CONFIG.API_URL}${endpoint}`, {
-            method: 'POST',
-            headers: this._headers(),
-            body: JSON.stringify(body)
-        });
-        return this._handleResponse(res);
+        console.log(`API [POST]: ${CONFIG.API_URL}${endpoint}`, body);
+        try {
+            const res = await fetch(`${CONFIG.API_URL}${endpoint}`, {
+                method: 'POST',
+                headers: this._headers(),
+                body: JSON.stringify(body)
+            });
+            return await this._handleResponse(res);
+        } catch (e) {
+            console.error(`API [POST] Error:`, e);
+            throw e;
+        }
     },
 
     patch: async function(endpoint, body) {

@@ -1,10 +1,20 @@
-from app.models.user import User
-from app.models.specialty import Specialty
-from app.models.doctor import Doctor
-from app.models.schedule import Schedule
-from app.models.appointment import Appointment
-from app.models.leave_request import LeaveRequest
-from app.models.medicine import Medicine
-from app.models.prescription import Prescription, PrescriptionItem
+from .user import User
+from .specialty import Specialty
+from .doctor import Doctor
+from .schedule import Schedule
+from .appointment import Appointment, MedicalRecord, PrescriptionItem, Payment
+from .leave_request import LeaveRequest
+from .medicine import Medicine
 
-__all__ = ["User", "Specialty", "Doctor", "Schedule", "Appointment", "LeaveRequest", "Medicine", "Prescription", "PrescriptionItem"]
+__all__ = [
+    "User",
+    "Specialty",
+    "Doctor",
+    "Schedule",
+    "Appointment",
+    "MedicalRecord",
+    "PrescriptionItem",
+    "Payment",
+    "LeaveRequest",
+    "Medicine",
+]

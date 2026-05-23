@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Optional, List
 from uuid import UUID
 
 from jose import JWTError, jwt
@@ -34,6 +34,19 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
 
+def create_verification_token(user_id: str, purpose: str = "verify_email") -> str:
+    """Create a token for email verification or password reset."""
+    if purpose == "verify_email":
+        expire_delta = timedelta(hours=settings.EMAIL_VERIFY_TOKEN_EXPIRE_HOURS)
+    elif purpose == "reset_password":
+        expire_delta = timedelta(minutes=settings.PASSWORD_RESET_TOKEN_EXPIRE_MINUTES)
+    else:
+        expire_delta = timedelta(hours=1)
+
+    data = {"sub": user_id, "purpose": purpose}
+    return create_access_token(data, expires_delta=expire_delta)
+
+
 def decode_token(token: str) -> dict:
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
@@ -66,19 +79,32 @@ async def get_current_user(
     return user
 
 
-async def require_patient(current_user=Depends(get_current_user)):
-    if current_user.role != "patient":
-        raise HTTPException(status_code=403, detail="Chỉ bệnh nhân mới có quyền thực hiện thao tác này")
-    return current_user
+# ── Class-based RBAC Dependency ──
+class RoleChecker:
+    """
+    Usage:
+        require_hr = RoleChecker(["hr_admin"])
+        require_medical = RoleChecker(["doctor", "hr_admin"])
+
+    In router:
+        current_user = Depends(RoleChecker(["hr_admin", "cashier_admin"]))
+    """
+    def __init__(self, allowed_roles: List[str]):
+        self.allowed_roles = allowed_roles
+
+    async def __call__(self, current_user=Depends(get_current_user)):
+        if current_user.role not in self.allowed_roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Bạn không có quyền truy cập. Yêu cầu vai trò: {', '.join(self.allowed_roles)}"
+            )
+        return current_user
 
 
-async def require_doctor(current_user=Depends(get_current_user)):
-    if current_user.role != "doctor":
-        raise HTTPException(status_code=403, detail="Chỉ bác sĩ mới có quyền thực hiện thao tác này")
-    return current_user
-
-
-async def require_admin(current_user=Depends(get_current_user)):
-    if current_user.role != "admin":
-        raise HTTPException(status_code=403, detail="Chỉ Admin mới có quyền thực hiện thao tác này")
-    return current_user
+# ── Convenience shortcuts (backward-compatible) ──
+require_patient = RoleChecker(["patient"])
+require_doctor = RoleChecker(["doctor"])
+require_hr_admin = RoleChecker(["hr_admin"])
+require_cashier_admin = RoleChecker(["cashier_admin"])
+require_any_admin = RoleChecker(["hr_admin", "cashier_admin"])
+require_admin = RoleChecker(["hr_admin"])  # backward compat: old "admin" → hr_admin

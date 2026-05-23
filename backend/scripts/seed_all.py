@@ -132,16 +132,17 @@ async def seed_data():
             {"name": "Nguyễn Văn Bệnh", "email": "patient1@medbook.vn"},
             {"name": "Trần Thị Khám", "email": "patient2@medbook.vn"}
         ]
-        for p in patients:
+        for i, p in enumerate(patients):
             if (await db.execute(select(User).where(User.email == p["email"]))).first(): continue
             db.add(User(
                 email=p["email"],
                 password_hash=hash_password("Patient@123"),
                 full_name=p["name"],
-                phone="0922000" + str(patients.index(p)),
-                role="patient"
+                phone="0922000" + str(i),
+                role="patient",
+                patient_code=f"MB-{100 + i}" # Ví dụ: MB-100, MB-101
             ))
-            print(f"Da tao benh nhan mau: {p['name']}")
+            print(f"Da tao benh nhan mau: {p['name']} (MB-{100 + i})")
 
         # 6. Nhập dữ liệu Thuốc từ CSV
         csv_path = os.path.join(os.path.dirname(__file__), "medicine_dataset.csv")
