@@ -37,10 +37,13 @@ class Settings(BaseSettings):
 
     def __init__(self, **values):
         super().__init__(**values)
-        if self.DATABASE_URL.startswith("postgres://"):
-            self.DATABASE_URL = self.DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
-        elif self.DATABASE_URL.startswith("postgresql://"):
-            self.DATABASE_URL = self.DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
+        # Render cung cấp URL dạng postgres:// hoặc postgresql://, asyncpg cần postgresql+asyncpg://
+        url = self.DATABASE_URL
+        if url.startswith("postgres://"):
+            url = url.replace("postgres://", "postgresql+asyncpg://", 1)
+        elif url.startswith("postgresql://") and "+asyncpg" not in url:
+            url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+        self.DATABASE_URL = url
 
     class Config:
         env_file = ".env"
