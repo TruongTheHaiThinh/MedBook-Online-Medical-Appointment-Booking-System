@@ -47,6 +47,12 @@ class AdminCreateUser(BaseModel):
     phone: str = Field(..., min_length=10, max_length=20)
     address: Optional[str] = Field(None, max_length=255)
     role: str  # doctor, cashier_admin
+    
+    # Optional Doctor fields
+    specialty_id: Optional[UUID] = None
+    experience_years: Optional[int] = None
+    bio: Optional[str] = None
+    room_number: Optional[str] = None
 
     @validator("password")
     def password_strength(cls, v):

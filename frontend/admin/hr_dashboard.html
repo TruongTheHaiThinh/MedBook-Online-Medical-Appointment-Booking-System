@@ -23,7 +23,7 @@
                     <i class="fa-solid fa-chart-line"></i> Dashboard
                 </a>
                 <a href="#" class="side-link" onclick="showTab('doctors-tab', this)">
-                    <i class="fa-solid fa-user-doctor"></i> Phê duyệt Bác sĩ
+                    <i class="fa-solid fa-user-doctor"></i> Quản lý Bác sĩ
                 </a>
                 <a href="#" class="side-link" onclick="showTab('leaves-tab', this)">
                     <i class="fa-solid fa-calendar-xmark"></i> Duyệt nghỉ phép
@@ -94,7 +94,59 @@
 
             <!-- Tab: Doctors -->
             <div id="doctors-tab" class="tab-content" style="display:none">
-                <h2 class="mb-4">Phê duyệt Bác sĩ</h2>
+                <div class="card mb-8" style="background: rgba(255, 255, 255, 0.45); box-shadow: var(--glass-shadow);">
+                    <h2 class="mb-4 text-primary"><i class="fa-solid fa-user-plus mr-2"></i>Đăng ký tài khoản Bác sĩ mới</h2>
+                    <form id="doctor-reg-form" onsubmit="submitDoctorReg(event)">
+                        <div class="grid grid-3">
+                            <div class="form-group">
+                                <label class="form-label">Họ tên bác sĩ</label>
+                                <input type="text" id="dr-reg-fullname" class="form-control" placeholder="Ví dụ: Bác sĩ Nguyễn Văn A" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Email đăng nhập</label>
+                                <input type="email" id="dr-reg-email" class="form-control" placeholder="bacsi@medbook.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Mật khẩu</label>
+                                <input type="password" id="dr-reg-password" class="form-control" placeholder="Mật khẩu tối thiểu 8 ký tự" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Số điện thoại</label>
+                                <input type="text" id="dr-reg-phone" class="form-control" placeholder="Ví dụ: 0987654321" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Địa chỉ</label>
+                                <input type="text" id="dr-reg-address" class="form-control" placeholder="Ví dụ: Quận 1, TP. HCM" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Chuyên khoa</label>
+                                <select id="dr-reg-specialty" class="form-control" required>
+                                    <option value="">-- Chọn chuyên khoa --</option>
+                                    <!-- Dynamic options -->
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Số năm kinh nghiệm</label>
+                                <input type="number" id="dr-reg-exp" class="form-control" min="0" max="60" placeholder="Ví dụ: 5" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Phòng khám</label>
+                                <input type="text" id="dr-reg-room" class="form-control" placeholder="Ví dụ: P.204" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Mô tả giới thiệu y khoa</label>
+                                <input type="text" id="dr-reg-bio" class="form-control" placeholder="Ví dụ: Chuyên gia điều trị nội tim mạch...">
+                            </div>
+                        </div>
+                        <div class="flex justify-end mt-4">
+                            <button type="submit" class="btn btn-primary" style="padding: 0.75rem 2rem;">
+                                <i class="fa-solid fa-user-check mr-2"></i>Đăng ký tài khoản
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <h2 class="mb-4"><i class="fa-solid fa-hourglass-half mr-2"></i>Bác sĩ tự đăng ký chờ phê duyệt</h2>
                 <div class="table-container">
                     <table>
                         <thead>
@@ -351,21 +403,31 @@
 
         async function loadSpecialties() {
             const grid = document.getElementById('specialties-grid');
+            const selectEl = document.getElementById('dr-reg-specialty');
             try {
                 const spRes = await api.get('/admin/hr/specialties');
-                grid.innerHTML = spRes.map(sp => `
-                    <div class="card hover-float">
-                        <div class="flex justify-between items-start">
-                            <h3 class="text-primary">${escapeHTML(sp.name)}</h3>
-                            <div class="flex gap-2">
-                                <button class="text-gray" onclick="openSpecModal('${sp.id}', '${encodeURIComponent(sp.name)}', '${encodeURIComponent(sp.description || '')}')"><i class="fa-solid fa-pen-to-square"></i></button>
-                                <button class="text-danger" onclick="deleteSpec('${sp.id}')"><i class="fa-solid fa-trash"></i></button>
+                if (grid) {
+                    grid.innerHTML = spRes.map(sp => `
+                        <div class="card hover-float">
+                            <div class="flex justify-between items-start">
+                                <h3 class="text-primary">${escapeHTML(sp.name)}</h3>
+                                <div class="flex gap-2">
+                                    <button class="text-gray" onclick="openSpecModal('${sp.id}', '${encodeURIComponent(sp.name)}', '${encodeURIComponent(sp.description || '')}')"><i class="fa-solid fa-pen-to-square"></i></button>
+                                    <button class="text-danger" onclick="deleteSpec('${sp.id}')"><i class="fa-solid fa-trash"></i></button>
+                                </div>
                             </div>
+                            <p class="text-sm text-gray mt-2">${escapeHTML(sp.description || 'Không có mô tả')}</p>
                         </div>
-                        <p class="text-sm text-gray mt-2">${escapeHTML(sp.description || 'Không có mô tả')}</p>
-                    </div>
-                `).join('');
-            } catch(e) { grid.innerHTML = e.message; }
+                    `).join('');
+                }
+                
+                if (selectEl) {
+                    selectEl.innerHTML = '<option value="">-- Chọn chuyên khoa --</option>' + 
+                        spRes.map(sp => `<option value="${sp.id}">${escapeHTML(sp.name)}</option>`).join('');
+                }
+            } catch(e) { 
+                if (grid) grid.innerHTML = e.message; 
+            }
         }
 
         function openSpecModal(id='', name='', desc='') {
@@ -671,6 +733,52 @@
 
         function closeHistoryModal() {
             document.getElementById('medical-history-modal').classList.remove('active');
+        }
+
+        async function submitDoctorReg(e) {
+            e.preventDefault();
+            const email = document.getElementById('dr-reg-email').value;
+            const password = document.getElementById('dr-reg-password').value;
+            const fullName = document.getElementById('dr-reg-fullname').value;
+            const phone = document.getElementById('dr-reg-phone').value;
+            const address = document.getElementById('dr-reg-address').value;
+            const specialtyId = document.getElementById('dr-reg-specialty').value;
+            const exp = parseInt(document.getElementById('dr-reg-exp').value);
+            const room = document.getElementById('dr-reg-room').value;
+            const bio = document.getElementById('dr-reg-bio').value;
+
+            // Simple validation
+            if (password.length < 8) {
+                alert("Mật khẩu phải tối thiểu 8 ký tự");
+                return;
+            }
+            if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password)) {
+                alert("Mật khẩu phải chứa ít nhất 1 chữ hoa, 1 chữ thường và 1 chữ số");
+                return;
+            }
+
+            const body = {
+                email: email,
+                password: password,
+                full_name: fullName,
+                phone: phone,
+                address: address,
+                role: 'doctor',
+                specialty_id: specialtyId,
+                experience_years: exp,
+                bio: bio,
+                room_number: room
+            };
+
+            try {
+                const res = await api.post('/admin/hr/users', body);
+                alert(`Đăng ký tài khoản bác sĩ ${res.full_name} thành công!`);
+                document.getElementById('doctor-reg-form').reset();
+                loadStats();
+                loadUsers();
+            } catch(err) {
+                alert("Lỗi đăng ký: " + err.message);
+            }
         }
     </script>
 </body>

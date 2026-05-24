@@ -133,7 +133,14 @@ class AuthService:
 
         # If doctor role, create doctor profile (pre-approved by admin)
         if data.role == "doctor":
-            doctor = Doctor(user_id=user.id, is_approved=True)
+            doctor = Doctor(
+                user_id=user.id,
+                is_approved=True,
+                specialty_id=data.specialty_id,
+                experience_years=data.experience_years,
+                bio=data.bio,
+                room_number=data.room_number,
+            )
             db.add(doctor)
 
         await db.commit()
