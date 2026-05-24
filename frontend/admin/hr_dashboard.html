@@ -23,7 +23,7 @@
                     <i class="fa-solid fa-chart-line"></i> Dashboard
                 </a>
                 <a href="#" class="side-link" onclick="showTab('doctors-tab', this)">
-                    <i class="fa-solid fa-user-doctor"></i> Quản lý Bác sĩ
+                    <i class="fa-solid fa-user-gear"></i> Đăng ký Nhân viên
                 </a>
                 <a href="#" class="side-link" onclick="showTab('leaves-tab', this)">
                     <i class="fa-solid fa-calendar-xmark"></i> Duyệt nghỉ phép
@@ -95,73 +95,64 @@
             <!-- Tab: Doctors -->
             <div id="doctors-tab" class="tab-content" style="display:none">
                 <div class="card mb-8" style="background: rgba(255, 255, 255, 0.45); box-shadow: var(--glass-shadow);">
-                    <h2 class="mb-4 text-primary"><i class="fa-solid fa-user-plus mr-2"></i>Đăng ký tài khoản Bác sĩ mới</h2>
-                    <form id="doctor-reg-form" onsubmit="submitDoctorReg(event)">
+                    <h2 class="mb-4 text-primary"><i class="fa-solid fa-user-plus mr-2"></i>Đăng ký tài khoản Nhân viên mới</h2>
+                    <form id="staff-reg-form" onsubmit="submitStaffReg(event)">
                         <div class="grid grid-3">
                             <div class="form-group">
-                                <label class="form-label">Họ tên bác sĩ</label>
-                                <input type="text" id="dr-reg-fullname" class="form-control" placeholder="Ví dụ: Bác sĩ Nguyễn Văn A" required>
+                                <label class="form-label">Vai trò</label>
+                                <select id="staff-reg-role" class="form-control" onchange="toggleStaffFields()" required>
+                                    <option value="doctor">Bác sĩ</option>
+                                    <option value="cashier_admin">Thu ngân</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Họ tên nhân viên</label>
+                                <input type="text" id="staff-reg-fullname" class="form-control" placeholder="Nguyễn Văn A" required>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Email đăng nhập</label>
-                                <input type="email" id="dr-reg-email" class="form-control" placeholder="bacsi@medbook.com" required>
+                                <input type="email" id="staff-reg-email" class="form-control" placeholder="nhanvien@medbook.com" required>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Mật khẩu</label>
-                                <input type="password" id="dr-reg-password" class="form-control" placeholder="Mật khẩu tối thiểu 8 ký tự" required>
+                                <input type="password" id="staff-reg-password" class="form-control" placeholder="Tối thiểu 8 ký tự" required>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Số điện thoại</label>
-                                <input type="text" id="dr-reg-phone" class="form-control" placeholder="Ví dụ: 0987654321" required>
+                                <input type="text" id="staff-reg-phone" class="form-control" placeholder="Ví dụ: 0987654321" required>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Địa chỉ</label>
-                                <input type="text" id="dr-reg-address" class="form-control" placeholder="Ví dụ: Quận 1, TP. HCM" required>
+                                <input type="text" id="staff-reg-address" class="form-control" placeholder="Ví dụ: Quận Gò Vấp, TP. HCM" required>
                             </div>
-                            <div class="form-group">
+                            
+                            <!-- Doctor-only fields -->
+                            <div class="form-group doctor-only-field">
                                 <label class="form-label">Chuyên khoa</label>
-                                <select id="dr-reg-specialty" class="form-control" required>
+                                <select id="dr-reg-specialty" class="form-control">
                                     <option value="">-- Chọn chuyên khoa --</option>
                                     <!-- Dynamic options -->
                                 </select>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group doctor-only-field">
                                 <label class="form-label">Số năm kinh nghiệm</label>
-                                <input type="number" id="dr-reg-exp" class="form-control" min="0" max="60" placeholder="Ví dụ: 5" required>
+                                <input type="number" id="dr-reg-exp" class="form-control" min="0" max="60" placeholder="Ví dụ: 5">
                             </div>
-                            <div class="form-group">
+                            <div class="form-group doctor-only-field">
                                 <label class="form-label">Phòng khám</label>
-                                <input type="text" id="dr-reg-room" class="form-control" placeholder="Ví dụ: P.204" required>
+                                <input type="text" id="dr-reg-room" class="form-control" placeholder="Ví dụ: P.204">
                             </div>
-                            <div class="form-group">
+                            <div class="form-group doctor-only-field" style="grid-column: span 3;">
                                 <label class="form-label">Mô tả giới thiệu y khoa</label>
                                 <input type="text" id="dr-reg-bio" class="form-control" placeholder="Ví dụ: Chuyên gia điều trị nội tim mạch...">
                             </div>
                         </div>
                         <div class="flex justify-end mt-4">
                             <button type="submit" class="btn btn-primary" style="padding: 0.75rem 2rem;">
-                                <i class="fa-solid fa-user-check mr-2"></i>Đăng ký tài khoản
+                                <i class="fa-solid fa-user-check mr-2"></i>Đăng ký nhân viên
                             </button>
                         </div>
                     </form>
-                </div>
-
-                <h2 class="mb-4"><i class="fa-solid fa-hourglass-half mr-2"></i>Bác sĩ tự đăng ký chờ phê duyệt</h2>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Họ tên</th>
-                                <th>Chuyên khoa</th>
-                                <th>Kinh nghiệm</th>
-                                <th>Bio</th>
-                                <th>Hành động</th>
-                            </tr>
-                        </thead>
-                        <tbody id="doctors-pending-body">
-                            <tr><td colspan="5" class="text-center">Đang tải...</td></tr>
-                        </tbody>
-                    </table>
                 </div>
             </div>
 
@@ -340,10 +331,10 @@
         if (guardRoute('hr_admin')) {
             document.addEventListener('DOMContentLoaded', () => {
                 loadStats();
-                loadPendingDoctors();
                 loadPendingLeaves();
                 loadSpecialties();
                 loadUsers();
+                toggleStaffFields();
             });
         }
 
@@ -368,38 +359,7 @@
             } catch(e) { console.error(e); }
         }
 
-        async function loadPendingDoctors() {
-            const tbody = document.getElementById('doctors-pending-body');
-            try {
-                const docs = await api.get('/admin/hr/doctors/pending');
-                if (docs.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-gray">Không có hồ sơ chờ duyệt.</td></tr>';
-                    return;
-                }
-                tbody.innerHTML = docs.map(d => `
-                    <tr>
-                        <td class="font-bold">${escapeHTML(d.full_name)}<br><span class="text-xs text-gray">${d.email}</span></td>
-                        <td>${escapeHTML(d.specialty_name || '-')}</td>
-                        <td>${d.experience_years} năm</td>
-                        <td class="text-xs" style="max-width:200px">${escapeHTML(d.bio || '-')}</td>
-                        <td>
-                            <button class="btn btn-primary btn-sm mr-2" onclick="approveDoctor('${d.id}')">Duyệt</button>
-                            <button class="btn btn-outline btn-sm" onclick="rejectDoctor('${d.id}')">Từ chối</button>
-                        </td>
-                    </tr>
-                `).join('');
-            } catch(e) { tbody.innerHTML = `<tr><td colspan="5">${e.message}</td></tr>`; }
-        }
 
-        async function approveDoctor(id) {
-            if(!confirm("Duyệt bác sĩ này?")) return;
-            try { await api.patch(`/admin/hr/doctors/${id}/approve`); loadPendingDoctors(); loadStats(); } catch(e) { alert(e.message); }
-        }
-
-        async function rejectDoctor(id) {
-            if(!confirm("Từ chối bác sĩ này?")) return;
-            try { await api.patch(`/admin/hr/doctors/${id}/reject`); loadPendingDoctors(); } catch(e) { alert(e.message); }
-        }
 
         async function loadSpecialties() {
             const grid = document.getElementById('specialties-grid');
@@ -735,19 +695,28 @@
             document.getElementById('medical-history-modal').classList.remove('active');
         }
 
-        async function submitDoctorReg(e) {
-            e.preventDefault();
-            const email = document.getElementById('dr-reg-email').value;
-            const password = document.getElementById('dr-reg-password').value;
-            const fullName = document.getElementById('dr-reg-fullname').value;
-            const phone = document.getElementById('dr-reg-phone').value;
-            const address = document.getElementById('dr-reg-address').value;
-            const specialtyId = document.getElementById('dr-reg-specialty').value;
-            const exp = parseInt(document.getElementById('dr-reg-exp').value);
-            const room = document.getElementById('dr-reg-room').value;
-            const bio = document.getElementById('dr-reg-bio').value;
+        function toggleStaffFields() {
+            const role = document.getElementById('staff-reg-role').value;
+            const drFields = document.querySelectorAll('.doctor-only-field');
+            drFields.forEach(el => {
+                if (role === 'doctor') {
+                    el.style.display = 'block';
+                } else {
+                    el.style.display = 'none';
+                }
+            });
+        }
 
-            // Simple validation
+        async function submitStaffReg(e) {
+            e.preventDefault();
+            const role = document.getElementById('staff-reg-role').value;
+            const email = document.getElementById('staff-reg-email').value;
+            const password = document.getElementById('staff-reg-password').value;
+            const fullName = document.getElementById('staff-reg-fullname').value;
+            const phone = document.getElementById('staff-reg-phone').value;
+            const address = document.getElementById('staff-reg-address').value;
+            
+            // Basic password validation
             if (password.length < 8) {
                 alert("Mật khẩu phải tối thiểu 8 ký tự");
                 return;
@@ -763,17 +732,30 @@
                 full_name: fullName,
                 phone: phone,
                 address: address,
-                role: 'doctor',
-                specialty_id: specialtyId,
-                experience_years: exp,
-                bio: bio,
-                room_number: room
+                role: role
             };
+
+            if (role === 'doctor') {
+                const specialtyId = document.getElementById('dr-reg-specialty').value;
+                const exp = parseInt(document.getElementById('dr-reg-exp').value);
+                const room = document.getElementById('dr-reg-room').value;
+                const bio = document.getElementById('dr-reg-bio').value;
+
+                if (!specialtyId) { alert("Vui lòng chọn chuyên khoa cho bác sĩ!"); return; }
+                if (isNaN(exp)) { alert("Vui lòng nhập số năm kinh nghiệm!"); return; }
+                if (!room) { alert("Vui lòng nhập số phòng khám!"); return; }
+
+                body.specialty_id = specialtyId;
+                body.experience_years = exp;
+                body.room_number = room;
+                body.bio = bio;
+            }
 
             try {
                 const res = await api.post('/admin/hr/users', body);
-                alert(`Đăng ký tài khoản bác sĩ ${res.full_name} thành công!`);
-                document.getElementById('doctor-reg-form').reset();
+                alert(`Đăng ký thành công tài khoản ${role === 'doctor' ? 'bác sĩ' : 'thu ngân'}: ${res.full_name}!`);
+                document.getElementById('staff-reg-form').reset();
+                toggleStaffFields();
                 loadStats();
                 loadUsers();
             } catch(err) {

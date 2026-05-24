@@ -85,10 +85,7 @@ class AuthService:
         db.add(user)
         await db.flush()
 
-        # If doctor role, create doctor profile (requires HR admin approval)
-        if data.role == "doctor":
-            doctor = Doctor(user_id=user.id, is_approved=False)
-            db.add(doctor)
+        # Doctors cannot self-register anymore. Only patients can register.
 
         await db.commit()
         await db.refresh(user)

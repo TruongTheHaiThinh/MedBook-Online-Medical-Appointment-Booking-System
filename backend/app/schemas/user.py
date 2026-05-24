@@ -28,8 +28,8 @@ class UserRegister(BaseModel):
 
     @validator("role")
     def role_must_be_valid(cls, v):
-        if v not in ["patient", "doctor"]:
-            raise ValueError("Role phải là 'patient' hoặc 'doctor'")
+        if v != "patient":
+            raise ValueError("Đăng ký công cộng chỉ hỗ trợ vai trò bệnh nhân (patient)")
         return v
 
     @validator("date_of_birth")
