@@ -30,8 +30,8 @@ class Settings(BaseSettings):
     FRONTEND_URL: str = "http://localhost:5500"
 
     # ── VNPAY ──
-    VNP_TMN_CODE: str = "2QXG2Y47"
-    VNP_HASH_SECRET: str = ""
+    VNP_TMN_CODE: str = "E2EMF78A"
+    VNP_HASH_SECRET: str = "1I1UDPIJZCYV9RIMZK0IQKDBQYJ8OPSR"
     VNP_URL: str = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
     VNP_RETURN_URL: str = "http://127.0.0.1:8000/appointments/vnpay-return"
 
