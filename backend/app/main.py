@@ -72,6 +72,18 @@ async def healthz():
     return {"status": "ok"}
 
 
+@app.get("/debug-db", tags=["Health"])
+async def debug_db():
+    """Temporary debug: show what DATABASE_URL is being used"""
+    from app.database import _db_url, _connect_args
+    return {
+        "db_url_masked": _db_url.split("@")[1] if "@" in _db_url else _db_url,
+        "db_url_scheme": _db_url.split("://")[0] if "://" in _db_url else "unknown",
+        "ssl_in_url": "ssl" in _db_url.lower(),
+        "connect_args_keys": list(_connect_args.keys()),
+    }
+
+
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     from fastapi.responses import JSONResponse
