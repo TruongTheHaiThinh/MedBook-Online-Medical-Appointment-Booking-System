@@ -200,41 +200,43 @@
             body * { visibility: hidden; }
             .no-print { display: none !important; }
             
-            /* Page setup for A9 (37mm x 52mm) */
+            /* Page setup for A9 (37mm width, auto height to prevent extra feed/blank space) */
             @page {
-                size: 37mm 52mm;
-                margin: 0;
+                size: 37mm auto;
+                margin: 0 !important;
             }
 
             html, body {
-                width: 37mm;
-                height: 52mm;
-                background: white;
-                margin: 0;
-                padding: 0;
-                overflow: hidden;
+                width: 37mm !important;
+                height: auto !important;
+                background: white !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: visible !important;
             }
 
             /* Display only the active print target */
             .modal-overlay {
                 display: block !important;
-                position: absolute !important;
-                inset: 0 !important;
+                position: relative !important;
                 background: white !important;
                 backdrop-filter: none !important;
                 margin: 0 !important;
                 padding: 0 !important;
                 width: 37mm !important;
-                height: 52mm !important;
+                height: auto !important;
+                min-height: auto !important;
+                inset: auto !important;
             }
 
             .modal-box {
                 display: block !important;
                 visibility: visible !important;
-                position: absolute !important;
-                inset: 0 !important;
+                position: relative !important;
                 width: 37mm !important;
-                height: 52mm !important;
+                height: auto !important;
+                min-height: auto !important;
+                inset: auto !important;
                 padding: 2mm !important;
                 margin: 0 !important;
                 border: none !important;
@@ -246,6 +248,7 @@
 
             .modal-box, .modal-box * {
                 visibility: visible !important;
+                page-break-inside: avoid !important;
             }
 
             /* Adjust typography for A9 paper */
