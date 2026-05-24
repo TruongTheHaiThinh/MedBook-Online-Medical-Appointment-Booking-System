@@ -1,79 +1,96 @@
-# 🏥 MedBook - Hướng dẫn khởi chạy ứng dụng (Dành cho thầy giáo chấm bài)
+# 🏥 MedBook - Hướng dẫn khởi chạy ứng dụng (Dành cho Giáo viên chấm bài)
 
-Tài liệu này hướng dẫn cách cài đặt thư viện, khởi tạo cơ sở dữ liệu mẫu và khởi chạy nhanh ứng dụng **MedBook** chỉ bằng **một cú click chuột**.
+Tài liệu này hướng dẫn chi tiết cách cài đặt thư viện, khởi tạo cơ sở dữ liệu mẫu và khởi chạy nhanh ứng dụng **MedBook** trên bất kỳ máy tính nào chỉ bằng **một cú click chuột** hoặc các dòng lệnh đơn giản.
+
+> [!NOTE]
+> **TIỆN ÍCH CÓ SẴN:** Cơ sở dữ liệu SQLite cục bộ `medbook.db` đã được **nạp sẵn toàn bộ dữ liệu mẫu** (32 tài khoản, lịch hẹn mẫu, đơn thuốc mẫu và 20,316 loại thuốc). Giáo viên có thể khởi chạy ứng dụng và đăng nhập trải nghiệm ngay lập tức mà không bắt buộc phải chạy lại lệnh nạp dữ liệu (seed).
+
+---
+
+## 🔑 DANH SÁCH TÀI KHOẢN DÙNG THỬ (TEST ACCOUNTS)
+
+Dưới đây là danh sách toàn bộ các tài khoản thử nghiệm đã được nạp sẵn trong hệ thống để Giáo viên dễ dàng chấm điểm tất cả các tính năng của đồ án:
+
+### 1. Quản lý Nhân sự (HR Admin)
+> Quyền hạn: Duyệt hồ sơ bác sĩ mới, **duyệt/từ chối các yêu cầu nghỉ phép của bác sĩ**, xem thống kê doanh thu và hoạt động toàn phòng khám...
+*   **Email:** `admin@medbook.vn`
+*   **Mật khẩu:** `123y`
+
+### 2. Thu ngân phòng khám (Cashier Admin)
+> Quyền hạn: Quản lý danh sách đón tiếp, check-in quét mã QR bệnh nhân đến khám, in phiếu khám kèm số thứ tự, thu phí dịch vụ y tế, in hóa đơn thuốc...
+*   **Email:** `cashier@medbook.vn`
+*   **Mật khẩu:** `Cashier@123`
+
+### 3. Bác sĩ chuyên khoa (Doctor)
+> Quyền hạn: Quản lý lịch làm việc, đăng ký lịch nghỉ phép (chờ HR duyệt), thực hiện khám bệnh, kê đơn thuốc tự động gợi ý từ danh mục 20,316 loại thuốc thực tế, in đơn thuốc mẫu A5 chuẩn y khoa...
+*   **Danh sách tài khoản:** MedBook có sẵn **28 tài khoản bác sĩ** thuộc 14 chuyên khoa (từ `pk1@medbook.com` đến `pk14b@medbook.com`).
+*   **Ví dụ đăng nhập:**
+    *   *Khoa Tim mạch:* `pk1@medbook.com` (Bác sĩ Tim mạch A) hoặc `pk1b@medbook.com` (Bác sĩ Tim mạch B)
+    *   *Khoa Tiêu hóa:* `pk2@medbook.com` (Bác sĩ Tiêu hóa A)
+    *   *Khoa Chấn thương chỉnh hình:* `pk3@medbook.com` (Bác sĩ Chấn thương Chỉnh hình A)
+*   **Mật khẩu chung:** `Doctor@123`
+
+### 4. Bệnh nhân (Patient)
+> Quyền hạn: Đăng ký tài khoản, xem hồ sơ bệnh án cá nhân, đặt lịch khám theo chuyên khoa/bác sĩ, thanh toán trực tuyến qua cổng **VNPAY Sandbox**...
+*   **Email:** `patient1@medbook.vn` (Họ tên: **Trương Thế Hải Thịnh**)
+*   **Email:** `patient2@medbook.vn` (Họ tên: **Nguyễn Văn B**)
+*   **Mật khẩu chung:** `Patient@123`
 
 ---
 
 ## ⚡ CÁCH 1: KHỞI CHẠY TỰ ĐỘNG BẰNG SCRIPT (KHUYÊN DÙNG)
-Để giúp thầy dễ dàng khởi động toàn bộ hệ thống mà không cần gõ lệnh thủ công, bạn đã có sẵn tệp kịch bản khởi chạy tự động **`run_all.bat`** ở thư mục gốc của dự án.
+Để giúp Giáo viên dễ dàng khởi động toàn bộ hệ thống mà không cần gõ lệnh thủ công, MedBook đã tích hợp sẵn tệp kịch bản khởi chạy tự động **`run_all.bat`** ở thư mục gốc của dự án.
 
 ### Các bước thực hiện:
-1. Đảm bảo máy tính đã cài đặt **Python (3.9 - 3.12)** và đã thêm Python vào biến môi trường **PATH** lúc cài đặt.
+1. Đảm bảo máy tính đã cài đặt **Python (phiên bản từ 3.9 đến 3.12)** và đã thêm Python vào biến môi trường **PATH** lúc cài đặt.
 2. Click đúp chuột vào tệp **`run_all.bat`** ở thư mục gốc của dự án.
 3. Kịch bản sẽ tự động:
    - Cài đặt/cập nhật tất cả thư viện cần thiết từ tệp `requirements.txt`.
-   - Khởi tạo cấu trúc bảng Database và tự động nạp (seed) dữ liệu mẫu (các chuyên khoa, tài khoản admin, bác sĩ, bệnh nhân, bộ từ điển thuốc...).
-   - Khởi động đồng thời **Backend API Server** (cổng 8000) và **Frontend Server** (cổng 5500) ở hai cửa sổ riêng biệt.
+   - Khởi tạo cấu trúc bảng Database và tự động nạp (seed) dữ liệu mẫu đầy đủ.
+   - Khởi động đồng thời **Backend API Server** (cổng 8000) và **Frontend Server** (cổng 5500) ở hai cửa sổ terminal riêng biệt.
    - Tự động mở trình duyệt dẫn trực tiếp đến trang chủ ứng dụng: [http://localhost:5500/frontend/index.html](http://localhost:5500/frontend/index.html)
 
 ---
 
 ## 🛠️ CÁCH 2: KHỞI CHẠY THỦ CÔNG (TỪNG BƯỚC)
 
-Nếu thầy muốn tự chạy từng bước thủ công bằng dòng lệnh, hãy mở terminal và thực hiện:
+Nếu Giáo viên muốn tự chạy từng bước thủ công bằng dòng lệnh, hãy mở terminal và thực hiện:
 
-### 1. Cài đặt thư viện & Khởi tạo dữ liệu mẫu (Chỉ cần chạy lần đầu):
+### 1. Cài đặt thư viện:
 ```powershell
 pip install -r backend/requirements.txt
+```
+
+### 2. Làm sạch và nạp lại dữ liệu mẫu (Tùy chọn - chỉ chạy khi muốn reset database về trạng thái ban đầu):
+```powershell
 cd backend
 python scripts/seed_all.py
 cd ..
 ```
 
-### 2. Khởi chạy Backend (Terminal 1):
+### 3. Khởi chạy Backend API Server (Terminal 1):
 ```powershell
 cd backend
+# Trên Windows PowerShell
 $env:PYTHONPATH="."
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+# Trên Windows Command Prompt (cmd)
+set PYTHONPATH=.
 python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-### 3. Khởi chạy Frontend (Terminal 2 - Đứng ở thư mục gốc của dự án):
+### 4. Khởi chạy Frontend Server (Terminal 2 - Đứng ở thư mục gốc của dự án):
 ```powershell
 python -m http.server 5500
 ```
+*Sau khi chạy, truy cập ứng dụng tại địa chỉ:* [http://localhost:5500/frontend/index.html](http://localhost:5500/frontend/index.html)
 
 ---
 
-## 🔑 DANH SÁCH TÀI KHOẢN DÙNG THỬ (TEST ACCOUNTS)
+## 🐳 CÁCH 3: KHỞI CHẠY BẰNG DOCKER (CONTAINERIZED)
 
-Dưới đây là danh sách các tài khoản đã được nạp sẵn vào cơ sở dữ liệu mẫu để thầy dễ dàng đăng nhập và chấm điểm tất cả các tính năng của đồ án:
-
-### 1. Quản lý Nhân sự (HR Admin)
-> Giúp duyệt hồ sơ bác sĩ, **duyệt các yêu cầu nghỉ phép của bác sĩ**, xem thống kê toàn hệ thống...
-*   **Email:** `admin@medbook.vn`
-*   **Mật khẩu:** `123y` (hoặc `Admin@123` tùy phiên bản database)
-
-### 2. Thu ngân phòng khám (Cashier Admin)
-> Giúp thu phí cuộc hẹn khi bệnh nhân đến khám, in hóa đơn...
-*   **Email:** `cashier@medbook.vn`
-*   **Mật khẩu:** `Cashier@123`
-
-### 3. Bác sĩ (Doctor)
-> Đăng ký lịch làm việc, **đăng ký nghỉ phép (chờ HR duyệt)**, thực hiện khám bệnh, kê đơn thuốc in mẫu A5...
-*   **Email:** `pk1@medbook.com` (Bác sĩ Tim mạch A - Khoa Tim mạch)
-*   **Email:** `vietnam.175@medbook.vn` (Bác sĩ Nguyễn Việt Nam - Chấn thương Chỉnh hình)
-*   **Mật khẩu:** `Doctor@123`
-
-### 4. Bệnh nhân (Patient)
-> Đăng ký tài khoản, xem hồ sơ bệnh án cá nhân, đặt lịch khám theo chuyên khoa/bác sĩ, thanh toán trực tuyến (VNPAY)...
-*   **Email:** `patient1@medbook.vn` (Trương Thế Hải Thịnh)
-*   **Mật khẩu:** `Patient@123`
-
----
-
-## 🐳 CÁCH 3: KHỞI CHẠY BẰNG DOCKER (DÀNH CHO DEPLOY)
-
-Hệ thống đã được đóng gói container hóa hoàn chỉnh bằng **Docker** và **Docker Compose**, giúp triển khai nhanh trên môi trường Staging/Production một cách đồng bộ nhất:
+Hệ thống đã được đóng gói container hóa hoàn chỉnh bằng **Docker** và **Docker Compose**, giúp triển khai nhanh chóng và đồng bộ:
 
 ### Các bước thực hiện:
 1. Mở terminal tại thư mục gốc của dự án (nơi có file `docker-compose.yml`).
@@ -81,13 +98,13 @@ Hệ thống đã được đóng gói container hóa hoàn chỉnh bằng **Doc
    ```bash
    docker-compose up --build -d
    ```
-3. Sau khi các container khởi động hoàn tất, chạy lệnh sau để khởi tạo cơ sở dữ liệu và nạp dữ liệu mẫu vào container của Backend:
+3. Sau khi các container khởi động hoàn tất, chạy lệnh sau để làm sạch và nạp dữ liệu mẫu vào container của Backend:
    ```bash
    docker-compose exec backend python scripts/seed_all.py
    ```
-4. Truy cập ứng dụng tại địa chỉ quen thuộc:
-   - **Frontend:** [http://localhost:5500/frontend/index.html](http://localhost:5500/frontend/index.html)
-   - **Backend API Docs:** [http://localhost:8000/docs](http://localhost:8000/docs)
+4. Truy cập ứng dụng tại địa chỉ:
+   - **Giao diện Frontend:** [http://localhost:5500/frontend/index.html](http://localhost:5500/frontend/index.html)
+   - **Tài liệu API Swagger:** [http://localhost:8000/docs](http://localhost:8000/docs)
 5. Để dừng hệ thống:
    ```bash
    docker-compose down
@@ -95,9 +112,10 @@ Hệ thống đã được đóng gói container hóa hoàn chỉnh bằng **Doc
 
 ---
 
-## 💎 Các tính năng đặc biệt của ứng dụng
-*   **Tự động gợi ý tên thuốc**: Kê đơn nhanh bằng gợi ý tự động (Autocomplete) lấy từ dataset 4000 loại thuốc thực tế.
+## 💎 CÁC TÍNH NĂNG NỔI BẬT CỦA MEDBOOK
+*   **Đặt lịch khám & Thanh toán VNPAY Sandbox**: Tích hợp cổng thanh toán Sandbox chuẩn VNPAY để người bệnh thanh toán phí đặt lịch trực tuyến, tự động cập nhật trạng thái lịch hẹn sau khi thanh toán thành công và sinh mã QR.
+*   **Đón tiếp thông minh & Check-in quét mã QR**: Cho phép Thu ngân check-in quét mã QR của bệnh nhân đến khám trực tiếp ngay tại quầy bằng camera để đẩy vào hàng đợi khám của Bác sĩ.
+*   **Duyệt lịch nghỉ phép an toàn**: Khi Bác sĩ xin nghỉ phép, hệ thống đưa vào hàng đợi chờ duyệt. Chỉ khi HR duyệt thì các lịch hẹn trùng trong ngày đó mới bị hủy và gửi email thông báo tự động cho người bệnh.
+*   **Tự động gợi ý tên thuốc**: Kê đơn nhanh bằng gợi ý tự động (Autocomplete) lấy từ bộ từ điển 20,316 loại thuốc thực tế.
 *   **Mẫu đơn thuốc chuẩn A5**: Tối ưu hiển thị, định dạng chuẩn y khoa và sẵn sàng kết nối máy in để in ra giấy.
-*   **Đặt lịch và Thanh toán VNPAY**: Tích hợp cổng thanh toán Sandbox chuẩn VNPAY để người bệnh thanh toán hóa đơn khám bệnh.
-*   **Duyệt lịch nghỉ phép an toàn**: Khi Bác sĩ xin nghỉ phép, hệ thống đưa vào hàng đợi chờ duyệt. Chỉ khi HR duyệt thì các lịch hẹn trùng trong ngày đó mới bị hủy và gửi email tự động cho người bệnh.
-*   **Container hóa hoàn chỉnh (Docker)**: Triển khai nhanh chóng, cấu hình Nginx tối ưu cho web tĩnh ở cổng 5500 và uvicorn cho API ở cổng 8000.
+*   **Đóng gói Docker hoàn chỉnh**: Sẵn sàng deploy lên các môi trường cloud staging/production một cách nhanh chóng nhất.
