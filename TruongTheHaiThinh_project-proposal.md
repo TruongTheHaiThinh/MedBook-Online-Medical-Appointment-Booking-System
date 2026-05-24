@@ -105,22 +105,28 @@ Hệ thống mở rộng lên **4 vai trò người dùng** với phân quyền 
 
 | **Trạng thái từ** | **Trạng thái đến** | **Điều kiện / Tác nhân** |
 | :--- | :--- | :--- |
+| AWAITING_PAYMENT | PENDING | Bệnh nhân đặt lịch thành công, chờ xác thực thanh toán |
+| AWAITING_PAYMENT | CONFIRMED | Bệnh nhân thanh toán phí đặt lịch qua VNPAY thành công (Auto-approve & cấp QR) |
+| AWAITING_PAYMENT | CANCELLED | Hủy do quá hạn thanh toán hoặc bệnh nhân chủ động hủy |
 | PENDING | CONFIRMED | Thu ngân xác nhận thông tin bệnh nhân |
-| PENDING | CANCELLED | Thu ngân từ chối (kèm lý do) hoặc bệnh nhân tự hủy (trước 24h) |
-| CONFIRMED | IN_PROGRESS | Bệnh nhân đến khám, xuất trình mã QR/mã vạch |
+| PENDING | CANCELLED | Thu ngân từ chối (kèm lý do) hoặc bệnh nhân tự hủy |
+| CONFIRMED | IN_PROGRESS | Bệnh nhân đến khám, quét mã QR/mã vạch check-in tại quầy |
 | CONFIRMED | CANCELLED | Hủy bởi thu ngân hoặc bác sĩ (kèm lý do) |
-| IN_PROGRESS | PRESCRIPTION_SENT | Bác sĩ hoàn thành khám, gửi đơn thuốc cho thu ngân |
-| PRESCRIPTION_SENT | COMPLETED | Thu ngân xác nhận thu phí và phát thuốc |
+| IN_PROGRESS | PRESCRIPTION_SENT | Bác sĩ hoàn thành khám và kê đơn thuốc trên hệ thống |
+| PRESCRIPTION_SENT | COMPLETED | Thu ngân xác nhận thu phí thuốc và phát thuốc cho bệnh nhân |
 
 ```mermaid
 stateDiagram-v2
-    [*] --> PENDING : Bệnh nhân đặt lịch
-    PENDING --> CONFIRMED : Thu ngân xác nhận
-    PENDING --> CANCELLED : Thu ngân từ chối / Bệnh nhân hủy (trước 24h)
-    CONFIRMED --> IN_PROGRESS : Bệnh nhân đến, xuất trình mã QR
-    CONFIRMED --> CANCELLED : Thu ngân / Bác sĩ hủy (kèm lý do)
-    IN_PROGRESS --> PRESCRIPTION_SENT : Bác sĩ gửi đơn thuốc
-    PRESCRIPTION_SENT --> COMPLETED : Thu ngân thu phí & phát thuốc
+    [*] --> AWAITING_PAYMENT : Bệnh nhân đặt lịch
+    AWAITING_PAYMENT --> CONFIRMED : Thanh toán VNPAY thành công (Auto-approve)
+    AWAITING_PAYMENT --> PENDING : Chuyển khoản thủ công chờ xác nhận
+    AWAITING_PAYMENT --> CANCELLED : Quá hạn / Bệnh nhân hủy
+    PENDING --> CONFIRMED : Thu ngân phê duyệt trực tiếp
+    PENDING --> CANCELLED : Thu ngân từ chối / Bệnh nhân hủy
+    CONFIRMED --> IN_PROGRESS : Quét QR Check-in tại quầy
+    CONFIRMED --> CANCELLED : Bác sĩ/Thu ngân hủy (kèm lý do)
+    IN_PROGRESS --> PRESCRIPTION_SENT : Bác sĩ kết thúc khám & kê đơn
+    PRESCRIPTION_SENT --> COMPLETED : Thu ngân thu tiền thuốc & phát thuốc
     COMPLETED --> [*]
     CANCELLED --> [*]
 ```
@@ -135,14 +141,17 @@ Hệ thống xác thực và phân quyền làm nền tảng bảo mật cho to�
 ### Module 2: Bác sĩ, Chuyên khoa & Lịch làm việc
 Bác sĩ định nghĩa lịch làm việc theo pattern tuần (VD: Thứ 2-4-6, 8:00–12:00, 30 phút/ca). Smart Scheduling Engine tự động sinh slot khả dụng on-demand, không pre-generate vào DB. Bác sĩ có thể block ngày nghỉ đột xuất.
 
-### Module 3: Luồng Đặt lịch & Quản lý Trạng thái
-Quản lý vòng đời hoàn chỉnh của lịch hẹn. Race condition check bằng `SELECT ... FOR UPDATE` để chống double-booking. Hệ thống tự động sinh mã QR / mã vạch sau khi bệnh nhân thanh toán và thu ngân xác nhận. Giấy hẹn khám được gửi tự động kèm lộ trình khám.
+### Module 3: Luồng Đặt lịch & Quản lý Trạng thái (Smart Scheduling & State Machine)
+Quản lý vòng đời lịch hẹn từ `AWAITING_PAYMENT` đến `COMPLETED`. Cơ chế chống đặt trùng lịch (Race Condition) bằng truy vấn locking `SELECT ... FOR UPDATE` trong DB transaction. Tích hợp cổng thanh toán trực tuyến **VNPAY Sandbox** an toàn. Bệnh nhân thanh toán thành công sẽ được cấp mã QR định danh duy nhất để phục vụ check-in nhanh.
 
-### Module 4: Hồ sơ Bệnh nhân & Sổ khám điện tử
-Bác sĩ tra cứu hồ sơ bệnh nhân theo tên. Mỗi hồ sơ lưu đầy đủ: thông tin cá nhân, tiền sử bệnh, danh sách tất cả lần khám kèm đơn thuốc. Bệnh nhân xem sổ khám điện tử ở chế độ read-only với giao diện chuyên nghiệp.
+### Module 4: Hồ sơ Bệnh nhân & Sổ khám điện tử (Clinical Records)
+Hồ sơ bệnh án điện tử lưu trữ toàn bộ tiền sử khám, nhóm máu, các lần kê đơn trước đó để Bác sĩ tiện tra cứu. Bệnh nhân có thể xem lịch sử khám bệnh và mã QR check-in của mình dưới dạng Sổ khám bệnh điện tử trực quan (read-only).
 
-### Module 5: Đơn thuốc & Thanh toán
-Bác sĩ kê đơn thuốc theo mẫu chuẩn (render A5, in được). Đơn thuốc ghi rõ có/không tái khám, ngày tái khám (nếu có). Thu ngân nhận đơn thuốc, thu phí (trực tiếp hoặc qua quét mã QR), xác nhận phát thuốc.
+### Module 5: Đơn thuốc & Thanh toán (Pharmacy & Cashier Work)
+Bác sĩ kê đơn thuốc tương tác trực tiếp với kho dữ liệu 20,316 loại thuốc. Đơn thuốc in mẫu chuẩn A5 ghi rõ liều lượng (sáng/trưa/chiều/tối), lời dặn và ngày tái khám. Thu ngân xác nhận thu tiền thuốc qua cổng VietQR/tiền mặt, in phiếu đón tiếp có **mã vạch (JsBarcode)** và phát thuốc cho người bệnh.
+
+### Module 7: Đăng ký & Duyệt nghỉ phép (Leave Management)
+Bác sĩ xin nghỉ phép vào các ngày đột xuất. HR Admin kiểm tra và duyệt yêu cầu nghỉ phép. Khi đơn nghỉ phép được duyệt, hệ thống sẽ tự động hủy các ca khám trùng lịch trong ngày nghỉ đó và gửi email xin lỗi/thông báo tự động tới tất cả bệnh nhân bị ảnh hưởng.
 
 ### Module 6: Thống kê & Quản trị (HR Admin)
 Dashboard tổng quan với biểu đồ Chart.js: lịch hẹn theo thời gian, tỷ lệ xác nhận/hủy, doanh thu theo ngày. Admin Nhân sự quản lý toàn bộ tài khoản và có thể can thiệp vào bất kỳ dữ liệu nào trong hệ thống.
@@ -155,24 +164,24 @@ Dashboard tổng quan với biểu đồ Chart.js: lịch hẹn theo thời gian
 
 ### 1. Yêu cầu chức năng hệ thống – Phân loại MoSCoW
 
-#### Nhóm MUST-HAVE (Bắt buộc – MVP):
+#### Nhóm MUST-HAVE (Bắt buộc – MVP & Premium Features):
 
-- **Đăng ký/Đăng nhập 4 vai trò** (Patient, Doctor, HR Admin, Cashier Admin) với JWT. Tài khoản Doctor và Cashier do HR Admin tạo/phê duyệt.
-- **Bệnh nhân:** Đặt lịch, nhận mã QR/mã vạch, xem giấy hẹn khám có lộ trình, xem sổ khám điện tử.
-- **Thu ngân:** Tiếp nhận, xác nhận/từ chối đặt lịch, thông báo bác sĩ, nhận đơn thuốc, thu phí, phát thuốc.
-- **Bác sĩ:** Nhận thông báo ca khám (mới/tái khám), xem hồ sơ & lịch sử bệnh nhân, kê đơn thuốc chuẩn A5, gửi đơn cho thu ngân.
-- **HR Admin:** Phê duyệt tài khoản, CRUD chuyên khoa, quản lý nhân sự, xem thống kê.
-- **State Machine đầy đủ:** `PENDING → CONFIRMED → IN_PROGRESS → PRESCRIPTION_SENT → COMPLETED`.
-- **Email tự động:** Xác nhận đặt lịch, giấy hẹn khám, thông báo xác nhận/hủy.
+- **Đăng ký/Đăng nhập 4 vai trò** (Patient, Doctor, HR Admin, Cashier Admin) tích hợp xác thực JWT, OTP email và mã hóa an toàn.
+- **Bệnh nhân:** Đặt lịch, **thanh toán trực tuyến qua VNPAY Sandbox**, tự nhận mã QR định danh, xem sổ khám bệnh điện tử và nhận thông tin lộ trình khám.
+- **Bác sĩ:** Đăng ký lịch nghỉ phép (Leave Request), xem hồ sơ lâm sàng bệnh nhân, kê đơn thuốc in mẫu A5 chuẩn y khoa liên kết từ điển 20,316 loại thuốc.
+- **Thu ngân:** Quét mã QR check-in tiếp đón, **in phiếu số thứ tự có mã vạch (JsBarcode)**, xử lý đơn thuốc và thu phí thuốc.
+- **HR Admin:** Quản trị nhân sự bác sĩ, quản trị chuyên khoa, **duyệt đơn xin nghỉ phép của Bác sĩ** (tự động hủy lịch trùng & gửi email thông báo cho người bệnh), xem thống kê doanh thu Chart.js.
+- **State Machine hoàn chỉnh:** `AWAITING_PAYMENT → PENDING/CONFIRMED → IN_PROGRESS → PRESCRIPTION_SENT → COMPLETED` và trạng thái `CANCELLED`.
+- **Hệ thống Email tự động:** Xác nhận tài khoản, giấy hẹn khám, thông báo duyệt/hủy lịch khám và thông báo bác sĩ nghỉ phép.
 
 #### Nhóm SHOULD-HAVE:
-- **Email nhắc lịch tự động:** Background job (APScheduler) chạy mỗi giờ, gửi email nhắc trước 24h.
-- **Phân trang (Pagination):** Tất cả list endpoint hỗ trợ `?page=1&size=20`.
-- **Block date (Doctor):** Bác sĩ đánh dấu ngày nghỉ đột xuất.
+- **Email nhắc lịch tự động:** Background job (APScheduler) chạy quét và gửi email nhắc nhở trước 24 giờ.
+- **Lịch sử mật khẩu (Password History):** Chống brute-force và cấm dùng lại mật khẩu cũ trong 3 tháng.
+- **Phân trang linh hoạt (Pagination):** Tất cả các API danh sách đều hỗ trợ phân trang `?page=1&size=20`.
 
 #### Nhóm COULD-HAVE:
-- **Đánh giá bác sĩ (Rating):** 1-5 sao sau khi ca khám COMPLETED.
-- **Dashboard doanh thu chi tiết** theo tháng cho Admin Thu ngân.
+- **Đánh giá bác sĩ (Rating & Review):** Cho phép bệnh nhân đánh giá bác sĩ 1-5 sao sau khi ca khám hoàn thành.
+- **Dashboard doanh thu chi tiết** theo tháng cho Admin Thu ngân và lọc nâng cao.
 
 ---
 
@@ -194,32 +203,37 @@ Dashboard tổng quan với biểu đồ Chart.js: lịch hẹn theo thời gian
 
 ---
 
-### 3. Mô hình Thực thể Dữ liệu (Entity Relationship – Lược đồ mức logic)
+### 3. Mô hình Thực thể Dữ liệu (Entity Relationship – Lược đồ mức vật lý & logic)
 
-Hệ thống được mở rộng lên **8 thực thể (Entities)** cốt lõi:
+Hệ thống quản lý cơ sở dữ liệu mở rộng với **11 thực thể (Entities)** đầy đủ từ thiết kế mã nguồn:
 
 | **Thực thể** | **Các trường chính** |
 | :--- | :--- |
-| Users | `id`, `email`, `password_hash`, `full_name`, `phone`, `role` (patient/doctor/hr_admin/cashier_admin), `is_active`, `created_at` |
-| Doctors | `id`, `user_id` FK, `specialty_id` FK, `bio`, `experience_years`, `is_approved` |
+| Users | `id`, `email`, `password_hash`, `full_name`, `phone`, `role` (patient/doctor/hr_admin/cashier_admin), `is_active`, `is_verified`, `patient_code`, `date_of_birth`, `gender`, `blood_type`, `address`, `created_at` |
+| Doctors | `id`, `user_id` FK, `specialty_id` FK, `bio`, `experience_years`, `room_number`, `is_approved` |
 | Specialties | `id`, `name` (Unique), `description` |
-| Schedules | `id`, `doctor_id` FK, `day_of_week`, `start_time`, `end_time`, `slot_duration_min`, `max_slots` |
-| Appointments | `id`, `patient_id` FK, `doctor_id` FK, `scheduled_date`, `scheduled_time`, `reason`, `status`, `is_revisit`, `qr_code`, `reminder_sent`, `created_at` |
+| Schedules | `id`, `doctor_id` FK, `day_of_week` (0-6), `start_time`, `end_time`, `slot_duration_min`, `max_slots` |
+| Appointments | `id`, `patient_id` FK, `doctor_id` FK, `scheduled_date`, `scheduled_time`, `reason`, `status`, `is_revisit`, `qr_code`, `doctor_notes`, `reminder_sent`, `queue_number`, `room_number`, `created_at` |
 | MedicalRecords | `id`, `appointment_id` FK, `patient_id` FK, `doctor_id` FK, `diagnosis`, `notes`, `revisit_date`, `revisit_required`, `created_at` |
-| Prescriptions | `id`, `medical_record_id` FK, `drug_name`, `dosage`, `frequency`, `duration`, `notes` |
+| PrescriptionItems | `id`, `medical_record_id` FK, `medicine_name`, `dosage`, `frequency`, `duration`, `morning`, `noon`, `afternoon`, `evening`, `total_quantity`, `instructions` |
 | Payments | `id`, `appointment_id` FK, `cashier_id` FK, `amount`, `payment_method`, `status`, `paid_at` |
+| LeaveRequests | `id`, `doctor_id` FK, `leave_date`, `reason`, `status` (PENDING/APPROVED/REJECTED), `created_at` |
+| Medicines | `id`, `name` (Index), `category`, `dosage_form`, `strength`, `manufacturer`, `indication`, `classification` |
+| PasswordHistory | `id`, `user_id` FK, `password_hash`, `created_at` |
 
 ```mermaid
 erDiagram
     Users ||--o{ Appointments : "đặt lịch (patient)"
     Users ||--o| Doctors : "hồ sơ bác sĩ"
-    Users ||--o{ Payments : "thu ngân xử lý"
+    Users ||--o{ Payments : "thu ngân xác nhận"
+    Users ||--o{ PasswordHistory : "lịch sử đổi mật khẩu"
     Doctors ||--o{ Appointments : "nhận ca khám"
-    Doctors ||--o{ Schedules : "thiết lập lịch"
+    Doctors ||--o{ Schedules : "thiết lập lịch tuần"
+    Doctors ||--o{ LeaveRequests : "xin nghỉ phép"
     Specialties ||--o{ Doctors : "phân loại"
     Appointments ||--o| MedicalRecords : "kết quả khám"
-    Appointments ||--o| Payments : "thanh toán"
-    MedicalRecords ||--o{ Prescriptions : "đơn thuốc"
+    Appointments ||--o| Payments : "hóa đơn"
+    MedicalRecords ||--o{ PrescriptionItems : "kê thuốc"
 
     Users {
         uuid id PK
@@ -229,6 +243,12 @@ erDiagram
         varchar phone
         varchar role "patient/doctor/hr_admin/cashier_admin"
         boolean is_active "Default true"
+        boolean is_verified "Xác thực email"
+        varchar patient_code "Tự sinh dạng MB-XXX"
+        date date_of_birth
+        varchar gender
+        varchar blood_type
+        varchar address
         timestamp created_at
     }
 
@@ -238,6 +258,7 @@ erDiagram
         uuid specialty_id FK
         text bio
         int experience_years
+        varchar room_number "Phòng làm việc cố định"
         boolean is_approved "HR Admin phê duyệt"
     }
 
@@ -264,10 +285,13 @@ erDiagram
         date scheduled_date
         time scheduled_time
         varchar reason
-        varchar status "PENDING/CONFIRMED/IN_PROGRESS/PRESCRIPTION_SENT/CANCELLED/COMPLETED"
+        varchar status "AWAITING_PAYMENT/PENDING/CONFIRMED/IN_PROGRESS/PRESCRIPTION_SENT/CANCELLED/COMPLETED"
         boolean is_revisit "Default false"
-        varchar qr_code "Mã QR xác thực"
+        varchar qr_code "Mã QR check-in tự sinh"
+        text doctor_notes
         boolean reminder_sent "Default false"
+        int queue_number "Số thứ tự khám trong ngày"
+        varchar room_number "Phòng khám lâm sàng"
         timestamp created_at
     }
 
@@ -283,14 +307,19 @@ erDiagram
         timestamp created_at
     }
 
-    Prescriptions {
+    PrescriptionItems {
         uuid id PK
         uuid medical_record_id FK
-        varchar drug_name
+        varchar medicine_name
         varchar dosage
         varchar frequency
         varchar duration
-        text notes
+        numeric morning "Số lượng uống buổi sáng"
+        numeric noon "Số lượng uống buổi trưa"
+        numeric afternoon "Số lượng uống buổi chiều"
+        numeric evening "Số lượng uống buổi tối"
+        numeric total_quantity "Tổng số lượng cấp phát"
+        text instructions
     }
 
     Payments {
@@ -298,9 +327,36 @@ erDiagram
         uuid appointment_id FK
         uuid cashier_id FK
         decimal amount
-        varchar payment_method
-        varchar status
+        varchar payment_method "VNPAY/cash/transfer"
+        varchar status "PENDING/PAID"
         timestamp paid_at
+    }
+
+    LeaveRequests {
+        uuid id PK
+        uuid doctor_id FK
+        date leave_date "Ngày xin nghỉ"
+        varchar reason
+        varchar status "PENDING/APPROVED/REJECTED"
+        timestamp created_at
+    }
+
+    Medicines {
+        uuid id PK
+        varchar name "Tên thuốc (Index)"
+        varchar category
+        varchar dosage_form
+        varchar strength
+        varchar manufacturer
+        text indication
+        varchar classification
+    }
+
+    PasswordHistory {
+        uuid id PK
+        uuid user_id FK
+        varchar password_hash
+        timestamp created_at
     }
 ```
 
@@ -320,7 +376,7 @@ graph TD
         A["👤 Người dùng\n(Trình duyệt)"]:::client
     end
 
-    subgraph Frontend_Tier ["Frontend – HTML/CSS/JS (Render Static Site)"]
+    subgraph Frontend_Tier ["Frontend – HTML/CSS/JS (Render Static Site / Vercel)"]
         A --> |"HTTPS"| FE["Giao diện Web\nHTML/CSS/JS thuần\nPatient / Doctor / HR Admin / Cashier Admin pages"]:::frontend
         FE --> |"fetch() + JWT"| B
     end
@@ -333,11 +389,16 @@ graph TD
     end
 
     subgraph Data_Tier ["Database"]
-        E --> |"ORM Query (async)"| F[("PostgreSQL\nRender managed DB\nUsers, Doctors, Schedules\nAppointments, MedicalRecords\nPrescriptions, Payments")]:::database
+        E --> |"ORM Query (async)"| F[("PostgreSQL / SQLite\nUsers, Doctors, LeaveRequests\nAppointments, MedicalRecords\nPrescriptionItems, Payments, Medicines")]:::database
+    end
+
+    subgraph External_Gateways ["External Services (Tầng Dịch vụ ngoài)"]
+        D <--> |"1. Request URL / 2. IPN Callback"| EX_VNP["cổng thanh toán VNPAY Sandbox Gateway"]:::external
+        D -.-> |"Tạo mã chuyển khoản nhanh"| EX_QR["VietQR API (MB Bank)"]:::external
     end
 
     subgraph Background_Tier ["Background Tasks"]
-        D -.-> |"Trigger khi tạo/cập nhật appointment"| G["Email Service\nFastAPI-Mail + Jinja2 Template\n(Xác nhận, Hủy, Giấy hẹn khám)"]:::external
+        D -.-> |"Trigger khi tạo/cập nhật appointment"| G["Email Service\nFastAPI-Mail + Jinja2 Template\n(Xác thực email, Reset mật khẩu, Xác nhận, Hủy, Giấy hẹn khám)"]:::external
         H["APScheduler\nJob chạy mỗi giờ\n(Nhắc lịch 24h trước)"]:::external --> F
         H --> G
     end
@@ -361,24 +422,31 @@ graph LR
         UC2["Tìm kiếm bác sĩ\ntheo chuyên khoa"]:::usecase
         UC3["Xem slot trống\ntheo ngày"]:::usecase
         UC4["Đặt lịch hẹn"]:::usecase
-        UC5["Nhận mã QR\n/ mã vạch"]:::usecase
+        UC5["Nhận mã QR check-in"]:::usecase
         UC6["Xem giấy hẹn khám\n(có lộ trình)"]:::usecase
-        UC7["Hủy lịch hẹn\n(trước 24h)"]:::usecase
+        UC7["Hủy lịch hẹn"]:::usecase
         UC8["Xem sổ khám\nbệnh điện tử"]:::usecase
-        UC9["Thiết lập\nlịch làm việc"]:::usecase
+        UC24["Thanh toán Online VNPAY"]:::usecase
+        UC29["Quên & Đặt lại mật khẩu"]:::usecase
+        
+        UC9["Thiết lập\nlịch làm việc tuần"]:::usecase
         UC10["Nhận thông báo\nca khám mới/tái khám"]:::usecase
         UC11["Xem hồ sơ\nbệnh nhân"]:::usecase
         UC12["Kê đơn thuốc\n(chuẩn A5)"]:::usecase
         UC13["Gửi đơn thuốc\ncho thu ngân"]:::usecase
-        UC14["Block ngày nghỉ\nđột xuất"]:::usecase
+        UC25["Đăng ký nghỉ phép"]:::usecase
+        
         UC15["Tiếp nhận &\nxác nhận đặt lịch"]:::usecase
-        UC16["Thông báo bác sĩ\n(mới/tái khám)"]:::usecase
         UC17["Nhận & xử lý\nđơn thuốc"]:::usecase
         UC18["Thu phí &\nphát thuốc"]:::usecase
-        UC19["Quản lý doanh thu"]:::usecase
+        UC27["Quét mã QR Check-in"]:::usecase
+        UC28["In phiếu khám có mã vạch"]:::usecase
+        
         UC20["Phê duyệt\ntài khoản bác sĩ"]:::usecase
         UC21["Quản lý nhân sự\n& chuyên khoa"]:::usecase
-        UC22["Xem thống kê\nhệ thống"]:::usecase
+        UC22["Xem thống kê doanh thu"]:::usecase
+        UC26["Duyệt lịch nghỉ phép Bác sĩ"]:::usecase
+        
         UC23["Nhận email\ntự động"]:::usecase
     end
 
@@ -390,6 +458,8 @@ graph LR
     Patient --> UC6
     Patient --> UC7
     Patient --> UC8
+    Patient --> UC24
+    Patient --> UC29
     Patient --> UC23
 
     Doctor --> UC1
@@ -398,19 +468,24 @@ graph LR
     Doctor --> UC11
     Doctor --> UC12
     Doctor --> UC13
-    Doctor --> UC14
+    Doctor --> UC25
+    Doctor --> UC29
     Doctor --> UC23
 
+    Cashier --> UC1
     Cashier --> UC15
-    Cashier --> UC16
     Cashier --> UC17
     Cashier --> UC18
-    Cashier --> UC19
+    Cashier --> UC27
+    Cashier --> UC28
     Cashier --> UC23
 
+    HRAdmin --> UC1
     HRAdmin --> UC20
     HRAdmin --> UC21
     HRAdmin --> UC22
+    HRAdmin --> UC26
+    HRAdmin --> UC23
 ```
 
 ---
@@ -419,22 +494,24 @@ graph LR
 
 | Layer | Công nghệ | Ghi chú |
 | :--- | :--- | :--- |
-| **Frontend** | HTML5, CSS3, JavaScript (ES6+) | Không dùng framework – thuần JS với Fetch API |
-| **Backend** | Python 3.11+, FastAPI | Framework chính |
-| **ORM** | SQLAlchemy 2.0 (async) | Kết nối PostgreSQL qua `asyncpg` |
-| **DB Driver** | `asyncpg` | Driver async cho PostgreSQL |
-| **Database** | **PostgreSQL** (Render managed) | Free tier trên Render |
-| **Migration** | Alembic | Quản lý schema version |
-| **Authentication** | `python-jose` (JWT), `passlib` + `bcrypt` | Access Token 30 phút, Refresh 7 ngày |
-| **QR Code** | `qrcode` (Python) / `jsQR` (Frontend) | Sinh và đọc mã QR/mã vạch xác thực |
-| **Email** | FastAPI-Mail, Jinja2 | HTML email template |
-| **Background Tasks** | APScheduler | Nhắc lịch 24h trước ca khám |
-| **Chart** | Chart.js (CDN) | Render biểu đồ thống kê trên Admin frontend |
-| **Testing** | Pytest, `httpx` (AsyncClient) | Coverage mục tiêu ≥ 70% |
-| **Deployment – Backend** | **Render Web Service** | Free tier, auto-deploy từ GitHub nhánh `main` |
-| **Deployment – Frontend** | **Render Static Site** | Free tier, auto-deploy từ GitHub |
-| **Deployment – Database** | **Render PostgreSQL** | Free tier 90 ngày |
-| **API Docs** | Swagger UI + ReDoc | Tự sinh từ FastAPI tại `/docs` và `/redoc` |
+| **Frontend** | HTML5, CSS3 (Vanilla), JavaScript (ES6+) | Không dùng framework – thuần JS với Fetch API, phong cách Glassmorphism hiện đại |
+| **Backend** | Python 3.9 - 3.12, FastAPI | Framework chính hỗ trợ async mạnh mẽ |
+| **ORM** | SQLAlchemy 2.0 (async) | Kết nối PostgreSQL / SQLite qua các driver tương ứng |
+| **DB Driver** | `asyncpg` (PostgreSQL), `aiosqlite` (SQLite) | Driver async cho các loại database |
+| **Database** | **PostgreSQL** (Render managed) & **SQLite** (Local) | Lưu trữ cơ sở dữ liệu |
+| **Thanh toán Online** | **VNPAY Sandbox SDK** | Tích hợp cổng thanh toán trực tuyến của Merchant bằng SHA-512 |
+| **Giả lập chuyển khoản** | **VietQR API** (Ngân hàng MB Bank) | Sinh nhanh mã QR thanh toán |
+| **Xác thực & Mã hóa** | `python-jose` (JWT), `passlib` + `bcrypt` | Đăng nhập an toàn, lịch sử mật khẩu bảo vệ brute-force |
+| **Mã QR định danh** | `qrcode` (Python) | Tự động sinh mã QR định danh khi đặt lịch thành công |
+| **In mã vạch** | **JsBarcode** (Frontend) | In mã vạch trên phiếu thứ tự đón tiếp của Thu ngân |
+| **Email tự động** | FastAPI-Mail, Jinja2 | Gửi mã OTP xác thực email, link reset mật khẩu và Giấy hẹn khám |
+| **Background Tasks** | APScheduler | Background job chạy ngầm định kỳ |
+| **Biểu đồ Chart** | Chart.js (CDN) | Hiển thị trực quan số liệu thống kê doanh thu và lượt khám |
+| **Testing** | Pytest, `httpx` (AsyncClient) | Đảm bảo độ phủ kiểm thử đơn vị và tích hợp |
+| **Deployment – Backend** | **Render Web Service** | Triển khai container hóa Docker, auto-deploy từ GitHub |
+| **Deployment – Frontend** | **Render Static Site / Vercel** | Hosting miễn phí, bảo mật cao và truyền tải CDN siêu tốc |
+| **Deployment – Database** | **Render PostgreSQL** | Database đám mây PostgreSQL quản trị bởi Render |
+| **API Docs** | Swagger UI + ReDoc | Tự động sinh tài liệu kiểm thử API tại `/docs` và `/redoc` |
 
 > **Lưu ý về kết nối Database trên Render:**  
 > Render cung cấp PostgreSQL managed database tích hợp sẵn với Web Service. Connection string có dạng:  
