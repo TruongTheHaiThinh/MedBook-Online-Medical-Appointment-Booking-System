@@ -193,7 +193,7 @@ async def get_vnpay_url(
     vnp_TxnRef = f"{str(appt.id)[:18]}_{int(datetime.now().timestamp())}"
     
     order_info = f"Thanh toan dat lich hen {appt.id}"
-    vnp_ReturnUrl = "http://127.0.0.1:8000/appointments/vnpay-return"
+    vnp_ReturnUrl = settings.VNP_RETURN_URL
     vnp_url = vnp.get_payment_url(
         vnp_TxnRef=vnp_TxnRef,
         vnp_Amount=100000, # 100k
