@@ -51,7 +51,7 @@ Hệ thống mở rộng lên **4 vai trò người dùng** với phân quyền 
 | **Vai trò** | **Tên gọi** | **Mô tả** |
 | :--- | :--- | :--- |
 | Bệnh nhân | Patient | Đặt lịch, xem sổ khám bệnh điện tử, nhận mã QR/mã vạch |
-| Admin Nhân sự | HR Admin | Quản lý tài khoản bác sĩ, nhân viên, phê duyệt hồ sơ, thống kê hệ thống |
+| Quản trị hệ thống | Admin (HR Admin) | Phê duyệt bác sĩ/lịch nghỉ phép, quản lý user, xem nhật ký giao dịch & hồ sơ bệnh án bệnh nhân |
 | Admin Thu ngân | Cashier Admin | Tiếp nhận đặt lịch, xác nhận thông tin, quản lý đơn thuốc & thu phí |
 | Bác sĩ | Doctor | Nhận thông báo ca khám, xem hồ sơ bệnh nhân, kê đơn thuốc, gửi đơn cho thu ngân |
 
@@ -81,11 +81,13 @@ Hệ thống mở rộng lên **4 vai trò người dùng** với phân quyền 
 - **Giấy hẹn khám:** Nhận giấy hẹn điện tử sau khi thu ngân xác nhận, có ghi đầy đủ: tên bác sĩ, phòng khám, giờ hẹn, lộ trình đến khám, các lưu ý chuẩn bị.
 - **Sổ khám bệnh điện tử:** Xem toàn bộ lịch sử khám bệnh dưới dạng hồ sơ điện tử chuyên nghiệp (read-only): ngày khám, bác sĩ, chẩn đoán, đơn thuốc, ghi chú tái khám.
 
-**B. Admin Nhân sự (HR Admin)**
+**B. Quản trị hệ thống (Admin)**
 - **Quản lý tài khoản:** Phê duyệt hoặc từ chối tài khoản bác sĩ sau khi xác minh thông tin. Khóa tài khoản vi phạm, reset mật khẩu khi cần.
 - **Quản lý nhân sự:** CRUD bác sĩ, nhân viên thu ngân. Phân công bác sĩ theo chuyên khoa. Quản lý lịch làm việc tổng thể.
 - **Quản lý chuyên khoa:** Tạo, sửa, xóa danh mục chuyên khoa (Tim mạch, Nội tổng quát, Da liễu...).
 - **Thống kê hệ thống:** Dashboard tổng quan: tổng lịch hẹn theo ngày/tuần/tháng, tỷ lệ CONFIRMED/CANCELLED theo từng bác sĩ, số bệnh nhân mới.
+- **Nhật ký Giao dịch:** Xem danh sách toàn bộ giao dịch, hóa đơn thanh toán của phòng khám.
+- **Hồ sơ Bệnh án:** Tra cứu thông tin lâm sàng và lịch sử bệnh án, đơn thuốc chi tiết của tất cả bệnh nhân.
 
 **C. Admin Thu ngân (Cashier Admin)**
 - **Tiếp nhận & xác nhận đặt lịch:** Xem danh sách lịch hẹn đang chờ (PENDING); xác minh thông tin bệnh nhân; xác nhận (CONFIRMED) hoặc từ chối kèm lý do.
@@ -136,7 +138,7 @@ stateDiagram-v2
 ## 4. CHI TIẾT CÁC MODULE KỸ THUẬT
 
 ### Module 1: Quản lý Tài khoản & Phân quyền
-Hệ thống xác thực và phân quyền làm nền tảng bảo mật cho toàn bộ API. Hệ thống hỗ trợ **4 vai trò**: Bệnh nhân, Bác sĩ, Admin Nhân sự, Admin Thu ngân. Xác thực dựa trên JWT (Access Token 30 phút + Refresh Token 7 ngày). Tài khoản bác sĩ và thu ngân do Admin Nhân sự tạo và phê duyệt.
+Hệ thống xác thực và phân quyền làm nền tảng bảo mật cho toàn bộ API. Hệ thống hỗ trợ **4 vai trò**: Bệnh nhân, Bác sĩ, Quản trị hệ thống (Admin), Thu ngân phòng khám. Xác thực dựa trên JWT (Access Token 30 phút + Refresh Token 7 ngày). Tài khoản bác sĩ và thu ngân do Admin tạo và phê duyệt.
 
 ### Module 2: Bác sĩ, Chuyên khoa & Lịch làm việc
 Bác sĩ định nghĩa lịch làm việc theo pattern tuần (VD: Thứ 2-4-6, 8:00–12:00, 30 phút/ca). Smart Scheduling Engine tự động sinh slot khả dụng on-demand, không pre-generate vào DB. Bác sĩ có thể block ngày nghỉ đột xuất.
@@ -153,8 +155,8 @@ Bác sĩ kê đơn thuốc tương tác trực tiếp với kho dữ liệu 20,3
 ### Module 7: Đăng ký & Duyệt nghỉ phép (Leave Management)
 Bác sĩ xin nghỉ phép vào các ngày đột xuất. HR Admin kiểm tra và duyệt yêu cầu nghỉ phép. Khi đơn nghỉ phép được duyệt, hệ thống sẽ tự động hủy các ca khám trùng lịch trong ngày nghỉ đó và gửi email xin lỗi/thông báo tự động tới tất cả bệnh nhân bị ảnh hưởng.
 
-### Module 6: Thống kê & Quản trị (HR Admin)
-Dashboard tổng quan với biểu đồ Chart.js: lịch hẹn theo thời gian, tỷ lệ xác nhận/hủy, doanh thu theo ngày. Admin Nhân sự quản lý toàn bộ tài khoản và có thể can thiệp vào bất kỳ dữ liệu nào trong hệ thống.
+### Module 6: Thống kê & Quản trị (Admin)
+Dashboard tổng quan với biểu đồ Chart.js: lịch hẹn theo thời gian, tỷ lệ xác nhận/hủy, doanh thu theo ngày. Quản trị hệ thống quản lý toàn bộ tài khoản, xem nhật ký giao dịch, xem hồ sơ bệnh án và có thể can thiệp vào bất kỳ dữ liệu nào trong hệ thống.
 
 ---
 
@@ -170,7 +172,7 @@ Dashboard tổng quan với biểu đồ Chart.js: lịch hẹn theo thời gian
 - **Bệnh nhân:** Đặt lịch, **thanh toán trực tuyến qua VNPAY Sandbox**, tự nhận mã QR định danh, xem sổ khám bệnh điện tử và nhận thông tin lộ trình khám.
 - **Bác sĩ:** Đăng ký lịch nghỉ phép (Leave Request), xem hồ sơ lâm sàng bệnh nhân, kê đơn thuốc in mẫu A5 chuẩn y khoa liên kết từ điển 20,316 loại thuốc.
 - **Thu ngân:** Quét mã QR check-in tiếp đón, **in phiếu số thứ tự có mã vạch (JsBarcode)**, xử lý đơn thuốc và thu phí thuốc.
-- **HR Admin:** Quản trị nhân sự bác sĩ, quản trị chuyên khoa, **duyệt đơn xin nghỉ phép của Bác sĩ** (tự động hủy lịch trùng & gửi email thông báo cho người bệnh), xem thống kê doanh thu Chart.js.
+- **Admin:** Quản trị nhân sự bác sĩ, quản trị chuyên khoa, **duyệt đơn xin nghỉ phép của Bác sĩ** (tự động hủy lịch trùng & gửi email thông báo cho người bệnh), xem thống kê doanh thu Chart.js, **xem nhật ký giao dịch và tra cứu hồ sơ bệnh án bệnh nhân**.
 - **State Machine hoàn chỉnh:** `AWAITING_PAYMENT → PENDING/CONFIRMED → IN_PROGRESS → PRESCRIPTION_SENT → COMPLETED` và trạng thái `CANCELLED`.
 - **Hệ thống Email tự động:** Xác nhận tài khoản, giấy hẹn khám, thông báo duyệt/hủy lịch khám và thông báo bác sĩ nghỉ phép.
 

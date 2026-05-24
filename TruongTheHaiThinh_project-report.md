@@ -10,7 +10,7 @@ Trong bối cảnh các cơ sở y tế thường xuyên đối mặt với áp 
 - **Đối với Bệnh nhân:** Giúp đặt lịch khám nhanh chóng, lựa chọn bác sĩ và chuyên khoa phù hợp; nhận thông báo, lộ trình khám chi tiết; thanh toán phí khám trực tuyến qua cổng VNPAY; tra cứu lịch sử khám bệnh mọi lúc mọi nơi qua Sổ khám bệnh điện tử.
 - **Đối với Bác sĩ:** Quản lý lịch làm việc tuần và đăng ký nghỉ phép linh hoạt; tra cứu đầy đủ hồ sơ bệnh án lịch sử của bệnh nhân; kê đơn thuốc nhanh chóng nhờ công cụ gợi ý tên thuốc tự động từ danh mục thực tế.
 - **Đối với Thu ngân phòng khám:** Tiếp nhận, xác nhận thông tin cuộc hẹn; check-in nhanh chóng bằng cách quét mã QR; xử lý hóa đơn khám bệnh và hóa đơn thuốc liên kết trực tiếp với phòng khám.
-- **Đối với Admin Nhân sự (HR Admin):** Quản trị nhân sự (thêm mới, mở khóa tài khoản bác sĩ, thu ngân); quản trị chuyên khoa; duyệt lịch nghỉ phép của bác sĩ (tự động hủy lịch hẹn trùng và gửi email thông báo); xem báo cáo thống kê trực quan.
+- **Đối với Quản trị hệ thống (Admin):** Phê duyệt bác sĩ mới, duyệt/từ chối lịch nghỉ phép của bác sĩ (tự động hủy lịch hẹn trùng và gửi email thông báo); quản lý danh mục chuyên khoa; quản lý/khóa người dùng; xem toàn bộ **nhật ký giao dịch tài chính** và tra cứu **hồ sơ bệnh án bệnh nhân**.
 
 ### 1.3 Phạm vi hệ thống
 **Bao gồm:**
@@ -20,8 +20,8 @@ Trong bối cảnh các cơ sở y tế thường xuyên đối mặt với áp 
 - Tích hợp cổng thanh toán trực tuyến: Tích hợp VNPAY Sandbox phục vụ thanh toán trực tuyến tiền đặt lịch.
 - Check-in nhanh bằng QR Code: Bệnh nhân nhận mã QR sau khi thanh toán, Thu ngân quét QR để chuyển trạng thái sang khám (`IN_PROGRESS`).
 - Hồ sơ & Kê đơn thuốc chuyên nghiệp: Hỗ trợ tìm kiếm nhanh gợi ý tên thuốc từ dataset 4000+ loại thuốc thực tế; hỗ trợ định dạng in khổ A5 chuẩn y tế.
-- Quản lý nghỉ phép của Bác sĩ: Bác sĩ xin nghỉ phép ở trạng thái `PENDING`. Chỉ khi HR Admin phê duyệt (`APPROVED`), hệ thống mới tự động hủy các lịch hẹn trùng, gửi email thông báo hủy hẹn kèm lý do cho bệnh nhân (FastAPI-Mail + SMTP).
-- Dashboard thống kê trực quan cho HR Admin bằng biểu đồ (Chart.js).
+- Quản lý nghỉ phép của Bác sĩ: Bác sĩ xin nghỉ phép ở trạng thái `PENDING`. Chỉ khi Admin hệ thống phê duyệt (`APPROVED`), hệ thống mới tự động hủy các lịch hẹn trùng, gửi email thông báo hủy hẹn kèm lý do cho bệnh nhân (FastAPI-Mail + SMTP).
+- Dashboard thống kê trực quan và quản trị giao dịch/bệnh án cho Admin bằng biểu đồ (Chart.js).
 - Đóng gói container hoàn chỉnh: Sử dụng Docker & Docker Compose chạy đa dịch vụ (PostgreSQL, Backend FastAPI, Frontend Nginx).
 
 **Không bao gồm:**
@@ -36,7 +36,7 @@ Trong bối cảnh các cơ sở y tế thường xuyên đối mặt với áp 
 - **Patient (Bệnh nhân):** Đăng ký tài khoản, kích hoạt email, đặt lịch khám theo bác sĩ/ngày/giờ, thanh toán trực tuyến qua VNPAY, xem mã QR check-in cuộc hẹn, tra cứu Sổ khám bệnh điện tử và đơn thuốc cá nhân.
 - **Doctor (Bác sĩ):** Đăng ký lịch làm việc tuần, đăng ký nghỉ phép đột xuất, quản lý danh sách cuộc hẹn được phân công, thực hiện ghi nhận bệnh án, kê đơn thuốc và chỉ định tái khám cho bệnh nhân.
 - **Cashier Admin (Thu ngân phòng khám):** Xác nhận lịch đặt trực tiếp, quét QR code check-in bệnh nhân khi đến khám, xử lý thanh toán hóa đơn tiền khám/tiền thuốc, cấp phát thuốc theo đơn đã hoàn thành thanh toán.
-- **HR Admin (Quản trị nhân sự):** Tạo tài khoản nhân viên (Bác sĩ, Thu ngân), phê duyệt hồ sơ bác sĩ mới, quản lý danh mục chuyên khoa, phê duyệt/từ chối yêu cầu nghỉ phép của bác sĩ, giám sát hoạt động hệ thống qua biểu đồ thống kê.
+- **Admin (Quản trị hệ thống):** Tạo tài khoản nhân viên (Bác sĩ, Thu ngân), phê duyệt hồ sơ bác sĩ mới, quản lý danh mục chuyên khoa, phê duyệt/từ chối yêu cầu nghỉ phép của bác sĩ, giám sát hoạt động hệ thống qua biểu đồ thống kê, xem nhật ký giao dịch và tra cứu hồ sơ bệnh án bệnh nhân.
 
 ### 2.2 Danh sách Use Case
 | ID | Use Case Name | Actors | Description |
@@ -55,10 +55,10 @@ Trong bối cảnh các cơ sở y tế thường xuyên đối mặt với áp 
 | **UC-12** | Quản lý Ca khám bệnh | Doctor | Xem danh sách bệnh nhân chờ khám trong ngày và tiền sử bệnh lý của họ. |
 | **UC-13** | Khám bệnh & Ghi bệnh án | Doctor | Nhập chẩn đoán lâm sàng, ghi chú khám bệnh, chỉ định có tái khám hay không. |
 | **UC-14** | Kê đơn thuốc | Doctor | Kê đơn thuốc với chức năng gợi ý tự động tên thuốc từ dữ liệu danh mục chuẩn. |
-| **UC-15** | Phê duyệt Bác sĩ | HR Admin | Phê duyệt/từ chối hồ sơ đăng ký tài khoản của bác sĩ mới vào hệ thống. |
-| **UC-16** | Quản lý Chuyên khoa | HR Admin | Thực hiện CRUD danh mục chuyên khoa của phòng khám. |
-| **UC-17** | Quản lý Lịch nghỉ phép | HR Admin | Duyệt/Từ chối yêu cầu xin nghỉ của bác sĩ, kích hoạt cơ chế tự động hủy lịch trùng và gửi email. |
-| **UC-18** | Xem báo cáo Thống kê | HR Admin | Theo dõi số lượng cuộc hẹn, tỷ lệ xác nhận/hủy và sự tăng trưởng bệnh nhân mới. |
+| **UC-15** | Phê duyệt Bác sĩ | Admin | Phê duyệt/từ chối hồ sơ đăng ký tài khoản của bác sĩ mới vào hệ thống. |
+| **UC-16** | Quản lý Chuyên khoa | Admin | Thực hiện CRUD danh mục chuyên khoa của phòng khám. |
+| **UC-17** | Quản lý Lịch nghỉ phép | Admin | Duyệt/Từ chối yêu cầu xin nghỉ của bác sĩ, kích hoạt cơ chế tự động hủy lịch trùng và gửi email. |
+| **UC-18** | Xem báo cáo Thống kê | Admin | Theo dõi số lượng cuộc hẹn, tỷ lệ xác nhận/hủy và sự tăng trưởng bệnh nhân mới. |
 | **UC-19** | Check-in bằng QR Code | Cashier Admin | Thu ngân quét mã QR của bệnh nhân bằng camera hoặc nhập mã để check-in tại quầy. |
 | **UC-20** | Xác nhận thanh toán | Cashier Admin | Thu ngân xác nhận thu tiền trực tiếp và lập biên nhận thanh toán. |
 | **UC-21** | Thanh toán thuốc & Phát thuốc| Cashier Admin | Nhận thông báo đơn thuốc từ bác sĩ, tính toán tiền thuốc, thu tiền và phát thuốc. |
@@ -71,7 +71,7 @@ graph LR
 
     Patient(["👤 Bệnh nhân"]):::actor
     Doctor(["👨‍⚕️ Bác sĩ"]):::actor
-    HRAdmin(["🔧 HR Admin"]):::actor
+    Admin(["🔧 Admin"]):::actor
     Cashier(["💰 Thu ngân"]):::actor
 
     subgraph MedBook System
@@ -106,10 +106,10 @@ graph LR
     Doctor --> UC9
     Doctor --> UC15
 
-    HRAdmin --> UC1
-    HRAdmin --> UC10
-    HRAdmin --> UC11
-    HRAdmin --> UC12
+    Admin --> UC1
+    Admin --> UC10
+    Admin --> UC11
+    Admin --> UC12
 
     Cashier --> UC1
     Cashier --> UC13
@@ -134,12 +134,12 @@ graph LR
 
 #### Đặc tả Use Case: UC-17 Duyệt lịch nghỉ phép của Bác sĩ
 - **Use Case ID:** UC-17
-- **Actors:** HR Admin (Quản lý Nhân sự)
+- **Actors:** Admin (Quản trị hệ thống)
 - **Preconditions:** Bác sĩ đã gửi yêu cầu nghỉ phép và yêu cầu đang ở trạng thái `PENDING`.
 - **Main Flow:**
-  1. HR Admin đăng nhập và truy cập vào tab "Duyệt nghỉ phép" trên dashboard.
+  1. Admin đăng nhập và truy cập vào tab "Duyệt nghỉ phép" trên dashboard.
   2. Hệ thống hiển thị bảng danh sách các yêu cầu nghỉ phép chờ duyệt.
-  3. HR Admin bấm nút "Duyệt" (Approve) đối với yêu cầu xin nghỉ của Bác sĩ A vào ngày X.
+  3. Admin bấm nút "Duyệt" (Approve) đối với yêu cầu xin nghỉ của Bác sĩ A vào ngày X.
   4. Hệ thống xác nhận yêu cầu, bắt đầu một DB transaction:
      - Cập nhật trạng thái yêu cầu nghỉ phép của Bác sĩ A vào ngày X thành `APPROVED`.
      - Tìm kiếm tất cả các cuộc hẹn trùng ngày X của Bác sĩ A đang ở trạng thái `PENDING` hoặc `CONFIRMED`.
@@ -375,7 +375,7 @@ MedBook/                          ← Thư mục gốc dự án
 │   ├── requirements.txt          ← Danh sách các thư viện Python phụ thuộc
 │   └── medbook.db                ← Database SQLite chạy local
 ├── frontend/                     ← Thư mục Frontend Web tĩnh
-│   ├── admin/                    ← Dashboard của HR Admin & Thu ngân
+│   ├── admin/                    ← Dashboard của Admin hệ thống & Thu ngân
 │   ├── css/                      ← Các tệp định dạng giao diện
 │   ├── doctor/                   ← Dashboard khám bệnh & lịch làm việc bác sĩ
 │   ├── js/                       ← Logic JavaScript, API & Auth
@@ -393,13 +393,13 @@ MedBook/                          ← Thư mục gốc dự án
 ```
 
 ### 4.3 Chức năng đã triển khai
-1. **Xác thực & Phân quyền nâng cao:** Kích hoạt email khi đăng ký tài khoản bệnh nhân, gửi mã thông báo token dùng 1 lần để khôi phục mật khẩu, kiểm tra lịch sử 3 mật khẩu gần nhất để nâng cao bảo mật. HR Admin phê duyệt tài khoản bác sĩ trước khi được phép đăng ký slot.
+1. **Xác thực & Phân quyền nâng cao:** Kích hoạt email khi đăng ký tài khoản bệnh nhân, gửi mã thông báo token dùng 1 lần để khôi phục mật khẩu, kiểm tra lịch sử 3 mật khẩu gần nhất để nâng cao bảo mật. Admin hệ thống phê duyệt tài khoản bác sĩ trước khi được phép đăng ký slot.
 2. **Thuật toán Smart Scheduling Engine:** Tự sinh danh sách slot giờ khám trống trong ngày của bác sĩ mà không cần ghi sẵn vào DB. Thuật toán tự loại bỏ slot bị trùng bởi lịch hẹn đã CONFIRMED, loại bỏ slot trùng với ngày nghỉ phép đã được phê duyệt của bác sĩ.
 3. **Chống Double-Booking:** Sử dụng cơ chế khóa bi quan DB `SELECT ... FOR UPDATE` bên trong transaction khi bệnh nhân đặt lịch, giải quyết triệt để race condition khi 2 bệnh nhân cùng bấm đặt 1 slot trong cùng 1 mili-giây.
 4. **Tích hợp cổng thanh toán VNPAY Sandbox:** Bệnh nhân thanh toán trực tuyến phí khám (100k). Xử lý dữ liệu trả về song song qua Redirect Return URL và IPN ngầm của VNPAY để cập nhật trạng thái cuộc hẹn đáng tin cậy.
 5. **Số hóa quy trình khám & Kê đơn thuốc:** Bác sĩ nhập chẩn đoán lâm sàng. Khung tìm kiếm thuốc gợi ý tự động (Autocomplete) giúp nhập nhanh liều lượng và tên thuốc từ kho dataset 4000 loại thuốc thực tế. Form in đơn thuốc khổ A5 chuyên nghiệp.
-6. **Duyệt lịch nghỉ phép an toàn & Tự động hủy lịch trùng:** Bác sĩ xin nghỉ phép ở trạng thái `PENDING`. Khi HR duyệt nghỉ, hệ thống tự động tìm tất cả lịch hẹn khám trong ngày nghỉ đó, chuyển trạng thái thành `CANCELLED` và gửi email thông báo hủy hẹn kèm lý do cụ thể đến bệnh nhân.
-7. **Biểu đồ dashboard quản trị (Chart.js):** HR Admin theo dõi số lượng bệnh nhân, bác sĩ, thống kê trạng thái lịch hẹn theo hình tròn và lịch sử đặt lịch theo biểu đồ đường trong 30 ngày qua.
+6. **Duyệt lịch nghỉ phép an toàn & Tự động hủy lịch trùng:** Bác sĩ xin nghỉ phép ở trạng thái `PENDING`. Khi Admin duyệt nghỉ, hệ thống tự động tìm tất cả lịch hẹn khám trong ngày nghỉ đó, chuyển trạng thái thành `CANCELLED` và gửi email thông báo hủy hẹn kèm lý do cụ thể đến bệnh nhân.
+7. **Biểu đồ dashboard quản trị (Chart.js):** Admin theo dõi số lượng bệnh nhân, bác sĩ, thống kê trạng thái lịch hẹn theo hình tròn và lịch sử đặt lịch theo biểu đồ đường trong 30 ngày qua.
 8. **Đóng gói Docker hoàn chỉnh:** Đã container hóa đa tầng dịch vụ (Backend, Frontend Nginx, Database PostgreSQL).
 9. **Kịch bản cài đặt nhanh:** Tập tin khởi chạy `run_all.bat` tự cài đặt thư viện, tạo DB, nạp dữ liệu mẫu và mở trình duyệt tự động chỉ với 1 cú click đúp chuột.
 
@@ -431,15 +431,15 @@ MedBook/                          ← Thư mục gốc dự án
 | **GET** | `/medical-records/my-history` | Bệnh nhân xem Sổ khám bệnh điện tử cá nhân (chẩn đoán, đơn thuốc). |
 | **POST** | `/prescriptions` | Bác sĩ kê toa đơn thuốc y khoa cho cuộc hẹn. |
 | **GET** | `/prescriptions/medicines` | Tìm kiếm danh mục thuốc thực tế, hỗ trợ gợi ý autocomplete. |
-| **POST** | `/admin/hr/users` | HR Admin tạo tài khoản nhân viên (Bác sĩ, Thu ngân) xác thực sẵn. |
-| **GET** | `/admin/hr/users` | HR Admin xem danh sách toàn bộ người dùng trong hệ thống (có phân trang). |
-| **PATCH** | `/admin/hr/users/{id}/toggle-active` | HR Admin khóa hoặc mở khóa một tài khoản người dùng bất kỳ. |
-| **GET** | `/admin/hr/doctors/pending` | HR Admin xem danh sách bác sĩ mới chờ duyệt thông tin. |
-| **PATCH** | `/admin/hr/doctors/{id}/approve` | HR Admin phê duyệt thông tin hồ sơ bác sĩ mới. |
-| **GET** | `/admin/hr/leaves/pending` | HR Admin lấy danh sách các yêu cầu nghỉ phép chờ duyệt. |
-| **PATCH** | `/admin/hr/leaves/{id}/approve` | HR Admin duyệt yêu cầu nghỉ phép của bác sĩ (hủy lịch hẹn trùng, gửi email). |
-| **PATCH** | `/admin/hr/leaves/{id}/reject` | HR Admin từ chối yêu cầu nghỉ phép của bác sĩ. |
-| **GET** | `/admin/hr/stats` | HR Admin lấy dữ liệu thống kê tổng quan và lịch sử cuộc hẹn. |
+| **POST** | `/admin/hr/users` | Admin tạo tài khoản nhân viên (Bác sĩ, Thu ngân) xác thực sẵn. |
+| **GET** | `/admin/hr/users` | Admin xem danh sách toàn bộ người dùng trong hệ thống (có phân trang). |
+| **PATCH** | `/admin/hr/users/{id}/toggle-active` | Admin khóa hoặc mở khóa một tài khoản người dùng bất kỳ. |
+| **GET** | `/admin/hr/doctors/pending` | Admin xem danh sách bác sĩ mới chờ duyệt thông tin. |
+| **PATCH** | `/admin/hr/doctors/{id}/approve` | Admin phê duyệt thông tin hồ sơ bác sĩ mới. |
+| **GET** | `/admin/hr/leaves/pending` | Admin lấy danh sách các yêu cầu nghỉ phép chờ duyệt. |
+| **PATCH** | `/admin/hr/leaves/{id}/approve` | Admin duyệt yêu cầu nghỉ phép của bác sĩ (hủy lịch hẹn trùng, gửi email). |
+| **PATCH** | `/admin/hr/leaves/{id}/reject` | Admin từ chối yêu cầu nghỉ phép của bác sĩ. |
+| **GET** | `/admin/hr/stats` | Admin lấy dữ liệu thống kê tổng quan và lịch sử cuộc hẹn. |
 | **GET** | `/admin/cashier/appointments/pending`| Thu ngân xem danh sách cuộc hẹn khám chờ xác nhận thông tin. |
 | **GET** | `/admin/cashier/prescriptions/pending`| Thu ngân lấy danh sách cuộc hẹn có đơn thuốc chờ thu phí phát thuốc. |
 | **POST** | `/admin/cashier/payments` | Thu ngân lập hóa đơn xác nhận thanh toán tiền khám hoặc tiền thuốc. |
@@ -454,9 +454,9 @@ Hệ thống MedBook đã được thiết kế và triển khai hoàn thiện g
 3. **Dashboard Bác sĩ (Doctor Portal):** Xem danh sách ca khám trong ngày của bác sĩ phụ trách. Giao diện khám bệnh y khoa chuyên nghiệp hỗ trợ nhập chẩn đoán lâm sàng và công cụ Autocomplete tìm kiếm gợi ý thuốc nhanh chóng từ cơ sở dữ liệu.
    - *Đường dẫn hình ảnh khám bệnh:* `file:///C:/Users/thinh/.gemini/antigravity-ide/brain/e7cd5ad4-f2d0-474b-9f46-55416032f76f/media__1779557026752.png`
    - *Hình ảnh in đơn thuốc A5 chuẩn y tế:* `file:///C:/Users/thinh/.gemini/antigravity-ide/brain/e7cd5ad4-f2d0-474b-9f46-55416032f76f/media__1779557908537.png`
-4. **Dashboard HR Admin (HR Dashboard):** Thống kê hệ thống dạng thẻ số liệu tổng quan kết hợp biểu đồ thống kê Chart.js.
+4. **Dashboard Quản trị hệ thống (Admin Dashboard):** Thống kê hệ thống dạng thẻ số liệu tổng quan kết hợp biểu đồ thống kê Chart.js.
    - *Đường dẫn hình ảnh dashboard:* `file:///C:/Users/thinh/.gemini/antigravity-ide/brain/e7cd5ad4-f2d0-474b-9f46-55416032f76f/media__1779608151734.png`
-5. **Giao diện Quản lý và Duyệt nghỉ phép (HR Admin):** Bảng quản lý hiển thị danh sách các yêu cầu xin nghỉ phép của Bác sĩ kèm lý do. HR Admin thực hiện nhấn nút Duyệt (Approve) hoặc Từ chối (Reject) trực tiếp trên bảng.
+5. **Giao diện Quản lý và Duyệt nghỉ phép (Admin):** Bảng quản lý hiển thị danh sách các yêu cầu xin nghỉ phép của Bác sĩ kèm lý do. Admin thực hiện nhấn nút Duyệt (Approve) hoặc Từ chối (Reject) trực tiếp trên bảng.
    - *Đường dẫn hình ảnh duyệt nghỉ:* `file:///C:/Users/thinh/.gemini/antigravity-ide/brain/e7cd5ad4-f2d0-474b-9f46-55416032f76f/media__1779624539472.png`
 
 ### 4.6 Luồng hoạt động hệ thống
@@ -497,7 +497,7 @@ Dưới đây là danh sách các commit chính được sử dụng để phát
 | **TC-05** | UC-06: Đặt lịch khám | Hai bệnh nhân cùng lúc bấm đặt 1 slot giờ khám của bác sĩ tại 1 mili-giây | Chỉ 1 bệnh nhân đặt thành công (`201`), bệnh nhân còn lại nhận lỗi `409 Conflict` (Chống đặt trùng). | **Pass** |
 | **TC-06** | UC-07: Thanh toán VNPAY | Bệnh nhân thanh toán phí khám thành công trên VNPAY Sandbox | Lịch hẹn chuyển sang trạng thái `CONFIRMED`, hệ thống tự sinh mã QR check-in thành công. | **Pass** |
 | **TC-07** | UC-11: Đăng ký nghỉ phép | Bác sĩ xin nghỉ phép vào ngày X | Đăng ký thành công, trạng thái yêu cầu nghỉ là `PENDING`, chưa ảnh hưởng lịch hẹn của bệnh nhân. | **Pass** |
-| **TC-08** | UC-17: Duyệt nghỉ phép | HR Admin nhấn nút phê duyệt yêu cầu nghỉ của bác sĩ vào ngày X | Trạng thái nghỉ phép của bác sĩ chuyển thành `APPROVED`, tất cả các lịch hẹn trùng tự động hủy (`CANCELLED`), hệ thống gửi email thông báo hủy hẹn kèm lý do cho bệnh nhân. | **Pass** |
+| **TC-08** | UC-17: Duyệt nghỉ phép | Admin nhấn nút phê duyệt yêu cầu nghỉ của bác sĩ vào ngày X | Trạng thái nghỉ phép của bác sĩ chuyển thành `APPROVED`, tất cả các lịch hẹn trùng tự động hủy (`CANCELLED`), hệ thống gửi email thông báo hủy hẹn kèm lý do cho bệnh nhân. | **Pass** |
 | **TC-09** | UC-19: Check-in QR | Thu ngân quét mã QR định danh cuộc hẹn của bệnh nhân khi đến quầy | Hệ thống xác thực mã QR hợp lệ, chuyển trạng thái cuộc hẹn thành `IN_PROGRESS` và sinh số thứ tự phòng khám. | **Pass** |
 | **TC-10** | UC-13 & UC-14: Kê đơn | Bác sĩ chẩn đoán bệnh, gõ gợi ý thuốc từ autocomplete và gửi đơn thuốc | Thông tin bệnh án và đơn thuốc được lưu trữ, trạng thái cuộc hẹn chuyển sang `PRESCRIPTION_SENT`. | **Pass** |
 | **TC-11** | UC-21: Thanh toán thuốc | Thu ngân xác nhận thu tiền thuốc của bệnh nhân | Hệ thống ghi nhận hóa đơn thanh toán tiền thuốc, chuyển trạng thái thành `COMPLETED` và mở trang in hóa đơn. | **Pass** |
@@ -516,7 +516,7 @@ Dưới đây là danh sách các commit chính được sử dụng để phát
 - **Tài khoản Thu ngân (Cashier Admin):**
   - Email: `cashier@medbook.vn`
   - Mật khẩu: `Cashier@123`
-- **Tài khoản Quản lý Nhân sự (HR Admin):**
+- **Tài khoản Quản trị hệ thống (Admin):**
   - Email: `admin@medbook.vn`
   - Mật khẩu: `123y` (hoặc `Admin@123`)
 
@@ -536,7 +536,7 @@ Dưới đây là danh sách các commit chính được sử dụng để phát
 Một số câu lệnh prompt tiêu biểu được dùng trong quá trình đồng hành cùng AI:
 1. *"Viết mã xử lý transaction trong SQLAlchemy 2.0 sử dụng lệnh SELECT FOR UPDATE để tránh việc 2 người dùng đặt trùng một slot khám tại phòng khám."*
 2. *"Thiết kế giao diện CSS riêng cho trang in đơn thuốc khổ A5, đảm bảo ẩn toàn bộ các nút hành động, sidebar điều hướng và footer khi người dùng nhấn Ctrl + P trên trình duyệt."*
-3. *"Hãy triển khai chức năng phê duyệt nghỉ phép của bác sĩ: HR duyệt nghỉ phép sẽ kích hoạt transaction tự động hủy lịch hẹn trùng ngày và gọi tác vụ ngầm gửi email thông báo hủy đến từng bệnh nhân bị ảnh hưởng."*
+3. *"Hãy triển khai chức năng phê duyệt nghỉ phép của bác sĩ: Admin duyệt nghỉ phép sẽ kích hoạt transaction tự động hủy lịch hẹn trùng ngày và gọi tác vụ ngầm gửi email thông báo hủy đến từng bệnh nhân bị ảnh hưởng."*
 
 ### 7.3 Đánh giá AI
 - **Ưu điểm:**

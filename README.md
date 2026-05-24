@@ -11,8 +11,8 @@ Tài liệu này hướng dẫn chi tiết cách cài đặt thư viện, khởi
 
 Dưới đây là danh sách toàn bộ các tài khoản thử nghiệm đã được nạp sẵn trong hệ thống để Giáo viên dễ dàng chấm điểm tất cả các tính năng của đồ án:
 
-### 1. Quản lý Nhân sự (HR Admin)
-> Quyền hạn: Duyệt hồ sơ bác sĩ mới, **duyệt/từ chối các yêu cầu nghỉ phép của bác sĩ**, xem thống kê doanh thu và hoạt động toàn phòng khám...
+### 1. Quản trị hệ thống (Admin)
+> Quyền hạn: Quản trị toàn bộ hệ thống phòng khám, duyệt hồ sơ bác sĩ mới, **duyệt/từ chối các yêu cầu nghỉ phép của bác sĩ**, quản lý danh mục chuyên khoa, quản lý/khóa người dùng, xem toàn bộ **nhật ký giao dịch tài chính** và tra cứu **hồ sơ bệnh án bệnh nhân**...
 *   **Email:** `admin@medbook.vn`
 *   **Mật khẩu:** `123y`
 
@@ -115,7 +115,7 @@ Hệ thống đã được đóng gói container hóa hoàn chỉnh bằng **Doc
 ## 💎 CÁC TÍNH NĂNG NỔI BẬT CỦA MEDBOOK
 *   **Đặt lịch khám & Thanh toán VNPAY Sandbox**: Tích hợp cổng thanh toán Sandbox chuẩn VNPAY để người bệnh thanh toán phí đặt lịch trực tuyến, tự động cập nhật trạng thái lịch hẹn sau khi thanh toán thành công và sinh mã QR.
 *   **Đón tiếp thông minh & Check-in quét mã QR**: Cho phép Thu ngân check-in quét mã QR của bệnh nhân đến khám trực tiếp ngay tại quầy bằng camera để đẩy vào hàng đợi khám của Bác sĩ.
-*   **Duyệt lịch nghỉ phép an toàn**: Khi Bác sĩ xin nghỉ phép, hệ thống đưa vào hàng đợi chờ duyệt. Chỉ khi HR duyệt thì các lịch hẹn trùng trong ngày đó mới bị hủy và gửi email thông báo tự động cho người bệnh.
+*   **Duyệt lịch nghỉ phép an toàn**: Khi Bác sĩ xin nghỉ phép, hệ thống đưa vào hàng đợi chờ duyệt. Chỉ khi Admin hệ thống duyệt thì các lịch hẹn trùng trong ngày đó mới bị hủy và gửi email thông báo tự động cho người bệnh.
 *   **Tự động gợi ý tên thuốc**: Kê đơn nhanh bằng gợi ý tự động (Autocomplete) lấy từ bộ từ điển 20,316 loại thuốc thực tế.
 *   **Mẫu đơn thuốc chuẩn A5**: Tối ưu hiển thị, định dạng chuẩn y khoa và sẵn sàng kết nối máy in để in ra giấy.
 *   **Đóng gói Docker hoàn chỉnh**: Sẵn sàng deploy lên các môi trường cloud staging/production một cách nhanh chóng nhất.
