@@ -14,6 +14,12 @@ venv/
 # Project specific
 backend/scratch/
 backend/medbook.db
+backend/.env
+
+# Docs / Deploy guides (không push lên repo)
+docs/
+render_deploy_guide.md
+TruongTheHaiThinh_project-proposal.md
 
 # OS
 .DS_Store
