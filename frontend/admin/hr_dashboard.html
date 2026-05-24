@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR Manager - MedBook Premium</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="theme-hr-admin">
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <a href="../index.html" class="logo">
+                    <i class="fa-solid fa-house-medical text-primary"></i> MedBook
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="side-link active" onclick="showTab('stats-tab', this)">
+                    <i class="fa-solid fa-chart-line"></i> Dashboard
+                </a>
+                <a href="#" class="side-link" onclick="showTab('doctors-tab', this)">
+                    <i class="fa-solid fa-user-doctor"></i> Phê duyệt Bác sĩ
+                </a>
+                <a href="#" class="side-link" onclick="showTab('leaves-tab', this)">
+                    <i class="fa-solid fa-calendar-xmark"></i> Duyệt nghỉ phép
+                </a>
+                <a href="#" class="side-link" onclick="showTab('specialties-tab', this)">
+                    <i class="fa-solid fa-stethoscope"></i> Chuyên khoa
+                </a>
+                <a href="#" class="side-link" onclick="showTab('users-tab', this)">
+                    <i class="fa-solid fa-users-gear"></i> Quản lý User
+                </a>
+            </nav>
+            <div style="margin-top: auto;">
+                <button class="btn btn-outline w-100" onclick="logout()">
+                    <i class="fa-solid fa-right-from-bracket mr-2"></i> Đăng xuất
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content-area">
+            <header class="flex justify-between items-center mb-8">
+                <div>
+                    <h1 class="text-2xl font-bold">Xin chào, <span class="user-name-display">Manager</span></h1>
+                    <p class="text-gray text-sm">Hôm nay có bác sĩ mới đang chờ bạn duyệt.</p>
+                </div>
+                <div class="glass p-3 rounded-lg flex items-center gap-3">
+                    <div class="text-right">
+                        <p class="text-xs font-bold uppercase tracking-wider text-primary">HR Management</p>
+                        <p class="text-sm font-bold user-name-display"></p>
+                    </div>
+                    <div class="icon-box" style="width:40px; height:40px; margin-bottom:0">
+                        <i class="fa-solid fa-user-shield"></i>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Tab: Stats -->
+            <div id="stats-tab" class="tab-content">
+                <div class="grid grid-3 mb-8">
+                    <div class="card hover-float">
+                        <div class="icon-box"><i class="fa-solid fa-user-nurse"></i></div>
+                        <h4 class="text-gray text-sm font-bold uppercase">Bác sĩ</h4>
+                        <div class="text-3xl font-bold mt-2" id="stat-doctors">-</div>
+                    </div>
+                    <div class="card hover-float">
+                        <div class="icon-box" style="background:rgba(59,130,246,0.1); color:#3b82f6"><i class="fa-solid fa-hospital-user"></i></div>
+                        <h4 class="text-gray text-sm font-bold uppercase">Bệnh nhân</h4>
+                        <div class="text-3xl font-bold mt-2" id="stat-patients">-</div>
+                    </div>
+                    <div class="card hover-float">
+                        <div class="icon-box" style="background:rgba(245,158,11,0.1); color:#f59e0b"><i class="fa-solid fa-calendar-check"></i></div>
+                        <h4 class="text-gray text-sm font-bold uppercase">Lịch hẹn</h4>
+                        <div class="text-3xl font-bold mt-2" id="stat-appts">-</div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3 class="mb-4">Thông báo hệ thống</h3>
+                    <p class="text-gray">Chức năng biểu đồ chi tiết đang được cập nhật...</p>
+                </div>
+            </div>
+
+            <!-- Tab: Doctors -->
+            <div id="doctors-tab" class="tab-content" style="display:none">
+                <h2 class="mb-4">Phê duyệt Bác sĩ</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Họ tên</th>
+                                <th>Chuyên khoa</th>
+                                <th>Kinh nghiệm</th>
+                                <th>Bio</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody id="doctors-pending-body">
+                            <tr><td colspan="5" class="text-center">Đang tải...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab: Leaves -->
+            <div id="leaves-tab" class="tab-content" style="display:none">
+                <h2 class="mb-4">Phê duyệt Lịch nghỉ phép</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Bác sĩ</th>
+                                <th>Ngày đăng ký nghỉ</th>
+                                <th>Lý do</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaves-pending-body">
+                            <tr><td colspan="4" class="text-center">Đang tải...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab: Specialties -->
+            <div id="specialties-tab" class="tab-content" style="display:none">
+                <div class="flex justify-between items-center mb-6">
+                    <h2>Danh mục Chuyên khoa</h2>
+                    <button class="btn btn-primary" onclick="openSpecModal()">
+                        <i class="fa-solid fa-plus mr-2"></i> Thêm mới
+                    </button>
+                </div>
+                <div class="grid grid-3" id="specialties-grid">
+                    <!-- Loaded via JS -->
+                </div>
+            </div>
+
+            <!-- Tab: Users -->
+            <div id="users-tab" class="tab-content" style="display:none">
+                <div class="flex justify-between items-center mb-6">
+                    <h2>Quản lý Người dùng</h2>
+                    <select id="user-role-filter" class="form-control w-auto" onchange="loadUsers()">
+                        <option value="">-- Tất cả vai trò --</option>
+                        <option value="patient">Bệnh nhân</option>
+                        <option value="doctor">Bác sĩ</option>
+                        <option value="hr_admin">Quản lý nhân sự</option>
+                        <option value="cashier_admin">Thu ngân</option>
+                    </select>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tên</th>
+                                <th>Email</th>
+                                <th>SĐT</th>
+                                <th>Vai trò</th>
+                                <th>Trạng thái</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-body">
+                            <tr><td colspan="6" class="text-center">Đang tải...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal-overlay" id="spec-modal">
+        <div class="modal-content glass shadow-xl">
+            <button class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="mb-4" id="spec-modal-title">Thêm Chuyên Khoa</h3>
+            <form id="spec-form" onsubmit="submitSpec(event)">
+                <input type="hidden" id="spec-id">
+                <div class="form-group">
+                    <label class="form-label">Tên chuyên khoa</label>
+                    <input type="text" id="spec-name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Mô tả</label>
+                    <textarea id="spec-desc" class="form-control" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary w-100" id="spec-btn">Lưu thay đổi</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        if (guardRoute('hr_admin')) {
+            document.addEventListener('DOMContentLoaded', () => {
+                loadStats();
+                loadPendingDoctors();
+                loadPendingLeaves();
+                loadSpecialties();
+                loadUsers();
+            });
+        }
+
+        function showTab(id, el) {
+            document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+            document.querySelectorAll('.side-link').forEach(l => l.classList.remove('active'));
+            document.getElementById(id).style.display = 'block';
+            el.classList.add('active');
+        }
+
+        async function loadStats() {
+            try {
+                const data = await api.get('/admin/hr/stats');
+                document.getElementById('stat-patients').textContent = data.total_patients;
+                document.getElementById('stat-doctors').textContent = data.total_doctors;
+                document.getElementById('stat-appts').textContent = data.total_appointments;
+            } catch(e) { console.error(e); }
+        }
+
+        async function loadPendingDoctors() {
+            const tbody = document.getElementById('doctors-pending-body');
+            try {
+                const docs = await api.get('/admin/hr/doctors/pending');
+                if (docs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-gray">Không có hồ sơ chờ duyệt.</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = docs.map(d => `
+                    <tr>
+                        <td class="font-bold">${escapeHTML(d.full_name)}<br><span class="text-xs text-gray">${d.email}</span></td>
+                        <td>${escapeHTML(d.specialty_name || '-')}</td>
+                        <td>${d.experience_years} năm</td>
+                        <td class="text-xs" style="max-width:200px">${escapeHTML(d.bio || '-')}</td>
+                        <td>
+                            <button class="btn btn-primary btn-sm mr-2" onclick="approveDoctor('${d.id}')">Duyệt</button>
+                            <button class="btn btn-outline btn-sm" onclick="rejectDoctor('${d.id}')">Từ chối</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch(e) { tbody.innerHTML = `<tr><td colspan="5">${e.message}</td></tr>`; }
+        }
+
+        async function approveDoctor(id) {
+            if(!confirm("Duyệt bác sĩ này?")) return;
+            try { await api.patch(`/admin/hr/doctors/${id}/approve`); loadPendingDoctors(); loadStats(); } catch(e) { alert(e.message); }
+        }
+
+        async function rejectDoctor(id) {
+            if(!confirm("Từ chối bác sĩ này?")) return;
+            try { await api.patch(`/admin/hr/doctors/${id}/reject`); loadPendingDoctors(); } catch(e) { alert(e.message); }
+        }
+
+        async function loadSpecialties() {
+            const grid = document.getElementById('specialties-grid');
+            try {
+                const spRes = await api.get('/admin/hr/specialties');
+                grid.innerHTML = spRes.map(sp => `
+                    <div class="card hover-float">
+                        <div class="flex justify-between items-start">
+                            <h3 class="text-primary">${escapeHTML(sp.name)}</h3>
+                            <div class="flex gap-2">
+                                <button class="text-gray" onclick="openSpecModal('${sp.id}', '${encodeURIComponent(sp.name)}', '${encodeURIComponent(sp.description || '')}')"><i class="fa-solid fa-pen-to-square"></i></button>
+                                <button class="text-danger" onclick="deleteSpec('${sp.id}')"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray mt-2">${escapeHTML(sp.description || 'Không có mô tả')}</p>
+                    </div>
+                `).join('');
+            } catch(e) { grid.innerHTML = e.message; }
+        }
+
+        function openSpecModal(id='', name='', desc='') {
+            document.getElementById('spec-id').value = id;
+            document.getElementById('spec-name').value = id ? decodeURIComponent(name) : '';
+            document.getElementById('spec-desc').value = id ? decodeURIComponent(desc) : '';
+            document.getElementById('spec-modal').classList.add('active');
+        }
+
+        function closeModal() { document.getElementById('spec-modal').classList.remove('active'); }
+
+        async function submitSpec(e) {
+            e.preventDefault();
+            const id = document.getElementById('spec-id').value;
+            const body = { name: document.getElementById('spec-name').value, description: document.getElementById('spec-desc').value };
+            try {
+                if (id) await api.patch(`/admin/hr/specialties/${id}`, body);
+                else await api.post('/admin/hr/specialties', body);
+                closeModal(); loadSpecialties();
+            } catch(e) { alert(e.message); }
+        }
+
+        async function loadUsers() {
+            const role = document.getElementById('user-role-filter').value;
+            const tbody = document.getElementById('users-body');
+            try {
+                const query = role ? `?role=${role}` : '';
+                const users = await api.get(`/admin/hr/users${query}`);
+                const roleMap = {
+                    'patient': 'Bệnh nhân',
+                    'doctor': 'Bác sĩ',
+                    'hr_admin': 'Nhân sự',
+                    'cashier_admin': 'Thu ngân'
+                };
+                tbody.innerHTML = users.map(u => `
+                    <tr>
+                        <td class="font-bold">${escapeHTML(u.full_name)}</td>
+                        <td>${u.email}</td>
+                        <td>${u.phone || '-'}</td>
+                        <td><span class="badge badge-info">${roleMap[u.role] || u.role}</span></td>
+                        <td><span class="badge ${u.is_active ? 'badge-success' : 'badge-danger'}">${u.is_active ? 'Đang hoạt động' : 'Đã khóa'}</span></td>
+                        <td>
+                            <button class="btn btn-outline btn-sm" onclick="toggleUserStatus('${u.id}')">${u.is_active ? 'Khóa' : 'Mở'}</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch(e) { tbody.innerHTML = e.message; }
+        }
+
+        async function toggleUserStatus(id) {
+            try { await api.patch(`/admin/hr/users/${id}/toggle-active`); loadUsers(); } catch(e) { alert(e.message); }
+        }
+
+        async function loadPendingLeaves() {
+            const tbody = document.getElementById('leaves-pending-body');
+            try {
+                const leaves = await api.get('/admin/hr/leaves/pending');
+                if (leaves.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-gray">Không có yêu cầu nghỉ phép nào đang chờ duyệt.</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = leaves.map(l => `
+                    <tr>
+                        <td class="font-bold text-primary"><i class="fa-solid fa-user-doctor mr-2"></i>${escapeHTML(l.doctor_name)}</td>
+                        <td class="font-bold text-danger"><i class="fa-solid fa-calendar-day mr-2"></i>${formatDate(l.leave_date)}</td>
+                        <td style="max-width:300px; white-space:pre-wrap; word-break:break-word;">${escapeHTML(l.reason || 'Không có')}</td>
+                        <td>
+                            <button class="btn btn-primary btn-sm mr-2" onclick="approveLeave('${l.id}', '${escapeHTML(l.doctor_name)}', '${l.leave_date}')"><i class="fa-solid fa-check mr-1"></i>Duyệt</button>
+                            <button class="btn btn-outline btn-sm text-danger" style="border-color:var(--danger);" onclick="rejectLeave('${l.id}', '${escapeHTML(l.doctor_name)}', '${l.leave_date}')"><i class="fa-solid fa-xmark mr-1"></i>Từ chối</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch(e) { tbody.innerHTML = `<tr><td colspan="4" class="text-center text-danger py-4">${escapeHTML(e.message)}</td></tr>`; }
+        }
+
+        async function approveLeave(id, doctorName, date) {
+            if (!confirm(`Bạn có chắc muốn phê duyệt lịch nghỉ ngày ${formatDate(date)} cho bác sĩ ${doctorName}? Toàn bộ lịch khám ngày này của bác sĩ sẽ bị hủy.`)) return;
+            try {
+                const res = await api.patch(`/admin/hr/leaves/${id}/approve`);
+                alert(res.message || "Đã phê duyệt thành công!");
+                loadPendingLeaves();
+                loadStats();
+            } catch(e) { alert("Lỗi khi duyệt: " + e.message); }
+        }
+
+        async function rejectLeave(id, doctorName, date) {
+            if (!confirm(`Từ chối lịch nghỉ ngày ${formatDate(date)} của bác sĩ ${doctorName}?`)) return;
+            try {
+                const res = await api.patch(`/admin/hr/leaves/${id}/reject`);
+                alert(res.message || "Đã từ chối lịch nghỉ phép!");
+                loadPendingLeaves();
+            } catch(e) { alert("Lỗi khi từ chối: " + e.message); }
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            const [y, m, d] = dateStr.split('-');
+            return `${d}/${m}/${y}`;
+        }
+
+        function escapeHTML(str) { const p = document.createElement('p'); p.textContent = str; return p.innerHTML; }
+    </script>
+</body>
+</html>

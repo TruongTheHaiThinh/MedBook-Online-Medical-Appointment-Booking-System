@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đặt lịch khám - MedBook Premium</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .slot-btn {
+            border: 2px solid var(--primary);
+            background: rgba(255,255,255,0.5);
+            color: var(--primary);
+            padding: 0.65rem 0.5rem;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s var(--ease-spring);
+            font-weight: 700;
+            font-size: 0.85rem;
+            backdrop-filter: blur(10px);
+        }
+        .slot-btn:hover { background: var(--primary-light); transform: translateY(-2px); }
+        .slot-btn.selected { 
+            background: var(--primary); color: white; 
+            box-shadow: 0 8px 20px var(--primary-glow);
+            transform: translateY(-3px);
+        }
+        .slots-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)); gap: 10px; }
+        .step-badge {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: var(--primary); color: white;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 0.85rem; margin-right: 0.5rem;
+        }
+        .payment-qr {
+            width: 200px;
+            height: 200px;
+            margin: 1rem auto;
+            display: block;
+            border-radius: var(--radius-lg);
+            border: 4px solid white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="theme-patient">
+
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <a href="../index.html" class="logo" style="gap: 0.85rem;">
+                    <i class="fa-solid fa-heart-pulse text-primary"></i>
+                    <span>MedBook</span>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="side-link">
+                    <i class="fa-solid fa-calendar-alt mr-2"></i> Lịch hẹn của tôi
+                </a>
+                <a href="booking.html" class="side-link active">
+                    <i class="fa-solid fa-plus-circle mr-2"></i> Đặt lịch mới
+                </a>
+                <a href="dashboard.html?tab=profile" class="side-link">
+                    <i class="fa-solid fa-id-card mr-2"></i> Hồ sơ cá nhân
+                </a>
+            </nav>
+            <div style="margin-top: auto;">
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content-area">
+            <header class="flex justify-between items-center mb-8">
+                <div>
+                    <h1 class="text-2xl font-bold">Đặt lịch khám mới</h1>
+                    <p class="text-gray text-sm">Chọn chuyên khoa, bác sĩ và khung giờ phù hợp nhất cho bạn.</p>
+                </div>
+            </header>
+
+            <div class="grid grid-2">
+                <!-- Step 1: Select Doctor -->
+                <div class="card glass">
+                    <h3 class="mb-4 flex items-center gap-3">
+                        <span class="step-badge" style="margin-right: 0;">1</span> Chọn Bác sĩ
+                    </h3>
+                    <div class="form-group">
+                        <label class="form-label">Chuyên khoa</label>
+                        <select id="spec-select" class="form-control" onchange="loadDoctors()"></select>
+                    </div>
+                    <div class="form-group mb-0">
+                        <label class="form-label">Danh sách Bác sĩ</label>
+                        <select id="doc-select" class="form-control" onchange="handleDoctorChange()">
+                            <option value="">-- Vui lòng chọn chuyên khoa trước --</option>
+                        </select>
+                    </div>
+                    <div id="doc-info" class="mt-4 p-4 glass" style="display:none; border-radius: var(--radius-lg);">
+                        <p class="font-bold text-primary text-lg" id="doc-name-display"></p>
+                        <p class="text-sm mt-1"><i class="fa-solid fa-medal mr-1" style="color: var(--warning)"></i> <span id="doc-exp-display"></span> năm kinh nghiệm</p>
+                        <p class="text-sm text-gray mt-1 italic" id="doc-bio-display"></p>
+                    </div>
+                </div>
+
+                <!-- Step 2: Select Time & Confirm -->
+                <div class="card glass" id="booking-area" style="opacity: 0.5; pointer-events: none;">
+                    <h3 class="mb-4 flex items-center gap-3">
+                        <span class="step-badge" style="margin-right: 0;">2</span> Chọn Thời gian
+                    </h3>
+                    <div class="form-group">
+                        <label class="form-label">Ngày khám</label>
+                        <input type="date" id="date-input" class="form-control" onchange="loadSlots()">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Khung giờ trống</label>
+                        <div id="slots-container" class="slots-grid">
+                            <p class="text-sm text-gray" style="grid-column: 1/-1;">Vui lòng chọn ngày khám.</p>
+                        </div>
+                    </div>
+
+                    <form id="confirm-form" onsubmit="submitBooking(event)" style="display:none;" class="mt-6 pt-4" style="border-top: 1px solid var(--glass-border);">
+                        <h3 class="mb-4 flex items-center">
+                            <span class="step-badge">3</span> Xác nhận
+                        </h3>
+                        <div class="glass p-4 mb-4" style="border-radius: var(--radius-lg);">
+                            <p class="text-sm text-gray">Bạn đang đặt lịch lúc</p>
+                            <p class="font-bold text-lg mb-3">
+                                <span class="text-primary" id="confirm-time"></span> — 
+                                ngày <span id="confirm-date"></span>
+                            </p>
+                            <div style="padding-top: 1rem; border-top: 1px dashed rgba(0,0,0,0.1);">
+                                <p class="text-xs text-gray uppercase font-bold tracking-widest">Phí đặt lịch (Thanh toán tại chỗ/Chuyển khoản)</p>
+                                <p class="text-xl font-black text-primary">100.000 VNĐ</p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Lý do khám (không bắt buộc)</label>
+                            <textarea id="reason-input" class="form-control" rows="3" placeholder="Mô tả triệu chứng hoặc lý do khám..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100" id="submit-btn" style="justify-content:center;">
+                            <i class="fa-solid fa-calendar-check mr-2"></i> Xác Nhận & Thanh Toán
+                        </button>
+                        <div id="booking-error" class="error-msg mt-4" style="display:none;"></div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Payment Modal -->
+    <div id="payment-modal" class="modal-overlay" style="display:none; z-index: 1000;">
+        <div class="modal-content glass" style="max-width: 400px; text-align: center;">
+            <h2 class="text-xl font-bold mb-4">Thanh toán phí đặt lịch</h2>
+            <p class="text-sm text-gray mb-4">Vui lòng thanh toán phí dịch vụ để hoàn tất đặt lịch hẹn.</p>
+            
+            <div class="glass p-4 mb-4" style="border-radius: var(--radius-lg); background: rgba(255,255,255,0.8);">
+                <p class="text-xs text-gray uppercase font-bold tracking-widest">Số tiền cần thanh toán</p>
+                <p class="text-2xl font-black text-primary">100.000 VNĐ</p>
+            </div>
+
+            <img id="payment-qr-img" src="" alt="Payment QR" class="payment-qr">
+            
+            <div class="text-left mt-4 mb-6 text-sm">
+                <p><strong>Ngân hàng:</strong> MB Bank</p>
+                <p><strong>Số tài khoản:</strong> 0987654321</p>
+                <p><strong>Nội dung:</strong> <span id="payment-desc" class="font-bold"></span></p>
+            </div>
+
+            <div class="flex gap-3">
+                <button class="btn btn-outline w-100" onclick="closePaymentModal()">Để sau</button>
+                <button class="btn btn-primary w-100" id="confirm-pay-btn" onclick="handlePayment()">Đã thanh toán</button>
+            </div>
+            <div id="payment-error" class="error-msg mt-4" style="display:none;"></div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="success-modal" class="modal-overlay" style="display:none; z-index: 1001;">
+        <div class="modal-content glass" style="max-width: 400px; text-align: center;">
+            <div class="mb-4" style="font-size: 3rem; color: var(--success);">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <h2 class="text-xl font-bold mb-2">Đặt lịch thành công!</h2>
+            <p class="text-sm text-gray mb-6">Lịch hẹn của bạn đã được xác nhận. Vui lòng lưu lại mã QR để check-in tại phòng khám.</p>
+            
+            <img id="appt-qr-img" src="" alt="Appointment QR" class="payment-qr" style="border-color: var(--success-light);">
+            
+            <p class="text-xs font-bold text-gray mt-4" id="appt-qr-code"></p>
+            
+            <button class="btn btn-primary w-100 mt-6" onclick="window.location.href='dashboard.html'">Về trang chủ</button>
+        </div>
+    </div>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        let selectedDoctorId = null;
+        let selectedTime = null;
+        let currentAppointmentId = null;
+
+        if (guardRoute('patient')) {
+            document.addEventListener('DOMContentLoaded', () => {
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('date-input').setAttribute('min', today);
+                loadSpecialties();
+            });
+        }
+
+        async function loadSpecialties() {
+            try {
+                const spRes = await api.get('/admin/hr/specialties');
+                const sel = document.getElementById('spec-select');
+                sel.innerHTML = '<option value="">-- Chọn chuyên khoa --</option>' + 
+                    spRes.map(sp => `<option value="${sp.id}">${escapeHTML(sp.name)}</option>`).join('');
+            } catch(e) { console.error(e); }
+        }
+
+        async function loadDoctors() {
+            const specId = document.getElementById('spec-select').value;
+            const docSel = document.getElementById('doc-select');
+            resetBookingArea();
+            document.getElementById('doc-info').style.display = 'none';
+
+            if (!specId) {
+                docSel.innerHTML = '<option value="">-- Vui lòng chọn chuyên khoa trước --</option>';
+                return;
+            }
+
+            docSel.innerHTML = '<option value="">Đang tải...</option>';
+            try {
+                const docs = await api.get(`/doctors?specialty_id=${specId}`);
+                console.log("Docs loaded:", docs); // Debug
+                docSel.innerHTML = '<option value="">-- Chọn bác sĩ --</option>' + 
+                    docs.map(d => `<option value="${d.id}" data-exp="${d.experience_years}" data-bio="${encodeURIComponent(d.bio||'')}">${escapeHTML(d.user ? d.user.full_name : d.full_name)}</option>`).join('');
+            } catch(e) {
+                docSel.innerHTML = '<option value="">Lỗi tải dữ liệu</option>';
+            }
+        }
+
+        function handleDoctorChange() {
+            const docSel = document.getElementById('doc-select');
+            selectedDoctorId = docSel.value;
+            resetBookingArea();
+            
+            const infoBox = document.getElementById('doc-info');
+            if (selectedDoctorId && docSel.selectedIndex > 0) {
+                const opt = docSel.options[docSel.selectedIndex];
+                document.getElementById('doc-name-display').textContent = opt.text;
+                document.getElementById('doc-exp-display').textContent = opt.getAttribute('data-exp');
+                document.getElementById('doc-bio-display').textContent = decodeURIComponent(opt.getAttribute('data-bio'));
+                infoBox.style.display = 'block';
+                
+                document.getElementById('booking-area').style.opacity = '1';
+                document.getElementById('booking-area').style.pointerEvents = 'auto';
+                
+                if(document.getElementById('date-input').value) loadSlots();
+            } else {
+                infoBox.style.display = 'none';
+                document.getElementById('booking-area').style.opacity = '0.5';
+                document.getElementById('booking-area').style.pointerEvents = 'none';
+            }
+        }
+
+        function resetBookingArea() {
+            selectedTime = null;
+            document.getElementById('slots-container').innerHTML = '<p class="text-sm text-gray" style="grid-column: 1/-1;">Vui lòng chọn ngày khám.</p>';
+            document.getElementById('confirm-form').style.display = 'none';
+        }
+
+        async function loadSlots() {
+            const dateStr = document.getElementById('date-input').value;
+            if (!dateStr || !selectedDoctorId) return;
+
+            const container = document.getElementById('slots-container');
+            container.innerHTML = '<p class="text-sm" style="grid-column: 1/-1;"><i class="fa-solid fa-spinner fa-spin"></i> Đang tính toán slot trống...</p>';
+            document.getElementById('confirm-form').style.display = 'none';
+
+            try {
+                const res = await api.get(`/doctors/${selectedDoctorId}/available-slots?date=${dateStr}`);
+                if (!res.slots || res.slots.length === 0) {
+                    container.innerHTML = '<p class="text-danger text-sm font-bold" style="grid-column: 1/-1;">Bác sĩ không có lịch trống ngày này.</p>';
+                    return;
+                }
+
+                const morningSlots = res.slots.filter(t => parseInt(t.split(':')[0]) < 12);
+                const afternoonSlots = res.slots.filter(t => parseInt(t.split(':')[0]) >= 12);
+
+                let html = '';
+                if (morningSlots.length > 0) {
+                    html += '<h4 class="text-xs font-bold text-gray mb-2 uppercase tracking-wider" style="grid-column: 1/-1;">☀️ Buổi sáng</h4>';
+                    html += morningSlots.map(time => `<button type="button" class="slot-btn" onclick="selectSlot(this, '${time}')">${time}</button>`).join('');
+                }
+                if (afternoonSlots.length > 0) {
+                    html += `<h4 class="text-xs font-bold text-gray ${morningSlots.length > 0 ? 'mt-4' : ''} mb-2 uppercase tracking-wider" style="grid-column: 1/-1;">🌙 Buổi chiều</h4>`;
+                    html += afternoonSlots.map(time => `<button type="button" class="slot-btn" onclick="selectSlot(this, '${time}')">${time}</button>`).join('');
+                }
+                container.innerHTML = html;
+            } catch(e) {
+                container.innerHTML = `<p class="text-danger text-sm" style="grid-column: 1/-1;">${escapeHTML(e.message)}</p>`;
+            }
+        }
+
+        function selectSlot(btnEl, time) {
+            document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
+            btnEl.classList.add('selected');
+            selectedTime = time;
+
+            const form = document.getElementById('confirm-form');
+            form.style.display = 'block';
+            document.getElementById('confirm-time').textContent = time;
+            document.getElementById('confirm-date').textContent = formatDate(document.getElementById('date-input').value);
+            form.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function submitBooking(e) {
+            e.preventDefault();
+            const dateStr = document.getElementById('date-input').value;
+            const reason = document.getElementById('reason-input').value;
+            const btn = document.getElementById('submit-btn');
+            const err = document.getElementById('booking-error');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang tạo lịch hẹn...';
+            err.style.display = 'none';
+
+            try {
+                // 1. Tạo lịch hẹn
+                const res = await api.post('/appointments', {
+                    doctor_id: selectedDoctorId,
+                    scheduled_date: dateStr,
+                    scheduled_time: selectedTime + ":00",
+                    reason: reason
+                });
+                
+                currentAppointmentId = res.id;
+                
+                showToast("Đặt lịch thành công! Đang chuyển hướng đến trang thanh toán...", "success");
+                setTimeout(() => {
+                    window.location.href = `./dashboard.html?booking_success=true&appt_id=${res.id}`;
+                }, 1500);
+                
+            } catch(error) {
+                err.textContent = error.message;
+                err.style.display = 'block';
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-calendar-check mr-2"></i> Xác Nhận Đặt Lịch';
+                if(error.message.includes('giờ khác')) loadSlots();
+            }
+        }
+
+        function closePaymentModal() {
+            document.getElementById('payment-modal').classList.remove('active');
+            setTimeout(() => {
+                document.getElementById('payment-modal').style.display = 'none';
+            }, 500);
+            showToast("Lịch hẹn đã được lưu. Vui lòng thanh toán sau trong phần Quản lý lịch hẹn.");
+            window.location.href = 'dashboard.html';
+        }
+
+        async function handlePayment() {
+            const btn = document.getElementById('confirm-pay-btn');
+            const err = document.getElementById('payment-error');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang kết nối VNPAY...';
+            err.style.display = 'none';
+
+            try {
+                // Lấy URL thanh toán từ Backend
+                const res = await api.get(`/appointments/${currentAppointmentId}/vnpay-url`);
+                
+                if (res.payment_url) {
+                    showToast("Đang chuyển hướng sang VNPAY...");
+                    setTimeout(() => {
+                        window.location.href = res.payment_url;
+                    }, 1000);
+                } else {
+                    throw new Error("Không nhận được URL thanh toán từ hệ thống.");
+                }
+            } catch(error) {
+                err.textContent = error.message;
+                err.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = 'Thanh toán';
+            }
+        }
+    </script>
+</body>
+</html>

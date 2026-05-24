@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thu ngân - MedBook Premium</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #00b894; 
+            --primary-light: rgba(0, 184, 148, 0.1);
+            --secondary: #0984e3; 
+            --success: #00c853;
+            --warning: #f1c40f; 
+            --danger: #ff7675;
+            --bg: #f8fafc; 
+            --card: #ffffff;
+            --text: #1e293b; 
+            --text-light: #64748b;
+            --sidebar-w: 280px;
+            --radius: 24px;
+            --shadow: 0 10px 30px rgba(0,0,0,0.04);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
+
+        /* ── Sidebar ── */
+        .sidebar { 
+            width: var(--sidebar-w); 
+            background: white; 
+            border-right: 1px solid #f1f5f9; 
+            display: flex; 
+            flex-direction: column; 
+            padding: 2rem 1.25rem; 
+            flex-shrink: 0;
+            box-shadow: 10px 0 30px rgba(0,0,0,0.02);
+        }
+        .sidebar-logo { 
+            font-size: 1.5rem; 
+            font-weight: 900; 
+            color: var(--primary); 
+            display: flex; 
+            align-items: center; 
+            gap: 0.85rem; 
+            margin-bottom: 3rem; 
+            padding-left: 0.5rem; 
+        }
+        .nav-btn { 
+            display: flex; 
+            align-items: center; 
+            gap: 1rem; 
+            padding: 1rem 1.25rem; 
+            border-radius: 18px; 
+            border: none; 
+            background: none; 
+            color: var(--text-light); 
+            cursor: pointer; 
+            width: 100%; 
+            text-align: left; 
+            font-size: 0.95rem; 
+            font-weight: 700;
+            font-family: inherit; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            margin-bottom: 0.5rem; 
+        }
+        .nav-btn i { font-size: 1.1rem; transition: transform 0.3s; }
+        .nav-btn:hover { background: #f8fafc; color: var(--text); }
+        .nav-btn:hover i { transform: translateX(3px); }
+        .nav-btn.active { 
+            background: var(--primary-light); 
+            color: var(--primary); 
+            box-shadow: 0 10px 20px rgba(0, 184, 148, 0.05);
+        }
+        .sidebar-footer { 
+            margin-top: auto; 
+            padding-top: 2rem; 
+            border-top: 1px solid #f1f5f9; 
+        }
+        .logout-btn {
+            margin-top: auto !important;
+            padding: 0.85rem 1.5rem !important;
+            border: 2px solid var(--danger) !important;
+            color: var(--danger) !important;
+            border-radius: 50px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 12px !important;
+            font-weight: 800 !important;
+            transition: all 0.3s ease !important;
+            background: transparent !important;
+            cursor: pointer !important;
+            width: 100% !important;
+        }
+        .logout-btn:hover {
+            background: var(--danger) !important;
+            color: white !important;
+        }
+
+        /* ── Main ── */
+        .main { flex: 1; overflow-y: auto; padding: 2.5rem 3rem; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; }
+        .page-header h1 { font-size: 1.75rem; font-weight: 900; letter-spacing: -0.02em; }
+        .page-header .sub { color: var(--text-light); font-size: 0.9rem; margin-top: 0.4rem; font-weight: 600; }
+
+        /* ── Stats ── */
+        .stats { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 1.5rem; 
+            margin-bottom: 2.5rem; 
+        }
+        .stat-card { 
+            background: var(--card); 
+            padding: 1.75rem; 
+            border-radius: var(--radius); 
+            box-shadow: var(--shadow); 
+            border: 1px solid #f1f5f9;
+            transition: transform 0.3s;
+        }
+        .stat-card:hover { transform: translateY(-5px); }
+        .stat-card .label { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-light); letter-spacing: 0.05em; }
+        .stat-card .value { font-size: 2rem; font-weight: 900; margin-top: 0.6rem; color: #0f172a; }
+
+        /* ── Table & Cards ── */
+        .card { 
+            background: var(--card); 
+            border-radius: var(--radius); 
+            box-shadow: var(--shadow); 
+            padding: 2rem; 
+            margin-bottom: 2rem; 
+            border: 1px solid #f1f5f9;
+        }
+        .card-title { font-size: 1.1rem; font-weight: 900; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; color: #0f172a; }
+        
+        table { width: 100%; border-collapse: separate; border-spacing: 0 0.5rem; }
+        th { text-align: left; padding: 1rem; color: var(--text-light); font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
+        td { padding: 1.25rem 1rem; background: transparent; border-bottom: 1px solid #f1f5f9; font-size: 0.95rem; font-weight: 600; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #f8fafc; }
+
+        /* ── Badge ── */
+        .badge { padding: 0.5rem 1rem; border-radius: 12px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; }
+        .badge-pending { background: #fff9db; color: #f08c00; }
+        .badge-confirmed { background: #e3faf3; color: #0ca678; }
+        .badge-progress { background: #e7f5ff; color: #1c7ed6; }
+        .badge-prescription { background: #f3f0ff; color: #7048e8; }
+        .badge-completed { background: #ebfbee; color: #2b8a3e; }
+        .badge-service { background: #fff4e6; color: #d9480f; }
+
+        /* ── Buttons ── */
+        .btn { 
+            padding: 0.75rem 1.25rem; 
+            border-radius: 14px; 
+            border: none; 
+            cursor: pointer; 
+            font-weight: 800; 
+            font-size: 0.85rem; 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 0.6rem; 
+            transition: all 0.2s; 
+        }
+        .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(0, 184, 148, 0.2); }
+        .btn-success { background: var(--success); color: white; box-shadow: 0 4px 12px rgba(0, 200, 83, 0.2); }
+        .btn-outline { background: white; border: 1px solid #e2e8f0; color: var(--text-light); }
+        .btn:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.05); }
+        .btn:active { transform: translateY(0); }
+
+        /* ── Modal ── */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-overlay.show { display: flex; }
+        .modal-box { background: white; border-radius: 20px; padding: 1.5rem; width: 95%; max-width: 380px; position: relative; animation: modalIn .25s ease; }
+        @keyframes modalIn { from { transform: scale(.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .modal-close { position: absolute; right: 1.5rem; top: 1.5rem; border: none; background: none; font-size: 1.3rem; cursor: pointer; color: #999; }
+
+        /* ── Slip ── */
+        .slip-header { text-align: center; border-bottom: 2px dashed #e0e0e0; padding-bottom: 1.2rem; margin-bottom: 1.2rem; }
+        .slip-row { display: flex; justify-content: space-between; padding: .4rem 0; font-size: .9rem; }
+        .slip-label { color: var(--text-light); }
+        .slip-value { font-weight: 600; }
+        .slip-highlight { background: #f0faf7; padding: 1.2rem; border-radius: 14px; text-align: center; margin: 1rem 0; border: 2px solid #b2dfdb; }
+        .slip-stt { font-size: 2.8rem; font-weight: 800; color: var(--primary); }
+
+        /* ── Tab ── */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* ── Toast ── */
+        #app-toast { position: fixed; bottom: 30px; right: 30px; z-index: 2000; }
+        .toast-item { background: white; padding: 1rem 1.5rem; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,.12); margin-top: .5rem; border-left: 4px solid var(--primary); display: flex; align-items: center; gap: .5rem; animation: slideIn .3s ease; }
+        .toast-item.error { border-left-color: var(--danger); }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* ── Print ── */
+        @media print {
+            /* Hide all screen components */
+            body * { visibility: hidden; }
+            .no-print { display: none !important; }
+            
+            /* Page setup for A9 (37mm width, auto height to prevent extra feed/blank space) */
+            @page {
+                size: 37mm auto;
+                margin: 0 !important;
+            }
+
+            html, body {
+                width: 37mm !important;
+                height: auto !important;
+                background: white !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: visible !important;
+            }
+
+            /* Display only the active print target */
+            .modal-overlay {
+                display: block !important;
+                position: relative !important;
+                background: white !important;
+                backdrop-filter: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 37mm !important;
+                height: auto !important;
+                min-height: auto !important;
+                inset: auto !important;
+            }
+
+            .modal-box {
+                display: block !important;
+                visibility: visible !important;
+                position: relative !important;
+                width: 37mm !important;
+                height: auto !important;
+                min-height: auto !important;
+                inset: auto !important;
+                padding: 2mm !important;
+                margin: 0 !important;
+                border: none !important;
+                box-sizing: border-box !important;
+                background: white !important;
+                border-radius: 0 !important;
+                box-shadow: none !important;
+            }
+
+            .modal-box, .modal-box * {
+                visibility: visible !important;
+                page-break-inside: avoid !important;
+            }
+
+            /* Adjust typography for A9 paper */
+            .slip-header {
+                padding-bottom: 0.5mm !important;
+                margin-bottom: 0.5mm !important;
+                border-bottom: 1px dashed #333 !important;
+            }
+            .slip-header h3 {
+                font-size: 8px !important;
+                margin: 0 !important;
+                font-weight: bold !important;
+                letter-spacing: normal !important;
+            }
+            .slip-header div {
+                font-size: 5px !important;
+                margin-bottom: 0px !important;
+            }
+            #slip-id {
+                font-size: 5px !important;
+            }
+            .slip-row {
+                padding: 0.1mm 0 !important;
+                font-size: 6px !important;
+                line-height: 1.1 !important;
+            }
+            .slip-label {
+                color: #333 !important;
+            }
+            .slip-value {
+                font-weight: bold !important;
+            }
+            #slip-barcode {
+                width: 33mm !important;
+                height: 10mm !important;
+                margin: 0.5mm 0 !important;
+            }
+            .slip-highlight {
+                padding: 0.8mm !important;
+                margin: 0.5mm 0 !important;
+                border: 1px solid #333 !important;
+                border-radius: 2px !important;
+                background: none !important;
+            }
+            .slip-highlight div {
+                font-size: 5px !important;
+            }
+            .slip-stt {
+                font-size: 16px !important;
+                font-weight: 900 !important;
+                color: #000 !important;
+                line-height: 1.1 !important;
+            }
+            .slip-note {
+                margin-top: 0.5mm !important;
+                padding-top: 0.5mm !important;
+                border-top: 1px dashed #333 !important;
+                font-size: 5px !important;
+                line-height: 1.1 !important;
+                color: #333 !important;
+            }
+            .slip-note div {
+                font-weight: bold !important;
+                margin-bottom: 0px !important;
+            }
+            .slip-note p {
+                margin: 0 !important;
+            }
+        }
+
+        /* ── QR Scanner ── */
+        .qr-input-group { display: flex; gap: .5rem; margin: 1rem 0; }
+        .qr-input-group input { flex: 1; padding: .7rem 1rem; border: 2px solid #e0e0e0; border-radius: 10px; font-size: .95rem; font-family: monospace; }
+        .qr-input-group input:focus { border-color: var(--primary); outline: none; }
+    </style>
+</head>
+<body>
+    <!-- SIDEBAR -->
+    <aside class="sidebar no-print">
+        <div class="sidebar-logo"><i class="fa-solid fa-house-medical"></i> MedBook</div>
+        <nav>
+            <button class="nav-btn active" onclick="switchTab('tab-reception', this)"><i class="fa-solid fa-user-check fa-fw"></i> Duyệt & Tiếp nhận</button>
+            <button class="nav-btn" onclick="switchTab('tab-qr', this)"><i class="fa-solid fa-qrcode fa-fw"></i> Quét mã QR</button>
+            <button class="nav-btn" onclick="switchTab('tab-finance', this)"><i class="fa-solid fa-file-invoice-dollar fa-fw"></i> Thanh toán đơn thuốc</button>
+            <button class="nav-btn" onclick="switchTab('tab-history', this)"><i class="fa-solid fa-clock-rotate-left fa-fw"></i> Lịch sử</button>
+            <button class="nav-btn" onclick="switchTab('tab-stats', this)"><i class="fa-solid fa-chart-pie fa-fw"></i> Thống kê</button>
+        </nav>
+        <div class="sidebar-footer">
+            <button class="nav-btn logout-btn" onclick="logout()">
+                <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+        <div class="page-header no-print">
+            <div>
+                <h1><i class="fa-solid fa-cash-register mr-2" style="color:var(--primary); margin-right: 12px;"></i> Quầy Thu ngân</h1>
+                <div class="sub" id="today-text"></div>
+            </div>
+            <button class="btn btn-outline" onclick="loadAll()"><i class="fa-solid fa-rotate mr-2"></i> Làm mới</button>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats no-print">
+            <div class="stat-card"><div class="label">Tổng ca hôm nay</div><div class="value" id="s-total">0</div></div>
+            <div class="stat-card" style="border-color:var(--warning)"><div class="label">Chờ duyệt</div><div class="value" style="color:#e67e22" id="s-pending">0</div></div>
+            <div class="stat-card" style="border-color:var(--secondary)"><div class="label">Chờ khám</div><div class="value" style="color:var(--secondary)" id="s-checkin">0</div></div>
+            <div class="stat-card" style="border-color:var(--success)"><div class="label">Chờ thanh toán</div><div class="value" style="color:var(--success)" id="s-pay">0</div></div>
+        </div>
+
+        <!-- TAB 1: Reception -->
+        <div class="tab-content active" id="tab-reception">
+            <div class="card">
+                <div class="card-title"><i class="fa-solid fa-clipboard-list"></i> Danh sách Tiếp nhận</div>
+                <table>
+                    <thead><tr><th>Mã</th><th>Bệnh nhân</th><th>Ngày hẹn</th><th>Giờ</th><th>Loại</th><th>Trạng thái</th><th style="text-align:right">Thao tác</th></tr></thead>
+                    <tbody id="tbl-reception"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 2: QR Scanner -->
+        <div class="tab-content" id="tab-qr">
+            <div class="card">
+                <div class="card-title"><i class="fa-solid fa-qrcode"></i> Quét mã QR Bệnh nhân</div>
+                <p style="color:var(--text-light); margin-bottom:1rem">Nhập hoặc quét mã QR từ phiếu hẹn để check-in bệnh nhân.</p>
+                <div class="qr-input-group">
+                    <input type="text" id="qr-input" placeholder="Nhập mã QR tại đây..." autofocus onkeypress="if(event.key==='Enter') doQrLookup()">
+                    <button class="btn btn-primary" onclick="doQrLookup()"><i class="fa-solid fa-magnifying-glass"></i> Tra cứu</button>
+                </div>
+                <div id="qr-result"></div>
+
+                <div style="margin-top:2.5rem">
+                    <div class="card-title" style="font-size:0.95rem; margin-bottom:1rem"><i class="fa-solid fa-list-check"></i> Danh sách chờ Check-in nhanh</div>
+                    <div id="qr-queue-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: Finance -->
+        <div class="tab-content" id="tab-finance">
+            <div class="card">
+                <div class="card-title"><i class="fa-solid fa-barcode"></i> Quét mã vạch Thanh toán</div>
+                <p style="color:var(--text-light); margin-bottom:1rem">Nhập thẻ hoặc quét mã vạch trên đơn thuốc để thanh toán.</p>
+                <div class="qr-input-group">
+                    <input type="text" id="barcode-input" placeholder="Nghe tiếng 'bíp' hoặc nhập mã tại đây..." autofocus>
+                    <button class="btn btn-success" onclick="doBarcodePayment()"><i class="fa-solid fa-magnifying-glass"></i> Tra cứu đơn thuốc</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><i class="fa-solid fa-file-invoice-dollar"></i> Danh sách Đơn thuốc chờ Thanh toán</div>
+                <table>
+                    <thead><tr><th>Mã Đơn</th><th>Bệnh nhân</th><th>Bác sĩ</th><th>Loại khám</th><th>Chi phí</th><th style="text-align:right">Thao tác</th></tr></thead>
+                    <tbody id="tbl-finance"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 4: History -->
+        <div class="tab-content" id="tab-history">
+            <div class="card">
+                <div class="card-title"><i class="fa-solid fa-clock-rotate-left"></i> Lịch sử Giao dịch & Khám bệnh</div>
+                <table>
+                    <thead><tr><th>Mã</th><th>Bệnh nhân</th><th>Ngày hẹn</th><th>Giờ</th><th>Bác sĩ</th><th>Trạng thái</th></tr></thead>
+                    <tbody id="tbl-history"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 5: Stats -->
+        <div class="tab-content" id="tab-stats">
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap:1.5rem">
+                <div class="card" style="height: 400px; display: flex; flex-direction: column;">
+                    <div class="card-title"><i class="fa-solid fa-chart-pie"></i> Phân bố trạng thái</div>
+                    <div style="flex: 1; position: relative;">
+                        <canvas id="chart-status"></canvas>
+                    </div>
+                </div>
+                <div class="card" style="height: 400px; display: flex; flex-direction: column;">
+                    <div class="card-title"><i class="fa-solid fa-chart-line"></i> Doanh thu tuần</div>
+                    <div style="flex: 1; position: relative;">
+                        <canvas id="chart-revenue"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL: Xác nhận Vào khám -->
+    <div class="modal-overlay no-print" id="modal-confirm-checkin">
+        <div class="modal-box" style="text-align:center; padding: 2.5rem 1.5rem;">
+            <div style="width: 70px; height: 70px; background: rgba(0,184,148,0.1); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 2rem;">
+                <i class="fa-solid fa-door-open"></i>
+            </div>
+            <h3 style="margin-bottom: 0.8rem; font-size: 1.3rem;">Xác nhận vào khám?</h3>
+            <p style="color: var(--text-light); font-size: 0.95rem; line-height: 1.5;">Bệnh nhân sẽ được chuyển vào danh sách chờ của bác sĩ và nhận số thứ tự.</p>
+            
+            <div style="display:flex; gap:1rem; margin-top:2rem">
+                <button class="btn btn-outline" style="flex:1; padding: 0.8rem;" onclick="closeAllModals()">Quay lại</button>
+                <button class="btn btn-primary" style="flex:1; padding: 0.8rem;" id="confirm-checkin-btn">Bắt đầu khám</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Xác nhận Duyệt -->
+    <div class="modal-overlay no-print" id="modal-approve">
+        <div class="modal-box" style="text-align:center">
+            <i class="fa-solid fa-clipboard-check" style="font-size:2.5rem; color:var(--primary); margin-bottom:1rem"></i>
+            <h3 style="margin-bottom:.5rem">Duyệt Lịch Hẹn?</h3>
+            <p style="color:var(--text-light); font-size:.9rem">Hệ thống sẽ tự động cấp STT và Phòng khám.</p>
+            <div style="margin-top:.8rem">
+                <label style="display:flex; align-items:center; gap:.5rem; justify-content:center; font-size:.9rem; color:var(--text-light)">
+                    <select id="exam-type" style="padding:.4rem .8rem; border-radius:8px; border:1px solid #ddd; font-family:inherit">
+                        <option value="service">Khám dịch vụ</option>
+                        <option value="bhyt">Khám BHYT</option>
+                    </select>
+                </label>
+            </div>
+            <div style="display:flex; gap:1rem; margin-top:1.5rem">
+                <button class="btn btn-outline" style="flex:1" onclick="closeAllModals()">Bỏ qua</button>
+                <button class="btn btn-primary" style="flex:1" onclick="doApprove()"><i class="fa-solid fa-check"></i> Duyệt ngay</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Phiếu hẹn khám -->
+    <div class="modal-overlay" id="modal-slip">
+        <div class="modal-box">
+            <button class="modal-close no-print" onclick="closeAllModals()">&times;</button>
+            <div class="slip-header">
+                <div style="font-size:.7rem; font-weight:700; color:var(--primary); text-transform:uppercase">MedBook Enterprise</div>
+                <h3 style="margin:.2rem 0; font-size:1.1rem">PHIẾU HẸN KHÁM</h3>
+                <div id="slip-id" style="font-family:monospace; font-size:.7rem; color:#888;"></div>
+            </div>
+            
+            <div style="margin-top:.8rem; font-size:.85rem">
+                <div class="slip-row" style="padding:.2rem 0"><span class="slip-label">Bệnh nhân:</span><span class="slip-value" id="slip-patient"></span></div>
+                <div class="slip-row" style="padding:.2rem 0"><span class="slip-label">Mã bệnh nhân:</span><span class="slip-value" id="slip-patient-code" style="font-weight:700; color:var(--secondary)"></span></div>
+                <div class="slip-row" style="padding:.2rem 0"><span class="slip-label">Bác sĩ:</span><span class="slip-value" id="slip-doctor"></span></div>
+                <div class="slip-row" style="padding:.2rem 0"><span class="slip-label">Phòng khám:</span><span class="slip-value" id="slip-room-text">---</span></div>
+                <div class="slip-row" style="padding:.2rem 0"><span class="slip-label">Ngày & Giờ:</span><span class="slip-value" id="slip-datetime"></span></div>
+            </div>
+            
+            <!-- Barcode representation -->
+            <div style="text-align: center; margin: 1rem 0 0.5rem 0;">
+                <svg id="slip-barcode"></svg>
+            </div>
+
+            <div class="slip-highlight" style="padding:.8rem; margin:.8rem 0; border:1px solid var(--primary)">
+                <div style="font-size:.7rem; color:var(--text-light)">SỐ THỨ TỰ</div>
+                <div class="slip-stt" id="slip-stt" style="font-size:2.8rem; line-height:1; font-weight:800;">--</div>
+            </div>
+            <div class="slip-note" style="margin-top:.8rem; padding-top:.5rem; border-top:1px dashed #ddd; font-size:.75rem; color:#666">
+                <div style="font-weight:600; margin-bottom:.2rem">Lưu ý:</div>
+                <p>Vui lòng đến đúng phòng và chờ gọi tên theo số thứ tự trên.</p>
+            </div>
+            <div style="display:flex; gap:1rem; margin-top:1.5rem" class="no-print">
+                <button class="btn btn-outline" style="flex:1" onclick="window.print()"><i class="fa-solid fa-print"></i> In phiếu</button>
+                <button class="btn btn-primary" style="flex:1" onclick="closeAllModals()">Hoàn tất</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Thanh toán -->
+    <div class="modal-overlay no-print" id="modal-pay">
+        <div class="modal-box" style="text-align:center">
+            <i class="fa-solid fa-money-bill-wave" style="font-size:2.5rem; color:var(--success); margin-bottom:1rem"></i>
+            <h3>Thanh toán Đơn thuốc</h3>
+            <p style="color:var(--text-light)">Bệnh nhân: <strong id="pay-patient"></strong></p>
+            <div style="margin:1rem 0">
+                <label style="font-size:.85rem; color:var(--text-light)">Phương thức:</label>
+                <select id="pay-method" style="padding:.4rem .8rem; border-radius:8px; border:1px solid #ddd; margin-left:.5rem; font-family:inherit">
+                    <option value="cash">Tiền mặt</option>
+                    <option value="card">Thẻ / Điện tử</option>
+                    <option value="transfer">Chuyển khoản / VNPay</option>
+                    <option value="bhyt">BHYT</option>
+                </select>
+            </div>
+            <div style="font-size:1.8rem; font-weight:700; color:var(--success); margin:1rem 0">150.000 VNĐ</div>
+            <div style="display:flex; gap:1rem">
+                <button class="btn btn-outline" style="flex:1" onclick="closeAllModals()">Đóng</button>
+                <button class="btn btn-success" style="flex:1" onclick="doPayment()"><i class="fa-solid fa-check"></i> Xác nhận thu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Biên lai -->
+    <div class="modal-overlay" id="modal-receipt">
+        <div class="modal-box" style="width: 400px;">
+            <div style="text-align:center; margin-bottom:1rem;">
+                <div style="font-size:1.5rem; font-weight:900; color:var(--primary); font-family:'Outfit'">MedBook</div>
+                <div style="font-size:.8rem; color:var(--text-light)">Phòng khám Đa khoa Quốc tế</div>
+            </div>
+            <div style="text-align:center; margin-bottom:1.5rem; padding-bottom:.5rem; border-bottom:2px dashed #ddd;">
+                <h3 style="margin:0;">BIÊN LAI ĐƠN THUỐC</h3>
+                <div style="font-size:.8rem; font-family:monospace; margin-top:.3rem" id="receipt-id">Mã BD: ---</div>
+            </div>
+            <div style="font-size:.9rem; line-height:1.8;">
+                <div style="display:flex; justify-content:space-between;"><span>Bệnh nhân:</span> <strong id="receipt-patient">---</strong></div>
+                <div style="display:flex; justify-content:space-between;"><span>Ngày thu:</span> <strong id="receipt-date">---</strong></div>
+                <div style="display:flex; justify-content:space-between;"><span>Chi phí thuốc:</span> <strong>150.000 đ</strong></div>
+                <div style="display:flex; justify-content:space-between;"><span>Bảo hiểm trả:</span> <strong>0 đ</strong></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-top:1rem; padding-top:1rem; border-top:2px dashed #ddd; font-size:1.2rem; font-weight:700;">
+                <span>TỔNG THU:</span>
+                <span style="color:var(--success)">150.000 đ</span>
+            </div>
+            <div style="text-align:center; font-size:.8rem; color:var(--text-light); margin-top:2rem;">
+                Cảm ơn quý khách đã sử dụng dịch vụ.<br>Xin mang biên lai này đến quầy phát thuốc.
+            </div>
+            <div style="display:flex; gap:1rem; margin-top:1.5rem" class="no-print">
+                <button class="btn btn-outline" style="flex:1" onclick="window.print()"><i class="fa-solid fa-print"></i> In biên lai</button>
+                <button class="btn btn-primary" style="flex:1" onclick="closeAllModals()">Hoàn tất</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="app-toast"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+    // ============================================================
+    //  GLOBAL STATE
+    // ============================================================
+    var _approveId = null;   // ID ca đang chờ duyệt
+    var _payId = null;       // ID ca đang chờ thanh toán
+    var _chartInstance = null;
+
+    // ============================================================
+    //  INIT
+    // ============================================================
+    window.onload = function() {
+        console.log('[Cashier] v3 loaded');
+        if (typeof guardRoute === 'function') {
+            if (!guardRoute('cashier_admin')) return;
+        }
+        document.getElementById('today-text').textContent =
+            new Date().toLocaleDateString('vi-VN', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+        loadAll();
+    };
+
+    // ============================================================
+    //  LOAD DATA
+    // ============================================================
+    function loadAll() {
+        loadStats();
+        loadReception();
+        loadFinance();
+        loadHistory();
+        loadQrQueue();
+    }
+
+    function loadStats() {
+        api.get('/appointments/cashier/stats')
+            .then(function(s) {
+                document.getElementById('s-total').textContent = s.total_today || 0;
+                document.getElementById('s-pending').textContent = s.pending_approval || 0;
+                document.getElementById('s-checkin').textContent = s.waiting_checkin || 0;
+                document.getElementById('s-pay').textContent = s.waiting_payment || 0;
+                drawChart(s);
+            })
+            .catch(function(e) { console.warn('Stats error', e); });
+    }
+
+    function loadReception() {
+        api.get('/appointments/cashier/reception')
+            .then(function(data) { renderReception(data); })
+            .catch(function(e) { console.warn('Reception error', e); });
+    }
+
+    function loadFinance() {
+        api.get('/appointments/cashier/finance')
+            .then(function(data) { renderFinance(data); })
+            .catch(function(e) { console.warn('Finance error', e); });
+    }
+
+    function loadHistory() {
+        console.log('[History] Loading...');
+        api.get('/appointments/cashier/history')
+            .then(function(data) { 
+                console.log('[History] Data:', data);
+                renderHistory(data); 
+            })
+            .catch(function(e) { 
+                console.error('[History] Error:', e);
+                toast('Lỗi tải lịch sử', 'error'); 
+            });
+    }
+
+    // ============================================================
+    //  RENDER TABLES
+    // ============================================================
+    function renderReception(list) {
+        var tbody = document.getElementById('tbl-reception');
+        if (!list || list.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:#999"><i class="fa-solid fa-inbox" style="font-size:2rem;margin-bottom:.5rem;display:block"></i>Không có ca nào đang chờ.</td></tr>';
+            return;
+        }
+        var html = '';
+        for (var i = 0; i < list.length; i++) {
+            var a = list[i];
+            var statusBadge = '';
+            var actions = '';
+
+            var s = (a.status || '').toUpperCase();
+            var statusBadge = '';
+            var actions = '';
+            var qrInfo = a.qr_code ? '<div style="font-size:0.7rem; color:var(--primary); font-weight:700; margin-top:4px;">QR: ' + a.qr_code + '</div>' : '';
+
+            if (s === 'PENDING' || s === 'AWAITING_PAYMENT') {
+                statusBadge = '<span class="badge badge-pending">' + (s === 'PENDING' ? 'Chờ duyệt' : 'Đang chờ xác nhận') + '</span>';
+                actions = '<button class="btn btn-primary btn-sm" onclick="openApprove(\'' + a.id + '\')"><i class="fa-solid fa-check"></i> Duyệt</button>';
+            } else if (s === 'CONFIRMED') {
+                statusBadge = '<span class="badge badge-confirmed">Đã duyệt</span>';
+                actions = '<div><button class="btn btn-success btn-sm" onclick="doQrConfirm(\'' + (a.qr_code || a.id) + '\')"><i class="fa-solid fa-door-open"></i> Vào khám</button></div>';
+            } else if (s === 'IN_PROGRESS') {
+                statusBadge = '<span class="badge badge-progress">Đang khám</span>';
+                actions = '<span style="color:var(--text-light);font-size:.8rem">Đang với BS</span>';
+            }
+
+            html += '<tr>' +
+                '<td style="font-family:monospace;font-size:.8rem">' + a.id.substring(0,8).toUpperCase() + '</td>' +
+                '<td><strong>' + (a.patient_name || '---') + '</strong>' + qrInfo + '</td>' +
+                '<td>' + a.scheduled_date + '</td>' +
+                '<td style="color:var(--primary);font-weight:600">' + a.scheduled_time + '</td>' +
+                '<td><span class="badge badge-service">Dịch vụ</span></td>' +
+                '<td>' + statusBadge + '</td>' +
+                '<td style="text-align:right">' + actions + '</td>' +
+            '</tr>';
+        }
+        tbody.innerHTML = html;
+    }
+
+    function renderFinance(list) {
+        var tbody = document.getElementById('tbl-finance');
+        if (!list || list.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:#999"><i class="fa-solid fa-receipt" style="font-size:2rem;margin-bottom:.5rem;display:block"></i>Chưa có đơn thuốc cần thanh toán.</td></tr>';
+            return;
+        }
+        var html = '';
+        for (var i = 0; i < list.length; i++) {
+            var a = list[i];
+            html += '<tr>' +
+                '<td style="font-family:monospace;font-size:.8rem">' + a.id.substring(0,8).toUpperCase() + '</td>' +
+                '<td><strong>' + (a.patient_name || '---') + '</strong></td>' +
+                '<td>' + (a.doctor_name || '---') + '</td>' +
+                '<td><span class="badge badge-service">Dịch vụ</span></td>' +
+                '<td style="font-weight:700">150.000đ</td>' +
+                '<td style="text-align:right"><button class="btn btn-success btn-sm" onclick="openPayment(\'' + a.id + '\', \'' + (a.patient_name || '') + '\')"><i class="fa-solid fa-money-bill"></i> Thu phí</button></td>' +
+            '</tr>';
+        }
+        tbody.innerHTML = html;
+    }
+
+    function renderHistory(list) {
+        var tbody = document.getElementById('tbl-history');
+        if (!tbody) return;
+        if (!list || list.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:#999"><i class="fa-solid fa-box-open" style="font-size:2rem;margin-bottom:.5rem;display:block"></i>Không có dữ liệu lịch sử.</td></tr>';
+            return;
+        }
+        var html = '';
+        for (var i = 0; i < list.length; i++) {
+            var a = list[i];
+            var s = (a.status || '').toUpperCase();
+            var statusBadge = '';
+            
+            if (s === 'PENDING') statusBadge = '<span class="badge badge-pending">Chờ duyệt</span>';
+            else if (s === 'AWAITING_PAYMENT') statusBadge = '<span class="badge badge-pending" style="background:#dfe6e9;color:#2d3436">Chờ thanh toán</span>';
+            else if (s === 'CONFIRMED') statusBadge = '<span class="badge badge-confirmed">Đã duyệt</span>';
+            else if (s === 'IN_PROGRESS') statusBadge = '<span class="badge badge-progress">Đang khám</span>';
+            else if (s === 'PRESCRIPTION_SENT') statusBadge = '<span class="badge badge-prescription">Chờ thanh toán</span>';
+            else if (s === 'COMPLETED') statusBadge = '<span class="badge badge-completed">Hoàn thành</span>';
+            else if (s === 'CANCELLED') statusBadge = '<span class="badge badge-danger" style="background:#ffeaa7;color:#d63031">Đã hủy</span>';
+            else statusBadge = '<span class="badge">' + a.status + '</span>';
+
+            html += '<tr>' +
+                '<td style="font-family:monospace;font-size:.8rem">' + a.id.substring(0,8).toUpperCase() + '</td>' +
+                '<td><strong>' + (a.patient_name || '---') + '</strong></td>' +
+                '<td>' + a.scheduled_date + '</td>' +
+                '<td style="color:var(--primary);font-weight:600">' + a.scheduled_time + '</td>' +
+                '<td>' + (a.doctor_name || '---') + '</td>' +
+                '<td>' + statusBadge + '</td>' +
+            '</tr>';
+        }
+        tbody.innerHTML = html;
+    }
+
+    // ============================================================
+    //  APPROVE FLOW  (onclick trực tiếp, không event delegation)
+    // ============================================================
+    function openApprove(id) {
+        _approveId = id;
+        document.getElementById('modal-approve').classList.add('show');
+    }
+
+    function doApprove() {
+        if (!_approveId) { toast('Không có ID để duyệt', 'error'); return; }
+        var id = _approveId;
+        var btnEl = event.target.closest('button');
+        if (btnEl) { btnEl.disabled = true; btnEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang duyệt...'; }
+
+        api.patch('/appointments/' + id + '/confirm', { doctor_notes: 'Approved by cashier' })
+            .then(function(appt) {
+                toast('Duyệt thành công! Đã gửi mã QR cho bệnh nhân.');
+                closeAllModals();
+
+                loadAll();
+            })
+            .catch(function(e) {
+                toast(e.message || 'Lỗi khi duyệt', 'error');
+            })
+            .finally(function() {
+                if (btnEl) { btnEl.disabled = false; btnEl.innerHTML = '<i class="fa-solid fa-check"></i> Duyệt ngay'; }
+            });
+    }
+
+    // ============================================================
+    //  CHECK-IN FLOW
+    // ============================================================
+    var _checkinId = null;
+
+    function doCheckin(id) {
+        _checkinId = id;
+        document.getElementById('modal-confirm-checkin').classList.add('show');
+    }
+
+    // Setup listener once
+    document.addEventListener('DOMContentLoaded', function() {
+        var confirmBtn = document.getElementById('confirm-checkin-btn');
+        if (confirmBtn) {
+            confirmBtn.onclick = function() {
+                if (!_checkinId) return;
+                var btn = this;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...';
+
+                api.patch('/appointments/' + _checkinId + '/checkin', {})
+                    .then(function(appt) {
+                        toast('Check-in thành công!');
+                        closeAllModals();
+                        showSlip(appt);
+                        loadAll();
+                    })
+                    .catch(function(e) { 
+                        toast(e.message || 'Lỗi check-in', 'error'); 
+                    })
+                    .finally(function() {
+                        btn.disabled = false;
+                        btn.innerHTML = 'Bắt đầu khám';
+                    });
+            };
+        }
+    });
+
+    // ============================================================
+    //  QR CHECK-IN
+    // ============================================================
+    function doQrLookup() {
+        var code = document.getElementById('qr-input').value.trim();
+        if (!code) { toast('Vui lòng nhập mã QR', 'error'); return; }
+        
+        api.get('/appointments/qr/' + encodeURIComponent(code))
+            .then(function(appt) {
+                renderQrResult(appt);
+            })
+            .catch(function(e) { 
+                document.getElementById('qr-result').innerHTML = '<div style="color:var(--danger); padding:1rem; text-align:center">Mã QR không hợp lệ hoặc đã hết hạn.</div>';
+            });
+    }
+
+    function renderQrResult(a) {
+        var payText = a.payment_status === 'PAID' ? 'Đã thanh toán' : 'Chưa thanh toán';
+        var payClass = a.payment_status === 'PAID' ? 'badge-confirmed' : 'badge-pending';
+        var html = 
+            '<div class="card" style="margin-top:1.5rem; background:#f8fafc; border:2px solid var(--primary-light)">' +
+                '<div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:1rem">' +
+                    '<div>' +
+                        '<div style="font-size:0.8rem; color:var(--text-light)">Bệnh nhân</div>' +
+                        '<div style="font-size:1.2rem; font-weight:800">' + a.patient_name + '</div>' +
+                    '</div>' +
+                    '<span class="badge ' + payClass + '">' + payText + '</span>' +
+                '</div>' +
+                '<div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; font-size:0.9rem">' +
+                    '<div><span style="color:var(--text-light)">Số điện thoại:</span> ' + (a.patient_phone || '---') + '</div>' +
+                    '<div><span style="color:var(--text-light)">Mã BN:</span> ' + (a.patient_code || '---') + '</div>' +
+                    '<div><span style="color:var(--text-light)">Bác sĩ:</span> ' + a.doctor_name + '</div>' +
+                    '<div><span style="color:var(--text-light)">Giờ hẹn:</span> <strong style="color:var(--primary)">' + a.scheduled_time + '</strong></div>' +
+                '</div>' +
+                '<div style="margin-top:1.5rem; display:flex; gap:1rem">' +
+                    (a.status === 'CONFIRMED' || a.status === 'IN_PROGRESS' ? 
+                        '<button class="btn btn-primary" style="flex:1" onclick="doQrConfirm(\'' + (a.qr_code || a.id) + '\')">' +
+                            '<i class="fa-solid fa-door-open"></i> Xác nhận vào khám' +
+                        '</button>' : 
+                        '<div style="flex:1; text-align:center; padding:0.75rem; background:#eee; border-radius:12px; color:#666; font-weight:700">' +
+                            'Trạng thái: ' + a.status + ' (Không thể check-in)' +
+                        '</div>'
+                    ) +
+                '</div>' +
+            '</div>';
+        document.getElementById('qr-result').innerHTML = html;
+    }
+
+    function doQrConfirm(code) {
+        console.log('[Checkin] Request started for code:', code);
+        api.post('/appointments/checkin-qr?qr_code=' + encodeURIComponent(code), {})
+            .then(function(appt) {
+                console.log('[Checkin] API Response received:', appt);
+                toast('Bệnh nhân đã vào khám!');
+                showSlip(appt);
+                document.getElementById('qr-input').value = '';
+                document.getElementById('qr-result').innerHTML = '';
+                loadAll();
+            })
+            .catch(function(e) { 
+                console.error('[Checkin] API Error:', e);
+                toast(e.message || 'Lỗi xác nhận vào khám', 'error'); 
+            });
+    }
+
+    function loadQrQueue() {
+        console.log('[QR] Loading queue...');
+        api.get('/appointments/cashier/reception')
+            .then(function(list) {
+                console.log('[QR] Data received:', list);
+                renderQrQueue(list);
+            })
+            .catch(function(e) { 
+                console.error('[QR] Load error:', e);
+                toast('Lỗi tải danh sách QR', 'error'); 
+            });
+    }
+
+    function renderQrQueue(list) {
+        var el = document.getElementById('qr-queue-list');
+        if (!el) return;
+        
+        // Hiện tất cả các ca đã thanh toán (CONFIRMED) hoặc đang khám (IN_PROGRESS)
+        var ready = list.filter(a => ['CONFIRMED', 'IN_PROGRESS'].includes(a.status.toUpperCase()));
+        
+        if (ready.length === 0) {
+            el.innerHTML = '<div style="text-align:center; padding:2rem; color:#999; background:#f8fafc; border-radius:20px; border:2px dashed #cbd5e1">' +
+                '<i class="fa-solid fa-qrcode" style="font-size:2rem; display:block; margin-bottom:1rem; color:#cbd5e1"></i>' +
+                'Chưa có bệnh nhân nào sẵn sàng check-in.</div>';
+            return;
+        }
+
+        var html = ready.map(a => {
+            var qrData = a.qr_code || a.id;
+            var qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' + encodeURIComponent(qrData);
+            var isConfirmed = a.status.toUpperCase() === 'CONFIRMED';
+            
+            return '<div style="background:white; padding:1.25rem; border-radius:24px; margin-bottom:1rem; border:1px solid #e2e8f0; display:flex; align-items:center; gap:1.5rem; box-shadow:0 10px 25px rgba(0,0,0,0.03)">' +
+                '<div style="position:relative">' +
+                    '<img src="' + qrUrl + '" style="width:80px; height:80px; border-radius:15px; border:1px solid #f1f5f9; background:white">' +
+                    '<div style="position:absolute; -top:5px; -right:5px; background:var(--primary); color:white; width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; border:2px solid white"><i class="fa-solid fa-check"></i></div>' +
+                '</div>' +
+                '<div style="flex:1">' +
+                    '<div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:4px">' +
+                        '<div style="font-weight:800; font-size:1.1rem; color:#1e293b">' + a.patient_name + '</div>' +
+                        '<span class="badge badge-confirmed" style="font-size:0.65rem; padding:2px 8px">Đã thanh toán</span>' +
+                    '</div>' +
+                    '<div style="display:flex; gap:1rem; font-size:0.85rem">' +
+                        '<span style="color:var(--primary); font-weight:700"><i class="fa-solid fa-clock mr-1"></i> ' + a.scheduled_time + '</span>' +
+                        '<span style="color:var(--text-light)">ID: ' + a.id.substring(0,8).toUpperCase() + '</span>' +
+                    '</div>' +
+                    '<div style="background:#f1f5f9; padding:4px 10px; border-radius:8px; display:inline-block; margin-top:8px; font-family:monospace; font-size:0.75rem; color:#475569; font-weight:700">' + (a.qr_code || 'CHƯA CÓ MÃ') + '</div>' +
+                '</div>' +
+                (isConfirmed ? 
+                    '<button class="btn btn-primary" onclick="doQrConfirm(\'' + (a.qr_code || a.id) + '\')" style="padding: 0.8rem 1.5rem; border-radius:15px; font-weight:800">Xác nhận vào khám</button>' :
+                    '<span class="badge badge-progress" style="padding:0.6rem 1rem">Đang khám</span>'
+                ) +
+            '</div>';
+        }).join('');
+        el.innerHTML = html;
+    }
+
+    // ============================================================
+    //  PAYMENT FLOW
+    // ============================================================
+    var _payId = null;
+    var _payName = null;
+
+    function openPayment(id, name) {
+        _payId = id;
+        _payName = name;
+        document.getElementById('pay-patient').textContent = name || 'Bệnh nhân chưa có tên';
+        document.getElementById('modal-pay').classList.add('show');
+    }
+
+    function doBarcodePayment() {
+        var code = document.getElementById('barcode-input').value.trim();
+        if (!code) { toast('Vui lòng nhập mã vạch/ID để thanh toán', 'error'); return; }
+        
+        // Find the appointment in the currently loaded finance list
+        // Alternatively, we could fetch it via API, but since finance list has all pending payments:
+        api.get('/appointments/cashier/finance').then(function(list) {
+            var found = list.find(function(a) { return a.id.toLowerCase() === code.toLowerCase() || a.id.substring(0,8).toLowerCase() === code.toLowerCase(); });
+            if (found) {
+                openPayment(found.id, found.patient_name);
+                document.getElementById('barcode-input').value = '';
+            } else {
+                toast('Không tìm thấy đơn thuốc chờ thanh toán với mã này!', 'error');
+            }
+        }).catch(function() { toast('Lỗi hệ thống khi tìm đơn thuốc', 'error'); });
+    }
+
+    function doPayment() {
+        if (!_payId) return;
+        var btnEl = event.target.closest('button');
+        if (btnEl) { btnEl.disabled = true; }
+
+        api.patch('/appointments/' + _payId + '/complete', {})
+            .then(function() {
+                toast('Thanh toán thành công! Có thể in biên lai.');
+                closeAllModals();
+                loadAll();
+                showReceipt(_payId, _payName);
+            })
+            .catch(function(e) { toast(e.message || 'Lỗi thanh toán', 'error'); })
+            .finally(function() { if (btnEl) btnEl.disabled = false; });
+    }
+
+    function showReceipt(id, name) {
+        document.getElementById('receipt-id').textContent = 'Mã: ' + id.toUpperCase();
+        document.getElementById('receipt-patient').textContent = name || '---';
+        var d = new Date();
+        document.getElementById('receipt-date').textContent = ('0'+d.getDate()).slice(-2) + '/' + ('0'+(d.getMonth()+1)).slice(-2) + '/' + d.getFullYear() + ' ' + ('0'+d.getHours()).slice(-2) + ':' + ('0'+d.getMinutes()).slice(-2);
+        document.getElementById('modal-receipt').classList.add('show');
+    }
+
+    // ============================================================
+    //  SHOW APPOINTMENT SLIP
+    // ============================================================
+    function showSlip(appt) {
+        console.log('[Slip] Displaying for:', appt);
+        if (!appt) return;
+        document.getElementById('slip-id').textContent = 'Mã: ' + (appt.id ? appt.id.toUpperCase().substring(0,18) : '---');
+        document.getElementById('slip-patient').textContent = appt.patient_name || '---';
+        document.getElementById('slip-patient-code').textContent = appt.patient_code || '---';
+        document.getElementById('slip-doctor').textContent = appt.doctor_name || '---';
+        document.getElementById('slip-room-text').textContent = appt.room_number || 'Phòng 101';
+        document.getElementById('slip-datetime').textContent = (appt.scheduled_time || '') + ' | ' + (appt.scheduled_date || '');
+        document.getElementById('slip-stt').textContent = appt.queue_number ? String(appt.queue_number).padStart(2, '0') : '01';
+        
+        // Generate barcode
+        if (typeof JsBarcode === 'function') {
+            try {
+                JsBarcode("#slip-barcode", appt.patient_code || "MB-000", {
+                    format: "CODE128",
+                    width: 1.5,
+                    height: 40,
+                    displayValue: true,
+                    fontSize: 12,
+                    margin: 0
+                });
+            } catch (e) {
+                console.error("Barcode generation failed", e);
+            }
+        }
+        
+        document.getElementById('modal-slip').classList.add('show');
+    }
+
+    // ============================================================
+    //  CHART
+    // ============================================================
+    function drawChart(s) {
+        try {
+            var el = document.getElementById('chart-status');
+            if (!el) return;
+            if (_chartInstance) _chartInstance.destroy();
+            _chartInstance = new Chart(el.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Chờ duyệt', 'Đã duyệt', 'Đang khám', 'Chờ thanh toán', 'Hoàn thành'],
+                    datasets: [{
+                        data: [s.pending_approval||0, s.waiting_checkin||0, 0, s.waiting_payment||0, s.completed_today||0],
+                        backgroundColor: ['#fdcb6e','#00b894','#0984e3','#6c5ce7','#00cec9']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        } catch(e) { console.warn('Chart error', e); }
+    }
+
+    // ============================================================
+    //  UTILS
+    // ============================================================
+    function switchTab(tabId, btnEl) {
+        document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
+        document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('active'); });
+        document.getElementById(tabId).classList.add('active');
+        btnEl.classList.add('active');
+
+        // Refresh data for the specific tab
+        if (tabId === 'tab-qr') loadQrQueue();
+        if (tabId === 'tab-reception') loadReception();
+        if (tabId === 'tab-finance') loadFinance();
+        if (tabId === 'tab-history') loadHistory();
+    }
+
+    function logout() {
+        localStorage.removeItem('medbook_token');
+        localStorage.removeItem('medbook_user');
+        window.location.href = '../index.html';
+    }
+
+    function closeAllModals() {
+        document.querySelectorAll('.modal-overlay').forEach(function(m) { m.classList.remove('show'); });
+        _approveId = null;
+        _payId = null;
+        _checkinId = null;
+    }
+
+    function toast(msg, type) {
+        var c = document.getElementById('app-toast');
+        var d = document.createElement('div');
+        d.className = 'toast-item' + (type === 'error' ? ' error' : '');
+        d.innerHTML = '<i class="fa-solid ' + (type === 'error' ? 'fa-circle-xmark' : 'fa-circle-check') + '"></i> ' + msg;
+        c.appendChild(d);
+        setTimeout(function() { d.style.opacity = '0'; d.style.transition = 'opacity .3s'; setTimeout(function() { d.remove(); }, 300); }, 3500);
+    }
+
+    // Enter key for QR
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && document.activeElement && document.activeElement.id === 'qr-input') {
+            doQrLookup();
+        }
+    });
+    </script>
+</body>
+</html>

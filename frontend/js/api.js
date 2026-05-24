@@ -1,0 +1,124 @@
+// Centralized API handler to inject JWT automatically
+const api = {
+    _headers: function() {
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        const token = localStorage.getItem('medbook_token');
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        return headers;
+    },
+
+    _handleResponse: async function(response) {
+        if (response.status === 401) {
+            // Token expired or invalid
+            localStorage.removeItem('medbook_token');
+            localStorage.removeItem('medbook_user');
+            // Do NOT redirect if on reset-password or verify-email pages
+            const path = window.location.pathname;
+            const isAuthPage = path.includes('reset-password') || path.includes('verify-email');
+            if (!isAuthPage && !path.endsWith('index.html') && path !== '/') {
+                window.location.href = '../index.html';
+            }
+            throw new Error('Phiên đăng nhập đã hết hạn');
+        }
+
+        const data = await response.json().catch(() => null);
+        
+        if (!response.ok) {
+            let errorMsg = 'Có lỗi xảy ra từ máy chủ';
+            if (data && data.detail) {
+                if (typeof data.detail === 'string') errorMsg = data.detail;
+                else if (Array.isArray(data.detail)) errorMsg = data.detail[0].msg;
+            }
+            throw new Error(errorMsg);
+        }
+        return data;
+    },
+
+    get: async function(endpoint) {
+        console.log(`API [GET]: ${CONFIG.API_URL}${endpoint}`);
+        try {
+            const res = await fetch(`${CONFIG.API_URL}${endpoint}`, {
+                method: 'GET',
+                headers: this._headers()
+            });
+            return await this._handleResponse(res);
+        } catch (e) {
+            console.error(`API [GET] Error:`, e);
+            throw e;
+        }
+    },
+
+    post: async function(endpoint, body) {
+        console.log(`API [POST]: ${CONFIG.API_URL}${endpoint}`, body);
+        try {
+            const res = await fetch(`${CONFIG.API_URL}${endpoint}`, {
+                method: 'POST',
+                headers: this._headers(),
+                body: JSON.stringify(body)
+            });
+            return await this._handleResponse(res);
+        } catch (e) {
+            console.error(`API [POST] Error:`, e);
+            throw e;
+        }
+    },
+
+    patch: async function(endpoint, body) {
+        const res = await fetch(`${CONFIG.API_URL}${endpoint}`, {
+            method: 'PATCH',
+            headers: this._headers(),
+            body: JSON.stringify(body)
+        });
+        return this._handleResponse(res);
+    },
+
+    put: async function(endpoint, body) {
+        const res = await fetch(`${CONFIG.API_URL}${endpoint}`, {
+            method: 'PUT',
+            headers: this._headers(),
+            body: JSON.stringify(body)
+        });
+        return this._handleResponse(res);
+    },
+
+    delete: async function(endpoint) {
+        const res = await fetch(`${CONFIG.API_URL}${endpoint}`, {
+            method: 'DELETE',
+            headers: this._headers()
+        });
+        if (!res.ok) return this._handleResponse(res);
+        return true; // 204 No Content typically doesn't have JSON body
+    }
+};
+const showToast = (message, type = 'success') => {
+    let container = document.getElementById('toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    
+    let icon = 'fa-check-circle';
+    if (type === 'error') icon = 'fa-exclamation-circle';
+    if (type === 'info') icon = 'fa-info-circle';
+
+    toast.innerHTML = `
+        <i class="fa-solid ${icon}"></i>
+        <div class="toast-content">${message}</div>
+    `;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add('fade-out');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+};

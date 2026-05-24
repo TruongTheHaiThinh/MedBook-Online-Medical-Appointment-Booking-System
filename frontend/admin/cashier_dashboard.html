@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thu ngân - MedBook Premium</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #00b894;
+            --primary-dark: #00a884;
+            --secondary: #0984e3;
+            --success: #00c853;
+            --warning: #f1c40f;
+            --danger: #d63031;
+            --gray-light: #f5f6fa;
+            --sidebar-width: 280px;
+        }
+
+        body { font-family: 'Inter', sans-serif; background: #f0f2f5; color: #2d3436; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        .sidebar { width: var(--sidebar-width); background: white; border-right: 1px solid #e1e4e8; display: flex; flex-direction: column; padding: 2rem 1.5rem; }
+        .main-content { flex: 1; overflow-y: auto; padding: 2rem 3rem; }
+        .sidebar-logo { font-size: 1.5rem; font-weight: 700; color: var(--primary); margin-bottom: 3rem; display: flex; align-items: center; gap: 0.5rem; }
+        .nav-item { display: flex; align-items: center; gap: 1rem; padding: 1rem; border-radius: 12px; color: #636e72; text-decoration: none; margin-bottom: 0.5rem; transition: all 0.3s; cursor: pointer; border: none; background: none; width: 100%; text-align: left; font-size: 1rem; }
+        .nav-item.active { background: rgba(0, 184, 148, 0.1); color: var(--primary); font-weight: 600; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { background: white; padding: 1.5rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .data-card { background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); padding: 1.5rem; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 1rem; border-bottom: 2px solid #f1f2f6; color: #b2bec3; font-size: 0.8rem; text-transform: uppercase; }
+        td { padding: 1.2rem 1rem; border-bottom: 1px solid #f1f2f6; }
+        .badge { padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+        .badge-pending { background: #fffcea; color: #d4a017; }
+        .badge-confirmed { background: #eafff0; color: #27ae60; }
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(5px); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal.active { display: flex; }
+        .modal-box { background: white; border-radius: 24px; padding: 2rem; width: 100%; max-width: 480px; position: relative; }
+        
+        .slip-header { text-align: center; border-bottom: 2px dashed #eee; padding-bottom: 1.5rem; margin-bottom: 1.5rem; }
+        .slip-qr { width: 150px; height: 150px; background: #eee; margin: 1rem auto; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
+        .slip-row { display: flex; justify-content: space-between; margin-bottom: 0.8rem; font-size: 0.95rem; }
+        .slip-label { color: #636e72; }
+        .slip-value { font-weight: 600; text-align: right; }
+        .slip-highlight { background: var(--gray-light); padding: 1rem; border-radius: 12px; text-align: center; margin-top: 1rem; }
+        
+        .btn-action { padding: 0.5rem 1rem; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem; }
+        .btn-approve { background: var(--primary); color: white; }
+        .btn-pay { background: var(--success); color: white; }
+        .btn-outline { border: 1px solid #dfe6e9; background: white; color: #636e72; }
+        .tab-section { display: none; }
+        .tab-section.active { display: block; }
+        #toast-container { position: fixed; bottom: 30px; right: 30px; z-index: 2000; }
+        .toast { background: white; padding: 1rem 1.5rem; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-top: 10px; border-left: 5px solid var(--primary); transition: all 0.4s; }
+        
+        @media print {
+            /* Hide all screen components */
+            body * { visibility: hidden; }
+            .no-print { display: none !important; }
+            
+            /* Page setup for A9 (37mm width, auto height to prevent extra feed/blank space) */
+            @page {
+                size: 37mm auto;
+                margin: 0 !important;
+            }
+
+            html, body {
+                width: 37mm !important;
+                height: auto !important;
+                background: white !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: visible !important;
+            }
+
+            /* Display only the active print target */
+            .modal {
+                display: block !important;
+                position: relative !important;
+                background: white !important;
+                backdrop-filter: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 37mm !important;
+                height: auto !important;
+                min-height: auto !important;
+                inset: auto !important;
+            }
+
+            .modal-box {
+                display: block !important;
+                visibility: visible !important;
+                position: relative !important;
+                width: 37mm !important;
+                height: auto !important;
+                min-height: auto !important;
+                inset: auto !important;
+                padding: 2mm !important;
+                margin: 0 !important;
+                border: none !important;
+                box-sizing: border-box !important;
+                background: white !important;
+                border-radius: 0 !important;
+                box-shadow: none !important;
+            }
+
+            .modal-box, .modal-box * {
+                visibility: visible !important;
+                page-break-inside: avoid !important;
+            }
+
+            /* Adjust typography for A9 paper */
+            .slip-header {
+                padding-bottom: 0.5mm !important;
+                margin-bottom: 0.5mm !important;
+                border-bottom: 1px dashed #333 !important;
+            }
+            .slip-header h2 {
+                font-size: 8px !important;
+                margin: 0 !important;
+                font-weight: bold !important;
+                letter-spacing: normal !important;
+            }
+            .slip-header h4 {
+                font-size: 5px !important;
+                margin-bottom: 0px !important;
+            }
+            #slip-id {
+                font-size: 5px !important;
+            }
+            .slip-row {
+                padding: 0.1mm 0 !important;
+                font-size: 6px !important;
+                line-height: 1.1 !important;
+            }
+            .slip-label {
+                color: #333 !important;
+            }
+            .slip-value {
+                font-weight: bold !important;
+            }
+            #slip-barcode {
+                width: 33mm !important;
+                height: 10mm !important;
+                margin: 0.5mm 0 !important;
+            }
+            .slip-highlight {
+                padding: 0.8mm !important;
+                margin: 0.5mm 0 !important;
+                border: 1px solid #333 !important;
+                border-radius: 2px !important;
+                background: none !important;
+            }
+            .slip-highlight div {
+                font-size: 5px !important;
+            }
+            #slip-stt {
+                font-size: 16px !important;
+                font-weight: 900 !important;
+                color: #000 !important;
+                line-height: 1.1 !important;
+            }
+            #slip-room {
+                font-size: 6px !important;
+                font-weight: bold !important;
+                margin-top: 0.3mm !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <aside class="sidebar no-print">
+        <div class="sidebar-logo"><i class="fa-solid fa-house-medical"></i> MedBook</div>
+        <nav class="nav-menu">
+            <button class="nav-item active" onclick="showTab('reception', this)"><i class="fa-solid fa-user-check"></i> 1. Duyệt & Tiếp nhận</button>
+            <button class="nav-item" onclick="showTab('finance', this)"><i class="fa-solid fa-file-invoice-dollar"></i> 2. Thanh toán đơn thuốc</button>
+            <button class="nav-item" onclick="showTab('stats', this)"><i class="fa-solid fa-chart-line"></i> 3. Thống kê báo cáo</button>
+            <button class="nav-item" onclick="showTab('history', this)"><i class="fa-solid fa-clock-rotate-left"></i> Lịch sử giao dịch</button>
+        </nav>
+        <div class="sidebar-footer" style="padding-top: 2rem; border-top: 1px solid #eee;">
+            <button class="btn-action btn-outline" style="width: 100%" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</button>
+        </div>
+    </aside>
+
+    <main class="main-content no-print">
+        <header style="margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1 id="page-heading" style="margin: 0;">Duyệt & Tiếp nhận Bệnh nhân</h1>
+                <p style="color: #636e72; margin-top: 0.5rem;" id="today-date"></p>
+            </div>
+            <button class="btn-action btn-outline" onclick="initDashboard()"><i class="fa-solid fa-rotate"></i> Làm mới</button>
+        </header>
+
+        <div class="stats-grid">
+            <div class="stat-card" style="border-left: 5px solid var(--secondary);">
+                <div style="font-size: 0.8rem; color: #636e72;">TỔNG SỐ CA</div>
+                <div style="font-size: 1.8rem; font-weight: 700; margin-top: 0.5rem;" id="stat-total">0</div>
+            </div>
+            <div class="stat-card" style="border-left: 5px solid var(--warning);">
+                <div style="font-size: 0.8rem; color: #d4a017;">SỐ CA CHỜ DUYỆT</div>
+                <div style="font-size: 1.8rem; font-weight: 700; margin-top: 0.5rem; color: #d4a017;" id="stat-pending">0</div>
+            </div>
+            <div class="stat-card" style="border-left: 5px solid var(--success);">
+                <div style="font-size: 0.8rem; color: #27ae60;">SỐ CA CHỜ THU PHÍ</div>
+                <div style="font-size: 1.8rem; font-weight: 700; margin-top: 0.5rem; color: #27ae60;" id="stat-finance">0</div>
+            </div>
+        </div>
+
+        <div id="reception" class="tab-section active">
+            <div class="data-card">
+                <table>
+                    <thead><tr><th>Mã lịch</th><th>Bệnh nhân</th><th>Ngày hẹn</th><th>Giờ hẹn</th><th>Thanh toán</th><th>Trạng thái</th><th style="text-align: right;">Thao tác</th></tr></thead>
+                    <tbody id="reception-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="finance" class="tab-section">
+            <div class="data-card">
+                <table>
+                    <thead><tr><th>Mã ca</th><th>Bệnh nhân</th><th>Bác sĩ</th><th>Chi phí</th><th>Trạng thái</th><th style="text-align: right;">Thao tác</th></tr></thead>
+                    <tbody id="finance-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="stats" class="tab-section">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div class="data-card"><canvas id="statusChart" height="250"></canvas></div>
+                <div class="data-card"><canvas id="trendChart" height="250"></canvas></div>
+            </div>
+        </div>
+
+        <div id="history" class="tab-section">
+            <div class="data-card">
+                <table>
+                    <thead><tr><th>Ngày</th><th>Bệnh nhân</th><th>Bác sĩ</th><th>Số tiền</th></tr></thead>
+                    <tbody id="history-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <div class="modal no-print" id="modal-approve">
+        <div class="modal-box" style="text-align: center;">
+            <i class="fa-solid fa-clipboard-check" style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;"></i>
+            <h3>Xác nhận Duyệt Lịch Hẹn</h3>
+            <p>Dữ liệu STT và Phòng khám sẽ được cấp tự động sau khi duyệt.</p>
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button class="btn-action btn-outline" style="flex:1" onclick="closeModals()">Bỏ qua</button>
+                <button class="btn-action btn-approve" style="flex:1" id="btn-do-approve">Duyệt ngay</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="modal-slip">
+        <div class="modal-box">
+            <button class="no-print" style="position: absolute; right: 2rem; top: 2rem; border: none; background: none; font-size: 1.2rem; cursor: pointer;" onclick="closeModals()">&times;</button>
+            <div class="slip-header">
+                <h4 style="margin: 0; color: var(--primary);">MEDBOOK PREMIUM</h4>
+                <h2 style="margin: 0.5rem 0 0;">PHIẾU HẸN KHÁM BỆNH</h2>
+                <p id="slip-id" style="font-family: monospace; font-size: 0.8rem; color: #999;"></p>
+            </div>
+            
+            <!-- Barcode representation -->
+            <div style="text-align: center; margin: 1rem 0 0.5rem 0;">
+                <svg id="slip-barcode"></svg>
+            </div>
+
+            <div class="slip-content">
+                <div class="slip-row"><span class="slip-label">Bệnh nhân:</span> <span class="slip-value" id="slip-patient"></span></div>
+                <div class="slip-row"><span class="slip-label">Mã bệnh nhân:</span> <span class="slip-value" id="slip-patient-code" style="font-weight: 700; color: var(--secondary);"></span></div>
+                <div class="slip-row"><span class="slip-label">Bác sĩ khám:</span> <span class="slip-value" id="slip-doctor"></span></div>
+                <div class="slip-row"><span class="slip-label">Ngày & Giờ:</span> <span class="slip-value" id="slip-datetime"></span></div>
+                <div class="slip-highlight">
+                    <div style="font-size: 0.8rem; color: #636e72; mb: 0.3rem;">SỐ THỨ TỰ (STT)</div>
+                    <div style="font-size: 2.8rem; font-weight: 800; color: var(--primary);" id="slip-stt">--</div>
+                    <div style="margin-top: 0.5rem; font-weight: 700;" id="slip-room">Phòng: Đang xếp...</div>
+                </div>
+                <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #eee;">
+                    <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem;">Lưu ý:</p>
+                    <p style="font-size: 0.85rem; color: #636e72;">Vui lòng đến đúng phòng và chờ gọi tên theo số thứ tự trên.</p>
+                </div>
+            </div>
+
+            <div style="margin-top: 2rem; display: flex; gap: 1rem;" class="no-print">
+                <button class="btn-action btn-outline" style="flex:1" onclick="window.print()"><i class="fa-solid fa-print"></i> In phiếu</button>
+                <button class="btn-action btn-approve" style="flex:1" onclick="closeModals()">Hoàn tất</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal no-print" id="modal-payment">
+        <div class="modal-box" style="text-align: center;">
+            <i class="fa-solid fa-money-bill-wave" style="font-size: 3rem; color: var(--success); margin-bottom: 1rem;"></i>
+            <h3>Thu phí dịch vụ</h3>
+            <p>Bệnh nhân: <strong id="pay-name"></strong></p>
+            <p style="font-size: 1.5rem; font-weight: 700; color: var(--success); margin: 1.5rem 0;">150.000 VND</p>
+            <div style="display: flex; gap: 1rem;">
+                <button class="btn-action btn-outline" style="flex:1" onclick="closeModals()">Đóng</button>
+                <button class="btn-action btn-pay" style="flex:1" id="btn-do-pay">Xác nhận thu tiền</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="no-print"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        // Khai báo sớm nhất có thể
+        var appointments = [];
+        var charts = {};
+        var currentId = null;
+
+        // Khởi tạo Dashboard
+        window.addEventListener('load', function() {
+            if (typeof guardRoute === 'function' && guardRoute('cashier_admin')) {
+                const today = new Date();
+                const dayStr = today.toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                if (document.getElementById('today-date')) document.getElementById('today-date').textContent = dayStr;
+                
+                initDashboard();
+                setInterval(initDashboard, 15000);
+
+                document.body.addEventListener('click', function(e) {
+                    const btn = e.target.closest('button');
+                    if (!btn) return;
+                    if (btn.id === 'btn-do-approve') executeApproval(btn);
+                    if (btn.id === 'btn-do-pay') executePayment(btn);
+                    if (btn.id === 'btn-refresh') initDashboard();
+                });
+            }
+        });
+
+        async function initDashboard() {
+            try {
+                const [stats, reception, finance] = await Promise.all([
+                    api.get('/appointments/cashier/stats').catch(e => ({ total_today:0, pending_approval:0, waiting_payment:0, completed_today:0 })),
+                    api.get('/appointments/cashier/reception').catch(e => []),
+                    api.get('/appointments/cashier/finance').catch(e => [])
+                ]);
+
+                if (document.getElementById('stat-total')) document.getElementById('stat-total').textContent = stats.total_today;
+                if (document.getElementById('stat-pending')) document.getElementById('stat-pending').textContent = stats.pending_approval;
+                if (document.getElementById('stat-finance')) document.getElementById('stat-finance').textContent = stats.waiting_payment;
+
+                appointments = [...reception, ...finance];
+                renderReceptionTable(reception);
+                renderFinanceTable(finance);
+                updateCharts(stats);
+            } catch(e) { console.error("Dashboard error:", e); }
+        }
+
+        function renderReceptionTable(data) {
+            const tbody = document.getElementById('reception-body');
+            if(!tbody) return;
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 2rem; color: #999;">Không có ca nào.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = data.map(function(a) {
+                var statusText = 'Chờ duyệt';
+                var badgeClass = 'badge-pending';
+                if (a.status === 'AWAITING_PAYMENT') { statusText = 'Chờ thanh toán'; badgeClass = 'badge-pending'; }
+                if (a.status === 'CONFIRMED') { statusText = 'Chờ khám'; badgeClass = 'badge-confirmed'; }
+                if (a.status === 'IN_PROGRESS') { statusText = 'Đang khám'; badgeClass = 'badge-confirmed'; }
+
+                var payText = a.payment_status === 'PAID' ? 'Đã thanh toán' : 'Chưa thanh toán';
+                var payBadge = a.payment_status === 'PAID' ? 'badge-confirmed' : 'badge-pending';
+                
+                return '<tr>' +
+                    '<td>' + a.id.substring(0,8).toUpperCase() + '</td>' +
+                    '<td style="font-weight: 600;">' + a.patient_name + '</td>' +
+                    '<td>' + a.scheduled_date + '</td>' +
+                    '<td style="color: var(--primary); font-weight: 600;">' + a.scheduled_time + '</td>' +
+                    '<td><span class="badge ' + payBadge + '">' + payText + '</span></td>' +
+                    '<td><span class="badge ' + badgeClass + '">' + statusText + '</span></td>' +
+                    '<td style="text-align: right;">' +
+                        ((a.status === 'PENDING' || a.status === 'AWAITING_PAYMENT') ? 
+                            (a.payment_status === 'PAID' ? 
+                                '<button class="btn-action btn-approve" onclick="openApprove(\''+a.id+'\')">Cấp STT</button>' : 
+                                '<button class="btn-action btn-approve" onclick="openApprove(\''+a.id+'\')">Duyệt</button>'
+                            ) : ''
+                        ) +
+                        (a.status === 'CONFIRMED' ? '<button class="btn-action btn-pay" style="background:#27ae60" onclick="handleCheckin(\''+a.id+'\')">Vào khám</button>' : '') +
+                        (a.status === 'CONFIRMED' || a.status === 'IN_PROGRESS' ? '<button class="btn-action btn-outline" onclick="showSlipById(\''+a.id+'\')"><i class="fa-solid fa-print"></i></button>' : '') +
+                        '<button class="btn-action btn-outline" onclick="handleCancel(\''+a.id+'\')"><i class="fa-solid fa-x"></i></button>' +
+                    '</td>' +
+                '</tr>';
+            }).join('');
+        }
+
+        function renderFinanceTable(data) {
+            const tbody = document.getElementById('finance-body');
+            if(!tbody) return;
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 2rem; color: #999;">Trống.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = data.map(function(a) {
+                return '<tr>' +
+                    '<td>' + a.id.substring(0,8).toUpperCase() + '</td>' +
+                    '<td>' + a.patient_name + '</td>' +
+                    '<td>' + a.doctor_name + '</td>' +
+                    '<td style="font-weight: 700;">150.000 VND</td>' +
+                    '<td><span class="badge badge-prescription">Chờ thu phí</span></td>' +
+                    '<td style="text-align: right;">' +
+                        '<button class="btn-action btn-pay" onclick="openPayment(\''+a.id+'\', \''+a.patient_name+'\')">Thu phí</button>' +
+                    '</td>' +
+                '</tr>';
+            }).join('');
+        }
+
+        function openApprove(id) { 
+            currentId = id; 
+            const btn = document.getElementById('btn-do-approve');
+            if(btn) btn.dataset.appId = id;
+            const modal = document.getElementById('modal-approve');
+            if(modal) modal.classList.add('active'); 
+        }
+
+        function openPayment(id, name) {
+            currentId = id;
+            const btn = document.getElementById('btn-do-pay');
+            if(btn) btn.dataset.appId = id;
+            if(document.getElementById('pay-name')) document.getElementById('pay-name').textContent = name;
+            const modal = document.getElementById('modal-payment');
+            if(modal) modal.classList.add('active');
+        }
+
+        async function executeApproval(btn) {
+            const id = btn.dataset.appId;
+            if(!id) return;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            try {
+                const appt = await api.patch('/appointments/' + id + '/confirm', { doctor_notes: 'Duyệt bởi Thu ngân' });
+                showToast("Duyệt thành công!");
+                showSlip(appt);
+                initDashboard();
+            } catch(e) { showToast(e.message, 'error'); }
+            finally { btn.disabled = false; btn.textContent = 'Duyệt ngay'; }
+        }
+
+        function showSlip(appt) {
+            closeModals();
+            document.getElementById('slip-id').textContent = "Mã: " + appt.id.toUpperCase();
+            document.getElementById('slip-patient').textContent = appt.patient_name || "Bệnh nhân";
+            document.getElementById('slip-patient-code').textContent = appt.patient_code || "---";
+            document.getElementById('slip-doctor').textContent = appt.doctor_name || "Bác sĩ";
+            document.getElementById('slip-datetime').textContent = appt.scheduled_time + ' - ' + appt.scheduled_date;
+            document.getElementById('slip-stt').textContent = appt.queue_number || "--";
+            document.getElementById('slip-room').textContent = "Phòng: " + (appt.room_number || "Gửi sau");
+            
+            // Generate barcode
+            if (typeof JsBarcode === 'function') {
+                try {
+                    JsBarcode("#slip-barcode", appt.patient_code || "MB-000", {
+                        format: "CODE128",
+                        width: 1.5,
+                        height: 40,
+                        displayValue: true,
+                        fontSize: 12,
+                        margin: 0
+                    });
+                } catch (e) {
+                    console.error("Barcode generation failed", e);
+                }
+            }
+            
+            document.getElementById('modal-slip').classList.add('active');
+        }
+
+        async function executePayment(btn) {
+            const id = btn.dataset.appId;
+            if(!id) return;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            try {
+                await api.patch('/appointments/' + id + '/complete', {});
+                showToast("Thanh toán xong!");
+                closeModals();
+                initDashboard();
+            } catch(e) { showToast(e.message, 'error'); }
+            finally { btn.disabled = false; btn.textContent = 'Xác nhận thu tiền'; }
+        }
+
+        async function handleCheckin(id) {
+            if(!confirm("Bệnh nhân vào khám?")) return;
+            try { 
+                const appt = await api.patch('/appointments/' + id + '/checkin', {}); 
+                showToast("Đã Check-in!");
+                showSlip(appt);
+                initDashboard(); 
+            } catch(e) { showToast(e.message, 'error'); }
+        }
+
+        async function handleCancel(id) {
+            const r = prompt("Lý do hủy:");
+            if(!r) return;
+            try { await api.patch('/appointments/' + id + '/cancel', { doctor_notes: r }); showToast("Đã hủy."); initDashboard(); } catch(e) { showToast(e.message, 'error'); }
+        }
+
+        function updateCharts(s) {
+            const c1 = document.getElementById('statusChart');
+            if(!c1) return;
+            if(charts.status) charts.status.destroy();
+            charts.status = new Chart(c1.getContext('2d'), {
+                type: 'doughnut',
+                data: { labels: ['Chờ duyệt', 'Đang khám', 'Hoàn tất'], datasets: [{ data: [s.pending_approval, s.waiting_checkin || 0, s.completed_today || 0], backgroundColor: ['#f1c40f', '#00b894', '#0984e3'] }] },
+                options: { maintainAspectRatio: false }
+            });
+        }
+
+        function showTab(id, el) {
+            document.querySelectorAll('.tab-section').forEach(function(s) { s.classList.remove('active'); });
+            document.querySelectorAll('.nav-item').forEach(function(i) { i.classList.remove('active'); });
+            document.getElementById(id).classList.add('active');
+            el.classList.add('active');
+        }
+
+        function logout() { 
+            localStorage.removeItem('medbook_token');
+            localStorage.removeItem('medbook_user');
+            window.location.href = '../index.html'; 
+        }
+        function closeModals() { document.querySelectorAll('.modal').forEach(function(m) { m.classList.remove('active'); }); }
+        
+        function showSlipById(id) {
+            const a = appointments.find(x => x.id === id);
+            if(a) showSlip(a);
+        }
+
+        function showToast(m, t) {
+            const c = document.getElementById('toast-container');
+            if(!c) return;
+            const d = document.createElement('div');
+            d.className = 'toast';
+            d.innerHTML = '<span>' + m + '</span>';
+            if(t==='error') d.style.borderLeftColor = 'red';
+            c.appendChild(d);
+            setTimeout(function() { d.style.opacity='0'; setTimeout(function(){d.remove()}, 400); }, 3000);
+        }
+    </script>
+</body>
+</html>
