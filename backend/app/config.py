@@ -35,6 +35,13 @@ class Settings(BaseSettings):
     VNP_URL: str = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
     VNP_RETURN_URL: str = "http://127.0.0.1:8000/appointments/vnpay-return"
 
+    def __init__(self, **values):
+        super().__init__(**values)
+        if self.DATABASE_URL.startswith("postgres://"):
+            self.DATABASE_URL = self.DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
+        elif self.DATABASE_URL.startswith("postgresql://"):
+            self.DATABASE_URL = self.DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
+
     class Config:
         env_file = ".env"
         extra = "ignore"
