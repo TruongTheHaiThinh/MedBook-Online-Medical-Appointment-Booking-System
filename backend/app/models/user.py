@@ -36,3 +36,6 @@ class User(Base):
     payments_as_cashier = relationship(
         "Payment", back_populates="cashier", foreign_keys="Payment.cashier_id"
     )
+    password_history = relationship(
+        "PasswordHistory", back_populates="user", cascade="all, delete-orphan"
+    )

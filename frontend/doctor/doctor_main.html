@@ -281,7 +281,9 @@
     <div id="toast-container" style="position:fixed; bottom:20px; right:20px; z-index:9999"></div>
 
     <script>
-        const API_URL = 'http://127.0.0.1:8000';
+        const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+            ? 'http://127.0.0.1:8000'
+            : 'https://medbook-backend.onrender.com';
         let currentDoctor = null;
         let selectedAppt = null;
         let prescriptionItems = [];

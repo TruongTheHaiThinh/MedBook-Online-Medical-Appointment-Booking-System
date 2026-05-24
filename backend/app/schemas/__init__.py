@@ -5,7 +5,7 @@ from app.schemas.user import (
 from app.schemas.doctor import (
     SpecialtyCreate, SpecialtyUpdate, SpecialtyResponse,
     DoctorProfileResponse, DoctorProfileUpdate,
-    LeaveRequestCreate, LeaveRequestResponse,
+    LeaveRequestCreate, LeaveRequestResponse, AdminLeaveRequestResponse,
 )
 from app.schemas.schedule import ScheduleCreate, ScheduleResponse, AvailableSlotsResponse
 from app.schemas.appointment import (
@@ -20,7 +20,7 @@ __all__ = [
     "ForgotPasswordRequest", "ResetPasswordRequest", "VerifyEmailRequest", "MessageResponse",
     "SpecialtyCreate", "SpecialtyUpdate", "SpecialtyResponse",
     "DoctorProfileResponse", "DoctorProfileUpdate",
-    "LeaveRequestCreate", "LeaveRequestResponse",
+    "LeaveRequestCreate", "LeaveRequestResponse", "AdminLeaveRequestResponse",
     "ScheduleCreate", "ScheduleResponse", "AvailableSlotsResponse",
     "AppointmentCreate", "AppointmentConfirm", "AppointmentCancel", "AppointmentComplete", "AppointmentResponse",
     "MedicalRecordCreate", "MedicalRecordResponse",

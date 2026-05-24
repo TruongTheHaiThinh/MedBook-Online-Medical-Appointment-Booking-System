@@ -5,7 +5,7 @@ import csv
 from datetime import date, time
 
 # Thiết lập đường dẫn để có thể import từ app
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
 # Đảm bảo in được tiếng Việt trên Terminal Windows
 if sys.platform == "win32":
@@ -145,7 +145,7 @@ async def seed_data():
             print(f"Da tao benh nhan mau: {p['name']} (MB-{100 + i})")
 
         # 6. Nhập dữ liệu Thuốc từ CSV
-        csv_path = os.path.join(os.path.dirname(__file__), "medicine_dataset.csv")
+        csv_path = os.path.join(os.path.dirname(__file__), "..", "medicine_dataset.csv")
         if os.path.exists(csv_path):
             print("Dang nhap du lieu thuoc tu CSV...")
             with open(csv_path, mode='r', encoding='utf-8') as f:
