@@ -56,8 +56,114 @@
         .toast { background: white; padding: 1rem 1.5rem; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-top: 10px; border-left: 5px solid var(--primary); transition: all 0.4s; }
         
         @media print {
+            /* Hide all screen components */
+            body * { visibility: hidden; }
             .no-print { display: none !important; }
-            .modal { position: absolute; background: white; width: 100%; }
+            
+            /* Page setup for A9 (37mm x 52mm) */
+            @page {
+                size: 37mm 52mm;
+                margin: 0;
+            }
+
+            html, body {
+                width: 37mm;
+                height: 52mm;
+                background: white;
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+            }
+
+            /* Display only the active print target */
+            .modal {
+                display: flex !important;
+                position: absolute !important;
+                inset: 0 !important;
+                background: white !important;
+                backdrop-filter: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 37mm !important;
+                height: 52mm !important;
+            }
+
+            .modal-box {
+                display: block !important;
+                visibility: visible !important;
+                position: absolute !important;
+                inset: 0 !important;
+                width: 37mm !important;
+                height: 52mm !important;
+                padding: 2mm !important;
+                margin: 0 !important;
+                border: none !important;
+                box-sizing: border-box !important;
+                background: white !important;
+                border-radius: 0 !important;
+                box-shadow: none !important;
+            }
+
+            .modal-box, .modal-box * {
+                visibility: visible !important;
+            }
+
+            /* Adjust typography for A9 paper */
+            .slip-header {
+                padding-bottom: 0.5mm !important;
+                margin-bottom: 0.5mm !important;
+                border-bottom: 1px dashed #333 !important;
+            }
+            .slip-header h2 {
+                font-size: 8px !important;
+                margin: 0 !important;
+                font-weight: bold !important;
+                letter-spacing: normal !important;
+            }
+            .slip-header h4 {
+                font-size: 5px !important;
+                margin-bottom: 0px !important;
+            }
+            #slip-id {
+                font-size: 5px !important;
+            }
+            .slip-row {
+                padding: 0.1mm 0 !important;
+                font-size: 6px !important;
+                line-height: 1.1 !important;
+            }
+            .slip-label {
+                color: #333 !important;
+            }
+            .slip-value {
+                font-weight: bold !important;
+            }
+            #slip-barcode {
+                width: 33mm !important;
+                height: 10mm !important;
+                margin: 0.5mm 0 !important;
+            }
+            .slip-highlight {
+                padding: 0.8mm !important;
+                margin: 0.5mm 0 !important;
+                border: 1px solid #333 !important;
+                border-radius: 2px !important;
+                background: none !important;
+            }
+            .slip-highlight div {
+                font-size: 5px !important;
+            }
+            #slip-stt {
+                font-size: 16px !important;
+                font-weight: 900 !important;
+                color: #000 !important;
+                line-height: 1.1 !important;
+            }
+            #slip-room {
+                font-size: 6px !important;
+                font-weight: bold !important;
+                margin-top: 0.3mm !important;
+            }
         }
     </style>
 </head>
