@@ -16,8 +16,10 @@ const api = {
             // Token expired or invalid
             localStorage.removeItem('medbook_token');
             localStorage.removeItem('medbook_user');
-            // Redirect to index only if not already on index
-            if (!window.location.pathname.endsWith('index.html') && window.location.pathname !== '/') {
+            // Do NOT redirect if on reset-password or verify-email pages
+            const path = window.location.pathname;
+            const isAuthPage = path.includes('reset-password') || path.includes('verify-email');
+            if (!isAuthPage && !path.endsWith('index.html') && path !== '/') {
                 window.location.href = '../index.html';
             }
             throw new Error('Phiên đăng nhập đã hết hạn');

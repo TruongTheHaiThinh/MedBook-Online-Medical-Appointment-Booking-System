@@ -196,14 +196,127 @@
 
         /* ── Print ── */
         @media print {
-            .no-print { display: none !important; }
-            body { background: white; }
+            /* Hide all screen components */
             body * { visibility: hidden; }
-            #modal-slip, #modal-slip * { visibility: visible; }
-            #modal-receipt, #modal-receipt * { visibility: visible; }
-            #modal-slip, #modal-receipt { position: absolute; left: 0; top: 0; background: white; width: 100%; box-shadow: none; border: none; }
-            .modal-overlay { position: static; background: none; display: block; }
-            .modal-box { box-shadow: none; border: 2px solid #333; }
+            .no-print { display: none !important; }
+            
+            /* Page setup for A9 (37mm width, auto height to prevent extra feed/blank space) */
+            @page {
+                size: 37mm auto;
+                margin: 0 !important;
+            }
+
+            html, body {
+                width: 37mm !important;
+                height: auto !important;
+                background: white !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: visible !important;
+            }
+
+            /* Display only the active print target */
+            .modal-overlay {
+                display: block !important;
+                position: relative !important;
+                background: white !important;
+                backdrop-filter: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 37mm !important;
+                height: auto !important;
+                min-height: auto !important;
+                inset: auto !important;
+            }
+
+            .modal-box {
+                display: block !important;
+                visibility: visible !important;
+                position: relative !important;
+                width: 37mm !important;
+                height: auto !important;
+                min-height: auto !important;
+                inset: auto !important;
+                padding: 2mm !important;
+                margin: 0 !important;
+                border: none !important;
+                box-sizing: border-box !important;
+                background: white !important;
+                border-radius: 0 !important;
+                box-shadow: none !important;
+            }
+
+            .modal-box, .modal-box * {
+                visibility: visible !important;
+                page-break-inside: avoid !important;
+            }
+
+            /* Adjust typography for A9 paper */
+            .slip-header {
+                padding-bottom: 0.5mm !important;
+                margin-bottom: 0.5mm !important;
+                border-bottom: 1px dashed #333 !important;
+            }
+            .slip-header h3 {
+                font-size: 8px !important;
+                margin: 0 !important;
+                font-weight: bold !important;
+                letter-spacing: normal !important;
+            }
+            .slip-header div {
+                font-size: 5px !important;
+                margin-bottom: 0px !important;
+            }
+            #slip-id {
+                font-size: 5px !important;
+            }
+            .slip-row {
+                padding: 0.1mm 0 !important;
+                font-size: 6px !important;
+                line-height: 1.1 !important;
+            }
+            .slip-label {
+                color: #333 !important;
+            }
+            .slip-value {
+                font-weight: bold !important;
+            }
+            #slip-barcode {
+                width: 33mm !important;
+                height: 10mm !important;
+                margin: 0.5mm 0 !important;
+            }
+            .slip-highlight {
+                padding: 0.8mm !important;
+                margin: 0.5mm 0 !important;
+                border: 1px solid #333 !important;
+                border-radius: 2px !important;
+                background: none !important;
+            }
+            .slip-highlight div {
+                font-size: 5px !important;
+            }
+            .slip-stt {
+                font-size: 16px !important;
+                font-weight: 900 !important;
+                color: #000 !important;
+                line-height: 1.1 !important;
+            }
+            .slip-note {
+                margin-top: 0.5mm !important;
+                padding-top: 0.5mm !important;
+                border-top: 1px dashed #333 !important;
+                font-size: 5px !important;
+                line-height: 1.1 !important;
+                color: #333 !important;
+            }
+            .slip-note div {
+                font-weight: bold !important;
+                margin-bottom: 0px !important;
+            }
+            .slip-note p {
+                margin: 0 !important;
+            }
         }
 
         /* ── QR Scanner ── */
@@ -376,21 +489,24 @@
             
             <div style="margin-top:.8rem; font-size:.85rem">
                 <div class="slip-row" style="padding:.2rem 0"><span class="slip-label">Bệnh nhân:</span><span class="slip-value" id="slip-patient"></span></div>
+                <div class="slip-row" style="padding:.2rem 0"><span class="slip-label">Mã bệnh nhân:</span><span class="slip-value" id="slip-patient-code" style="font-weight:700; color:var(--secondary)"></span></div>
                 <div class="slip-row" style="padding:.2rem 0"><span class="slip-label">Bác sĩ:</span><span class="slip-value" id="slip-doctor"></span></div>
                 <div class="slip-row" style="padding:.2rem 0"><span class="slip-label">Phòng khám:</span><span class="slip-value" id="slip-room-text">---</span></div>
                 <div class="slip-row" style="padding:.2rem 0"><span class="slip-label">Ngày & Giờ:</span><span class="slip-value" id="slip-datetime"></span></div>
             </div>
+            
+            <!-- Barcode representation -->
+            <div style="text-align: center; margin: 1rem 0 0.5rem 0;">
+                <svg id="slip-barcode"></svg>
+            </div>
+
             <div class="slip-highlight" style="padding:.8rem; margin:.8rem 0; border:1px solid var(--primary)">
                 <div style="font-size:.7rem; color:var(--text-light)">SỐ THỨ TỰ</div>
-                <div class="slip-stt" id="slip-stt" style="font-size:2rem; line-height:1">--</div>
+                <div class="slip-stt" id="slip-stt" style="font-size:2.8rem; line-height:1; font-weight:800;">--</div>
             </div>
-            <div style="margin-top:.8rem; padding-top:.5rem; border-top:1px dashed #ddd; font-size:.75rem; color:#666">
+            <div class="slip-note" style="margin-top:.8rem; padding-top:.5rem; border-top:1px dashed #ddd; font-size:.75rem; color:#666">
                 <div style="font-weight:600; margin-bottom:.2rem">Lưu ý:</div>
                 <p>Vui lòng đến đúng phòng và chờ gọi tên theo số thứ tự trên.</p>
-            </div>
-            <div style="display:flex; gap:.5rem; margin-top:1.2rem" class="no-print">
-                <button class="btn btn-outline" style="flex:1" onclick="window.print()"><i class="fa-solid fa-print"></i> In</button>
-                <button class="btn btn-primary" style="flex:1" onclick="closeAllModals()">Đóng</button>
             </div>
             <div style="display:flex; gap:1rem; margin-top:1.5rem" class="no-print">
                 <button class="btn btn-outline" style="flex:1" onclick="window.print()"><i class="fa-solid fa-print"></i> In phiếu</button>
@@ -456,6 +572,7 @@
     <div id="app-toast"></div>
 
     <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <script src="../js/config.js"></script>
     <script src="../js/api.js"></script>
     <script src="../js/auth.js"></script>
@@ -878,10 +995,28 @@
         if (!appt) return;
         document.getElementById('slip-id').textContent = 'Mã: ' + (appt.id ? appt.id.toUpperCase().substring(0,18) : '---');
         document.getElementById('slip-patient').textContent = appt.patient_name || '---';
+        document.getElementById('slip-patient-code').textContent = appt.patient_code || '---';
         document.getElementById('slip-doctor').textContent = appt.doctor_name || '---';
         document.getElementById('slip-room-text').textContent = appt.room_number || 'Phòng 101';
         document.getElementById('slip-datetime').textContent = (appt.scheduled_time || '') + ' | ' + (appt.scheduled_date || '');
         document.getElementById('slip-stt').textContent = appt.queue_number ? String(appt.queue_number).padStart(2, '0') : '01';
+        
+        // Generate barcode
+        if (typeof JsBarcode === 'function') {
+            try {
+                JsBarcode("#slip-barcode", appt.patient_code || "MB-000", {
+                    format: "CODE128",
+                    width: 1.5,
+                    height: 40,
+                    displayValue: true,
+                    fontSize: 12,
+                    margin: 0
+                });
+            } catch (e) {
+                console.error("Barcode generation failed", e);
+            }
+        }
+        
         document.getElementById('modal-slip').classList.add('show');
     }
 

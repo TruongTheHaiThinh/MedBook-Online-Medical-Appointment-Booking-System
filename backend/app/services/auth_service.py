@@ -3,7 +3,7 @@ AuthService – Service Layer for Authentication & Account Management.
 All business logic for registration, login, email verification,
 and password reset lives here. Routers only call this service.
 """
-from datetime import timedelta
+from datetime import timedelta, datetime
 from uuid import UUID
 
 from fastapi import HTTPException, status, BackgroundTasks
@@ -12,16 +12,39 @@ from sqlalchemy import select
 
 from app.models.user import User
 from app.models.doctor import Doctor
+from app.models.password_history import PasswordHistory
 from app.schemas.user import (
     UserRegister, AdminCreateUser, UserLogin,
     ForgotPasswordRequest, ResetPasswordRequest,
 )
 from app.core.security import (
     hash_password, verify_password,
-    create_access_token, create_verification_token, decode_token,
+    create_access_token, create_verification_token, decode_token, decode_reset_token,
 )
 from app.core.email import send_verify_email, send_reset_password_email
 from app.config import settings
+
+
+async def _generate_next_patient_code(db: AsyncSession) -> str:
+    # Query all patient codes that start with "MB-"
+    result = await db.execute(
+        select(User.patient_code).where(User.patient_code.like("MB-%"))
+    )
+    codes = result.scalars().all()
+    max_num = 0
+    for code in codes:
+        if code:
+            try:
+                # Extract number from "MB-XXX" (e.g. MB-001 -> 1)
+                parts = code.split("-")
+                if len(parts) == 2:
+                    num = int(parts[1])
+                    if num > max_num:
+                        max_num = num
+            except ValueError:
+                pass
+    next_num = max_num + 1
+    return f"MB-{next_num:03d}"
 
 
 class AuthService:
@@ -42,6 +65,10 @@ class AuthService:
             if result_e.scalar_one_or_none():
                 raise HTTPException(status_code=400, detail="Email đã được sử dụng")
 
+        p_code = None
+        if data.role == "patient":
+            p_code = await _generate_next_patient_code(db)
+
         user = User(
             email=data.email,
             password_hash=hash_password(data.password),
@@ -53,6 +80,7 @@ class AuthService:
             date_of_birth=data.date_of_birth,
             gender=data.gender,
             blood_type=data.blood_type,
+            patient_code=p_code,
         )
         db.add(user)
         await db.flush()
@@ -86,6 +114,10 @@ class AuthService:
         if result_p.scalar_one_or_none():
             raise HTTPException(status_code=400, detail="Số điện thoại đã được sử dụng")
 
+        p_code = None
+        if data.role == "patient":
+            p_code = await _generate_next_patient_code(db)
+
         user = User(
             email=data.email,
             password_hash=hash_password(data.password),
@@ -94,6 +126,7 @@ class AuthService:
             address=data.address,
             role=data.role,
             is_verified=True,  # Admin-created accounts are pre-verified
+            patient_code=p_code,
         )
         db.add(user)
         await db.flush()
@@ -120,10 +153,16 @@ class AuthService:
         )
         user = result.scalar_one_or_none()
 
-        if not user or not verify_password(data.password, user.password_hash):
+        if not user:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Số điện thoại/Email hoặc mật khẩu không đúng",
+                detail="Không tìm thấy tài khoản",
+            )
+
+        if not verify_password(data.password, user.password_hash):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Sai mật khẩu, vui lòng thử lại",
             )
 
         if not user.is_active:
@@ -140,7 +179,7 @@ class AuthService:
 
     @staticmethod
     async def verify_email(token: str, db: AsyncSession) -> dict:
-        payload = decode_token(token)
+        payload = decode_reset_token(token)  # dung 400 thay vi 401
         purpose = payload.get("purpose")
         user_id = payload.get("sub")
 
@@ -167,20 +206,22 @@ class AuthService:
         result = await db.execute(select(User).where(User.email == data.email))
         user = result.scalar_one_or_none()
 
-        # Always return success to prevent email enumeration
         if not user:
-            return {"message": "Nếu email tồn tại, chúng tôi đã gửi link đặt lại mật khẩu."}
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Email không tồn tại trên hệ thống",
+            )
 
         token = create_verification_token(str(user.id), purpose="reset_password")
         background_tasks.add_task(send_reset_password_email, user.email, user.full_name, token)
 
-        return {"message": "Nếu email tồn tại, chúng tôi đã gửi link đặt lại mật khẩu."}
+        return {"message": "Đã gửi link đặt lại mật khẩu thành công!"}
 
     # ── Reset Password ──
 
     @staticmethod
     async def reset_password(data: ResetPasswordRequest, db: AsyncSession) -> dict:
-        payload = decode_token(data.token)
+        payload = decode_reset_token(data.token)  # dung 400 thay vi 401, tranh redirect login
         purpose = payload.get("purpose")
         user_id = payload.get("sub")
 
@@ -193,6 +234,41 @@ class AuthService:
         if not user:
             raise HTTPException(status_code=404, detail="Người dùng không tồn tại")
 
+        # ── Kiem tra lich su mat khau (3 thang gan nhat) ──
+        three_months_ago = datetime.utcnow() - timedelta(days=90)
+        history_result = await db.execute(
+            select(PasswordHistory)
+            .where(
+                PasswordHistory.user_id == user.id,
+                PasswordHistory.created_at >= three_months_ago,
+            )
+            .order_by(PasswordHistory.created_at.desc())
+        )
+        recent_history = history_result.scalars().all()
+
+        # Kiểm tra với mật khẩu hiện tại
+        if verify_password(data.new_password, user.password_hash):
+            raise HTTPException(
+                status_code=400,
+                detail="Mật khẩu mới không được trùng với mật khẩu hiện tại",
+            )
+
+        # Kiểm tra với lịch sử mật khẩu trong 3 tháng
+        for record in recent_history:
+            if verify_password(data.new_password, record.password_hash):
+                raise HTTPException(
+                    status_code=400,
+                    detail="Mật khẩu mới không được trùng với mật khẩu đã dùng trong 3 tháng gần nhất",
+                )
+
+        # Luu mat khau cu vao lich su truoc khi cap nhat
+        history_entry = PasswordHistory(
+            user_id=user.id,
+            password_hash=user.password_hash,  # luu hash mat khau hien tai
+        )
+        db.add(history_entry)
+
+        # Cập nhật mật khẩu mới
         user.password_hash = hash_password(data.new_password)
         await db.commit()
         return {"message": "Đặt lại mật khẩu thành công! Bạn có thể đăng nhập với mật khẩu mới."}

@@ -28,21 +28,39 @@ async def _enrich_appointment(appt: Appointment, db: AsyncSession) -> Appointmen
     pt_res = await db.execute(select(User).where(User.id == appt.patient_id))
     patient = pt_res.scalar_one_or_none()
     dr_res = await db.execute(
-        select(User.full_name, Specialty.name.label("spec"))
+        select(User.full_name, Specialty.name.label("spec"), Doctor.room_number)
         .join(Doctor, Doctor.user_id == User.id)
         .outerjoin(Specialty, Specialty.id == Doctor.specialty_id)
         .where(Doctor.id == appt.doctor_id)
     )
     dr_data = dr_res.first()
+    
+    # Fetch Payment
+    p_res = await db.execute(select(Payment).where(Payment.appointment_id == appt.id))
+    payment = p_res.scalar_one_or_none()
+    
     return AppointmentResponse(
-        id=appt.id, patient_id=appt.patient_id, doctor_id=appt.doctor_id,
-        scheduled_date=appt.scheduled_date, scheduled_time=appt.scheduled_time,
-        reason=appt.reason, status=appt.status, is_revisit=appt.is_revisit,
-        qr_code=appt.qr_code, doctor_notes=appt.doctor_notes,
-        reminder_sent=appt.reminder_sent, created_at=appt.created_at,
+        id=appt.id,
+        patient_id=appt.patient_id,
+        doctor_id=appt.doctor_id,
+        scheduled_date=appt.scheduled_date,
+        scheduled_time=appt.scheduled_time,
+        reason=appt.reason,
+        status=appt.status,
+        is_revisit=appt.is_revisit,
+        qr_code=appt.qr_code,
+        doctor_notes=appt.doctor_notes,
+        reminder_sent=appt.reminder_sent,
+        created_at=appt.created_at,
         patient_name=patient.full_name if patient else None,
+        patient_phone=patient.phone if patient else None,
+        patient_code=patient.patient_code if patient else "MB-XXX",
         doctor_name=dr_data[0] if dr_data else None,
         specialty_name=dr_data[1] if dr_data else None,
+        queue_number=appt.queue_number,
+        room_number=appt.room_number or (dr_data[2] if dr_data else "---"),
+        payment_amount=float(payment.amount) if payment else 0,
+        payment_status=payment.status if payment else "PENDING"
     )
 
 

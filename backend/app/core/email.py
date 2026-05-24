@@ -1,69 +1,168 @@
+"""
+email.py – Gửi email HTML cho MedBook.
+Template đơn giản, không ảnh, gửi nhanh.
+"""
 from typing import Optional
+
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 from jinja2 import Environment, BaseLoader
 
 from app.config import settings
 
-# ── Base email layout ──
-BASE_TEMPLATE = """
-<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"></head>
-<body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-  <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">
-    <h1 style="color: white; margin: 0;">🏥 MedBook</h1>
-    <p style="color: rgba(255,255,255,0.9); margin: 8px 0 0;">Hệ thống quản lý & đặt lịch khám bệnh trực tuyến</p>
-  </div>
-  <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 12px 12px;">
-    {{ content }}
-    <p style="color: #999; font-size: 14px; margin-top: 30px;">Email này được gửi tự động từ hệ thống MedBook. Vui lòng không trả lời email này.</p>
-  </div>
+
+# ══════════════════════════════════════════════════════════════
+#  BASE LAYOUT
+# ══════════════════════════════════════════════════════════════
+BASE_TEMPLATE = """<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>MedBook</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f6f9;font-family:Arial,Helvetica,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f4f6f9;padding:32px 16px;">
+    <tr>
+      <td align="center">
+        <table width="560" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;width:100%;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+
+          <!-- HEADER -->
+          <tr>
+            <td style="background:#1a7f74;padding:28px 36px;text-align:center;">
+              <p style="margin:0;font-size:22px;font-weight:700;color:#ffffff;letter-spacing:0.5px;">MedBook</p>
+              <p style="margin:6px 0 0;font-size:12px;color:rgba(255,255,255,0.8);">Hệ thống Quản lý &amp; Đặt lịch Khám bệnh</p>
+            </td>
+          </tr>
+
+          <!-- BODY -->
+          <tr>
+            <td style="padding:32px 36px;">
+              {{ content }}
+            </td>
+          </tr>
+
+          <!-- DIVIDER -->
+          <tr>
+            <td style="padding:0 36px;">
+              <hr style="border:none;border-top:1px solid #e8edf2;margin:0;">
+            </td>
+          </tr>
+
+          <!-- FOOTER -->
+          <tr>
+            <td style="padding:20px 36px;text-align:center;">
+              <p style="margin:0;font-size:11px;color:#9ca3af;">
+                Email này được gửi tự động từ hệ thống MedBook. Vui lòng không trả lời email này.
+              </p>
+              <p style="margin:6px 0 0;font-size:11px;color:#d1d5db;">
+                &copy; 2025 MedBook &bull; medbook.online.vn@gmail.com
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
 </body>
-</html>
-"""
+</html>"""
 
-# ── Appointment notification ──
+
+# ══════════════════════════════════════════════════════════════
+#  APPOINTMENT NOTIFICATION
+# ══════════════════════════════════════════════════════════════
 APPOINTMENT_CONTENT = """
-<h2 style="color: #333;">{{ title }}</h2>
-<p style="color: #666;">Xin chào <strong>{{ patient_name }}</strong>,</p>
-<p style="color: #666;">{{ message }}</p>
-<div style="background: white; border-left: 4px solid #667eea; padding: 20px; border-radius: 8px; margin: 20px 0;">
-  <p><strong>🩺 Bác sĩ:</strong> {{ doctor_name }}</p>
-  <p><strong>📅 Ngày khám:</strong> {{ scheduled_date }}</p>
-  <p><strong>⏰ Giờ khám:</strong> {{ scheduled_time }}</p>
-  {% if reason %}<p><strong>📋 Lý do:</strong> {{ reason }}</p>{% endif %}
-  {% if doctor_notes %}<p><strong>📝 Ghi chú:</strong> {{ doctor_notes }}</p>{% endif %}
-</div>
+<p style="font-size:18px;font-weight:700;color:#111827;margin:0 0 16px;">{{ title }}</p>
+<p style="font-size:14px;color:#374151;margin:0 0 8px;">Xin chào <strong>{{ patient_name }}</strong>,</p>
+<p style="font-size:14px;color:#6b7280;margin:0 0 20px;line-height:1.6;">{{ message }}</p>
+
+<table width="100%" cellpadding="12" cellspacing="0" border="0"
+  style="background:#f8fafc;border-left:4px solid #1a7f74;border-radius:4px;margin-bottom:16px;">
+  <tr>
+    <td style="font-size:13px;color:#374151;line-height:1.8;">
+      <strong>Bác sĩ:</strong> {{ doctor_name }}<br>
+      <strong>Ngày khám:</strong> {{ scheduled_date }}<br>
+      <strong>Giờ khám:</strong> {{ scheduled_time }}<br>
+      {% if reason %}<strong>Lý do:</strong> {{ reason }}<br>{% endif %}
+      {% if doctor_notes %}<strong>Ghi chú:</strong> {{ doctor_notes }}{% endif %}
+    </td>
+  </tr>
+</table>
 """
 
-# ── Email verification ──
+
+# ══════════════════════════════════════════════════════════════
+#  EMAIL VERIFICATION
+# ══════════════════════════════════════════════════════════════
 VERIFY_EMAIL_CONTENT = """
-<h2 style="color: #333;">Xác thực tài khoản</h2>
-<p style="color: #666;">Xin chào <strong>{{ full_name }}</strong>,</p>
-<p style="color: #666;">Cảm ơn bạn đã đăng ký tài khoản MedBook. Vui lòng nhấn nút bên dưới để xác thực email của bạn:</p>
-<div style="text-align: center; margin: 30px 0;">
-  <a href="{{ verify_url }}" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 14px 40px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
-    ✅ Xác thực Email
-  </a>
+<p style="font-size:18px;font-weight:700;color:#111827;margin:0 0 16px;">Xác thực tài khoản</p>
+<p style="font-size:14px;color:#374151;margin:0 0 8px;">Xin chào <strong>{{ full_name }}</strong>,</p>
+<p style="font-size:14px;color:#6b7280;margin:0 0 24px;line-height:1.6;">
+  Cảm ơn bạn đã đăng ký tài khoản <strong>MedBook</strong>!
+  Vui lòng nhấn nút bên dưới để xác thực email của bạn:
+</p>
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr>
+    <td align="center" style="padding:8px 0 24px;">
+      <a href="{{ verify_url }}"
+        style="display:inline-block;background:#1a7f74;color:#ffffff;text-decoration:none;
+               padding:14px 40px;border-radius:8px;font-size:14px;font-weight:700;">
+        Xác thực Email
+      </a>
+    </td>
+  </tr>
+</table>
+
+<div style="background:#f8fafc;border:1px dashed #d1d5db;border-radius:6px;padding:12px 16px;margin-bottom:16px;">
+  <p style="font-size:11px;color:#9ca3af;margin:0 0 4px;">Hoặc copy đường link sau vào trình duyệt:</p>
+  <p style="font-size:11px;color:#6b7280;word-break:break-all;margin:0;font-family:monospace;">{{ verify_url }}</p>
 </div>
-<p style="color: #999; font-size: 13px;">Hoặc copy đường link sau vào trình duyệt:<br><code>{{ verify_url }}</code></p>
-<p style="color: #999; font-size: 13px;">Link có hiệu lực trong {{ expire_hours }} giờ.</p>
+
+<p style="font-size:12px;color:#9ca3af;margin:0;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:10px 14px;">
+  Link xác thực có hiệu lực trong <strong>{{ expire_hours }} giờ</strong>.
+  Nếu bạn không đăng ký tài khoản này, vui lòng bỏ qua email.
+</p>
 """
 
-# ── Password reset ──
+
+# ══════════════════════════════════════════════════════════════
+#  PASSWORD RESET
+# ══════════════════════════════════════════════════════════════
 RESET_PASSWORD_CONTENT = """
-<h2 style="color: #333;">Đặt lại mật khẩu</h2>
-<p style="color: #666;">Xin chào <strong>{{ full_name }}</strong>,</p>
-<p style="color: #666;">Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn. Nhấn nút bên dưới để tiếp tục:</p>
-<div style="text-align: center; margin: 30px 0;">
-  <a href="{{ reset_url }}" style="background: linear-gradient(135deg, #f093fb, #f5576c); color: white; padding: 14px 40px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
-    🔑 Đặt lại mật khẩu
-  </a>
+<p style="font-size:18px;font-weight:700;color:#111827;margin:0 0 16px;">Đặt lại mật khẩu</p>
+<p style="font-size:14px;color:#374151;margin:0 0 8px;">Xin chào <strong>{{ full_name }}</strong>,</p>
+<p style="font-size:14px;color:#6b7280;margin:0 0 24px;line-height:1.6;">
+  Chúng tôi nhận được yêu cầu <strong>đặt lại mật khẩu</strong> cho tài khoản MedBook của bạn.
+  Nhấn nút bên dưới để tiếp tục. Yêu cầu này sẽ hết hạn trong
+  <strong style="color:#dc2626;">{{ expire_minutes }} phút</strong>.
+</p>
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr>
+    <td align="center" style="padding:8px 0 24px;">
+      <a href="{{ reset_url }}"
+        style="display:inline-block;background:#dc2626;color:#ffffff;text-decoration:none;
+               padding:14px 40px;border-radius:8px;font-size:14px;font-weight:700;">
+        Đặt lại mật khẩu
+      </a>
+    </td>
+  </tr>
+</table>
+
+<div style="background:#f8fafc;border:1px dashed #d1d5db;border-radius:6px;padding:12px 16px;margin-bottom:16px;">
+  <p style="font-size:11px;color:#9ca3af;margin:0 0 4px;">Hoặc copy đường link sau vào trình duyệt:</p>
+  <p style="font-size:11px;color:#6b7280;word-break:break-all;margin:0;font-family:monospace;">{{ reset_url }}</p>
 </div>
-<p style="color: #999; font-size: 13px;">Hoặc copy đường link sau vào trình duyệt:<br><code>{{ reset_url }}</code></p>
-<p style="color: #999; font-size: 13px;">Link có hiệu lực trong {{ expire_minutes }} phút. Nếu bạn không yêu cầu, hãy bỏ qua email này.</p>
+
+<p style="font-size:12px;color:#9f1239;margin:0;background:#fff1f2;border:1px solid #fecdd3;border-radius:6px;padding:10px 14px;">
+  Nếu bạn <em>không</em> yêu cầu đặt lại mật khẩu, hãy bỏ qua email này. Mật khẩu hiện tại của bạn vẫn an toàn.
+</p>
 """
 
+
+# ══════════════════════════════════════════════════════════════
+#  Internals
+# ══════════════════════════════════════════════════════════════
 
 def _get_mail_config() -> ConnectionConfig:
     return ConnectionConfig(
@@ -79,32 +178,32 @@ def _get_mail_config() -> ConnectionConfig:
 
 
 def _render(content_template: str, **kwargs) -> str:
-    env = Environment(loader=BaseLoader())
+    env = Environment(loader=BaseLoader(), autoescape=False)
     content_html = env.from_string(content_template).render(**kwargs)
-    full_html = env.from_string(BASE_TEMPLATE).render(content=content_html)
-    return full_html
+    return env.from_string(BASE_TEMPLATE).render(content=content_html)
 
 
 async def _send_email(to_email: str, subject: str, html_body: str):
     if not settings.MAIL_USERNAME or not settings.MAIL_PASSWORD:
-        print(f"[EMAIL SKIPPED] To: {to_email} | {subject}")
+        print(f"[EMAIL SKIPPED] To: {to_email}")
         return
-
     try:
         msg = MessageSchema(
-            subject=f"MedBook – {subject}",
+            subject=subject,
             recipients=[to_email],
             body=html_body,
             subtype=MessageType.html,
         )
         fm = FastMail(_get_mail_config())
         await fm.send_message(msg)
-        print(f"[EMAIL SENT] To: {to_email} | {subject}")
+        print(f"[EMAIL SENT] To: {to_email}")
     except Exception as e:
-        print(f"[EMAIL ERROR] {e}")
+        print(f"[EMAIL ERROR] {type(e).__name__}: {e}")
 
 
-# ── Public API ──
+# ══════════════════════════════════════════════════════════════
+#  Public API
+# ══════════════════════════════════════════════════════════════
 
 async def send_appointment_email(
     to_email: str,
@@ -124,26 +223,28 @@ async def send_appointment_email(
         scheduled_date=scheduled_date, scheduled_time=scheduled_time,
         reason=reason, doctor_notes=doctor_notes,
     )
-    await _send_email(to_email, title, html)
+    await _send_email(to_email, f"MedBook - {title}", html)
 
 
 async def send_verify_email(to_email: str, full_name: str, token: str):
     verify_url = f"{settings.FRONTEND_URL}/verify-email.html?token={token}"
+    print(f"[VERIFY] {to_email} -> {verify_url}")
     html = _render(
         VERIFY_EMAIL_CONTENT,
         full_name=full_name,
         verify_url=verify_url,
         expire_hours=settings.EMAIL_VERIFY_TOKEN_EXPIRE_HOURS,
     )
-    await _send_email(to_email, "Xác thực tài khoản", html)
+    await _send_email(to_email, "MedBook - Xác thực tài khoản", html)
 
 
 async def send_reset_password_email(to_email: str, full_name: str, token: str):
     reset_url = f"{settings.FRONTEND_URL}/reset-password.html?token={token}"
+    print(f"[RESET] {to_email} -> {reset_url}")
     html = _render(
         RESET_PASSWORD_CONTENT,
         full_name=full_name,
         reset_url=reset_url,
         expire_minutes=settings.PASSWORD_RESET_TOKEN_EXPIRE_MINUTES,
     )
-    await _send_email(to_email, "Đặt lại mật khẩu", html)
+    await _send_email(to_email, "MedBook - Đặt lại mật khẩu", html)

@@ -22,6 +22,8 @@ app.add_middleware(
         "http://127.0.0.1:5500",
         "http://localhost:8000",
         "http://127.0.0.1:8000",
+        settings.FRONTEND_URL,
+        settings.FRONTEND_URL.rstrip("/frontend"),
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -37,9 +39,10 @@ app.include_router(admin_cashier.router)
 app.include_router(medical_records.router)
 
 
+
 # Duplicate Catcher to handle VNPAY Merchant Portal locked redirects
 @app.get("/api/v1/appointments/vnpay-return")
-async def vnpay_return_legacy(request: Request, db = Depends(get_db)):
+async def vnpay_return_legacy(request: Request, db=Depends(get_db)):
     return await vnpay_return(request, db)
 
 

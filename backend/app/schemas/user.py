@@ -32,6 +32,12 @@ class UserRegister(BaseModel):
             raise ValueError("Role phải là 'patient' hoặc 'doctor'")
         return v
 
+    @validator("date_of_birth")
+    def make_dob_naive(cls, v):
+        if v is not None and v.tzinfo is not None:
+            return v.replace(tzinfo=None)
+        return v
+
 
 class AdminCreateUser(BaseModel):
     """HR Admin creates doctor or cashier accounts."""
@@ -71,6 +77,7 @@ class UserResponse(BaseModel):
     full_name: str
     phone: str
     address: Optional[str]
+    patient_code: Optional[str] = None
     date_of_birth: Optional[datetime]
     gender: Optional[str]
     blood_type: Optional[str]
@@ -90,6 +97,12 @@ class UserUpdate(BaseModel):
     date_of_birth: Optional[datetime] = None
     gender: Optional[str] = None
     blood_type: Optional[str] = None
+
+    @validator("date_of_birth")
+    def make_dob_naive(cls, v):
+        if v is not None and v.tzinfo is not None:
+            return v.replace(tzinfo=None)
+        return v
 
 
 class TokenResponse(BaseModel):

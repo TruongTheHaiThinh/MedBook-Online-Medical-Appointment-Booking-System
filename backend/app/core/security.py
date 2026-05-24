@@ -59,6 +59,19 @@ def decode_token(token: str) -> dict:
         )
 
 
+def decode_reset_token(token: str) -> dict:
+    """Decode token dùng cho reset/verify email. Trả 400 thay vì 401
+    để tránh frontend bị redirect về trang đăng nhập."""
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        return payload
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn (15 phút). Vui lòng yêu cầu lại.",
+        )
+
+
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
     db: AsyncSession = Depends(get_db),

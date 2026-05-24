@@ -61,3 +61,16 @@ class LeaveRequestResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class AdminLeaveRequestResponse(BaseModel):
+    id: UUID
+    doctor_id: UUID
+    doctor_name: str
+    leave_date: date
+    reason: Optional[str]
+    status: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True

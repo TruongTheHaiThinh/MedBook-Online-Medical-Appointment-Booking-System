@@ -13,7 +13,8 @@ from app.models.user import User
 from app.models.doctor import Doctor
 from app.models.specialty import Specialty
 from app.models.appointment import Appointment
-from app.schemas.doctor import SpecialtyCreate, SpecialtyUpdate, SpecialtyResponse, DoctorProfileResponse
+from app.models.leave_request import LeaveRequest
+from app.schemas.doctor import SpecialtyCreate, SpecialtyUpdate, SpecialtyResponse, DoctorProfileResponse, AdminLeaveRequestResponse
 from app.schemas.user import UserResponse, AdminCreateUser
 from app.core.security import require_hr_admin
 from app.services.auth_service import AuthService
@@ -269,3 +270,119 @@ async def get_stats(
         "appointments_by_status": status_counts,
         "appointments_history": chart_data,
     }
+
+
+# ── Doctor Leave Management ──
+
+@router.get("/leaves/pending", response_model=List[AdminLeaveRequestResponse])
+async def list_pending_leaves(
+    current_user: User = Depends(require_hr_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Danh sách lịch nghỉ phép chờ duyệt"""
+    result = await db.execute(
+        select(LeaveRequest, User)
+        .join(Doctor, LeaveRequest.doctor_id == Doctor.id)
+        .join(User, Doctor.user_id == User.id)
+        .where(LeaveRequest.status == "PENDING")
+        .order_by(LeaveRequest.leave_date.asc())
+    )
+    rows = result.all()
+    return [
+        AdminLeaveRequestResponse(
+            id=leave.id,
+            doctor_id=leave.doctor_id,
+            doctor_name=user.full_name,
+            leave_date=leave.leave_date,
+            reason=leave.reason,
+            status=leave.status,
+            created_at=leave.created_at,
+        )
+        for leave, user in rows
+    ]
+
+
+@router.patch("/leaves/{leave_id}/approve")
+async def approve_leave(
+    leave_id: UUID,
+    current_user: User = Depends(require_hr_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """HR Admin duyệt lịch nghỉ phép, tự động hủy cuộc hẹn và gửi email cho bệnh nhân"""
+    result = await db.execute(
+        select(LeaveRequest, Doctor)
+        .join(Doctor, LeaveRequest.doctor_id == Doctor.id)
+        .where(LeaveRequest.id == leave_id)
+    )
+    row = result.first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Không tìm thấy yêu cầu nghỉ phép")
+    
+    leave, doctor = row
+    if leave.status != "PENDING":
+        raise HTTPException(status_code=400, detail="Yêu cầu nghỉ phép này đã được xử lý")
+
+    leave.status = "APPROVED"
+
+    # Get doctor's name for email
+    dr_user_result = await db.execute(select(User).where(User.id == doctor.user_id))
+    dr_user = dr_user_result.scalar_one_or_none()
+    dr_name = dr_user.full_name if dr_user else "Bác sĩ"
+
+    # Auto-cancel existing appointments for this doctor on this day
+    from app.core.email import send_appointment_email
+    import asyncio
+    
+    appt_result = await db.execute(
+        select(Appointment).where(
+            Appointment.doctor_id == doctor.id,
+            Appointment.scheduled_date == leave.leave_date,
+            Appointment.status.in_(["PENDING", "CONFIRMED"])
+        )
+    )
+    to_cancel = appt_result.scalars().all()
+    
+    cancel_reason = f"Bác sĩ xin nghỉ phép: {leave.reason or 'Có việc bận đột xuất'}"
+    for appt in to_cancel:
+        appt.status = "CANCELLED"
+        appt.doctor_notes = cancel_reason
+        
+        # Notify patient
+        pt_res = await db.execute(select(User).where(User.id == appt.patient_id))
+        patient = pt_res.scalar_one_or_none()
+        if patient:
+            asyncio.create_task(
+                send_appointment_email(
+                    to_email=patient.email,
+                    title="Lịch hẹn bị hủy do bác sĩ nghỉ phép",
+                    message=f"Rất tiếc, bác sĩ đã đăng ký nghỉ vào ngày {leave.leave_date}. Lịch hẹn của bạn đã bị hủy.",
+                    patient_name=patient.full_name,
+                    doctor_name=dr_name,
+                    scheduled_date=str(appt.scheduled_date),
+                    scheduled_time=str(appt.scheduled_time),
+                    doctor_notes=cancel_reason
+                )
+            )
+
+    await db.commit()
+    return {"message": "Đã phê duyệt lịch nghỉ phép và hủy các lịch hẹn trùng", "status": "APPROVED"}
+
+
+@router.patch("/leaves/{leave_id}/reject")
+async def reject_leave(
+    leave_id: UUID,
+    current_user: User = Depends(require_hr_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """HR Admin từ chối lịch nghỉ phép"""
+    result = await db.execute(select(LeaveRequest).where(LeaveRequest.id == leave_id))
+    leave = result.scalar_one_or_none()
+    if not leave:
+        raise HTTPException(status_code=404, detail="Không tìm thấy yêu cầu nghỉ phép")
+    
+    if leave.status != "PENDING":
+        raise HTTPException(status_code=400, detail="Yêu cầu nghỉ phép này đã được xử lý")
+
+    leave.status = "REJECTED"
+    await db.commit()
+    return {"message": "Đã từ chối lịch nghỉ phép", "status": "REJECTED"}

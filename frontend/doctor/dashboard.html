@@ -8,15 +8,86 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/style.css">
     <style>
+        .calendar-cell {
+            padding: 8px;
+            border: 1px solid #edf2f7;
+            border-radius: 6px;
+            min-height: 48px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .calendar-cell.inactive {
+            background-color: #f7fafc;
+            opacity: 0.5;
+        }
+        .calendar-cell.has-work {
+            background-color: #f0fdf4;
+            border-color: #bbf7d0;
+        }
+        .calendar-cell.has-work:hover {
+            background-color: #dcfce7;
+        }
+        .green-dot {
+            width: 6px;
+            height: 6px;
+            background-color: var(--primary);
+            border-radius: 50%;
+        }
         .medicine-row input { border: none !important; background: transparent !important; text-align: center; }
         .medicine-row td { padding: 0.5rem !important; }
         .medicine-row:hover { background: var(--primary-light); }
         .medicine-row input:focus { border-bottom: 2px solid var(--primary) !important; }
         .badge-ghost { background: #f1f5f9; color: #64748b; }
         
+        /* Mobile Bottom Nav Styles */
+        .mobile-bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 -8px 30px rgba(0,0,0,0.06);
+            z-index: 999;
+            height: 70px;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0 0.5rem;
+        }
+
+        .mobile-nav-link {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+            color: #64748b;
+            font-weight: 700;
+            font-size: 0.65rem;
+            flex: 1;
+            transition: all 0.3s;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .mobile-nav-link i {
+            font-size: 1.2rem;
+        }
+
+        .mobile-nav-link.active {
+            color: var(--primary);
+        }
+
         @media (max-width: 768px) {
-            .dashboard-container { grid-template-columns: 1fr; padding: 1rem; }
+            .dashboard-container { grid-template-columns: 1fr; padding: 1rem 1rem 5.5rem; }
             .sidebar { display: none; }
+            .mobile-bottom-nav { display: flex; }
             header { flex-direction: column; align-items: flex-start !important; gap: 1rem; }
             .stats-grid { grid-template-columns: 1fr; }
             .table-container { overflow-x: auto; }
@@ -127,8 +198,146 @@
                     </form>
                 </div>
             </div>
-            
-            <!-- Other tabs like schedule can be added later or kept same as original logic -->
+            <!-- Tab: Schedule Config -->
+            <div id="schedule-tab" class="tab-content" style="display:none;">
+                <div class="flex justify-between items-center mb-4">
+                    <h2>Cấu hình lịch làm việc cố định</h2>
+                </div>
+
+                <div class="grid grid-2 gap-6">
+                    <div class="card">
+                        <h3 class="mb-3 text-primary"><i class="fa-solid fa-plus-circle"></i> Thêm lịch mới</h3>
+                        <form id="schedule-form" onsubmit="createSchedule(event)">
+                            <div class="form-group">
+                                <label class="form-label">Loại lịch</label>
+                                <div class="flex gap-4 mb-2 mt-1">
+                                    <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                        <input type="radio" name="sch-type" value="recurring" checked onchange="toggleSchType()"> Lịch cố định hàng tuần
+                                    </label>
+                                    <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                        <input type="radio" name="sch-type" value="specific" onchange="toggleSchType()"> Lịch một ngày cụ thể
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group" id="sch-day-group">
+                                <label class="form-label">Thứ (*)</label>
+                                <select id="sch-day" class="form-control">
+                                    <option value="1">Thứ Hai</option>
+                                    <option value="2">Thứ Ba</option>
+                                    <option value="3">Thứ Tư</option>
+                                    <option value="4">Thứ Năm</option>
+                                    <option value="5">Thứ Sáu</option>
+                                    <option value="6">Thứ Bảy</option>
+                                    <option value="0">Chủ Nhật</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="sch-date-group" style="display:none;">
+                                <label class="form-label">Ngày cụ thể (*)</label>
+                                <input type="date" id="sch-date" class="form-control">
+                            </div>
+                            <div class="grid grid-2 gap-4">
+                                <div class="form-group">
+                                    <label class="form-label">Giờ bắt đầu (*)</label>
+                                    <input type="time" id="sch-start" class="form-control" value="07:00" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Giờ kết thúc (*)</label>
+                                    <input type="time" id="sch-end" class="form-control" value="17:00" required>
+                                </div>
+                            </div>
+                            <div class="grid grid-2 gap-4">
+                                <div class="form-group">
+                                    <label class="form-label">Độ dài 1 ca (phút) (*)</label>
+                                    <input type="number" id="sch-duration" class="form-control" value="30" min="10" max="120" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Số ca tối đa/buổi (*)</label>
+                                    <input type="number" id="sch-max" class="form-control" value="8" min="1" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100" id="sch-submit-btn">Tạo Lịch</button>
+                            <div id="sch-error" class="error-msg mt-3" style="display:none; color: var(--danger); font-weight: bold;"></div>
+                        </form>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="mb-3"><i class="fa-solid fa-calendar-alt"></i> Lịch hiện tại</h3>
+
+                        <div class="calendar-nav flex justify-between items-center mb-4">
+                            <button type="button" class="btn btn-outline btn-sm" onclick="changeCalendarMonth(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+                            <h4 id="calendar-month-year" class="font-bold text-gray uppercase tracking-wider">THÁNG ...</h4>
+                            <button type="button" class="btn btn-outline btn-sm" onclick="changeCalendarMonth(1)"><i class="fa-solid fa-chevron-right"></i></button>
+                        </div>
+                        <div class="calendar-grid mb-1" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.25rem; text-align: center;">
+                            <div class="calendar-day-header font-bold text-xs" style="color: var(--text-light)">CN</div>
+                            <div class="calendar-day-header font-bold text-xs" style="color: var(--text-light)">T2</div>
+                            <div class="calendar-day-header font-bold text-xs" style="color: var(--text-light)">T3</div>
+                            <div class="calendar-day-header font-bold text-xs" style="color: var(--text-light)">T4</div>
+                            <div class="calendar-day-header font-bold text-xs" style="color: var(--text-light)">T5</div>
+                            <div class="calendar-day-header font-bold text-xs" style="color: var(--text-light)">T6</div>
+                            <div class="calendar-day-header font-bold text-xs" style="color: var(--text-light)">T7</div>
+                        </div>
+                        <div id="calendar-days" class="calendar-grid mb-4" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.25rem; text-align: center;">
+                            <p class="text-sm text-gray" style="grid-column: span 7;">Đang tải...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Details table -->
+                <div class="card mt-4">
+                    <h4 class="mb-3 text-sm font-bold text-gray uppercase tracking-wider">Danh sách chi tiết ngày làm việc</h4>
+                    <div style="overflow-x:auto;">
+                        <table class="text-sm table-compact w-100">
+                            <thead>
+                                <tr>
+                                    <th>Ngày/Thứ</th>
+                                    <th>Thời gian</th>
+                                    <th>Cấu hình ca</th>
+                                    <th class="text-center">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="schedules-table-body">
+                                <tr>
+                                    <td colspan="4" class="text-center py-4">Chưa có dữ liệu</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Leave Requests -->
+            <div id="leaves-tab" class="tab-content" style="display:none;">
+                <div class="flex justify-between items-center mb-4">
+                    <h2>Quản lý lịch nghỉ phép</h2>
+                </div>
+
+                <div class="grid grid-2 gap-6">
+                    <div class="card">
+                        <h3 class="mb-3 text-primary"><i class="fa-solid fa-calendar-plus"></i> Đăng ký ngày nghỉ</h3>
+                        <p class="text-xs text-gray mb-3 italic">* Lưu ý: Đăng ký nghỉ sẽ tự động hủy các ca khám chưa được thực hiện vào ngày đó.</p>
+                        <form id="leave-form" onsubmit="createLeave(event)">
+                            <div class="form-group">
+                                <label class="form-label">Ngày nghỉ (*)</label>
+                                <input type="date" id="leave-date" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Lý do nghỉ</label>
+                                <textarea id="leave-reason" class="form-control" rows="3" placeholder="Ghi chú lý do nghỉ..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100" id="leave-submit-btn">Đăng Ký Nghỉ</button>
+                            <div id="leave-error" class="error-msg mt-3" style="display:none; color: var(--danger); font-weight: bold;"></div>
+                        </form>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="mb-3"><i class="fa-solid fa-list"></i> Danh sách ngày nghỉ</h3>
+                        <div id="leaves-list" class="flex flex-column gap-3">
+                            <p class="text-sm text-gray text-center py-3">Chưa có lịch nghỉ nào.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
 
@@ -233,7 +442,7 @@
                         <td class="text-sm">${escapeHTML(a.reason || '-')}</td>
                         <td><span class="badge ${a.status === 'CONFIRMED' ? 'badge-info' : (a.status === 'COMPLETED' || a.status === 'PRESCRIPTION_SENT' ? 'badge-success' : 'badge-warning')}">${getStatusText(a.status)}</span></td>
                         <td>
-                            ${a.status === 'IN_PROGRESS' 
+                            ${a.status === 'IN_PROGRESS' || a.status === 'CONFIRMED'
                                 ? `<a href="examination.html?id=${a.id}" class="btn btn-primary btn-sm"><i class="fa-solid fa-stethoscope mr-1"></i> Khám bệnh</a>`
                                 : (a.status === 'PRESCRIPTION_SENT' || a.status === 'COMPLETED'
                                     ? `<div class="flex gap-2">
@@ -261,19 +470,125 @@
             document.getElementById('exam-modal').classList.remove('active');
         }
 
-        function addMedRow() {
+        function addMedRow(medData = null) {
+            const tbody = document.getElementById('med-list');
             const tr = document.createElement('tr');
             tr.className = 'medicine-row';
+            
+            const name = medData ? (medData.medicine_name || '') : '';
+            const s = medData ? (medData.morning || 0) : 1;
+            const t = medData ? (medData.noon || 0) : 0;
+            const c = medData ? (medData.afternoon || 0) : 0;
+            const night = medData ? (medData.evening || 0) : 1;
+            const total = medData ? (medData.total_quantity || 0) : 10;
+
             tr.innerHTML = `
-                <td><input type="text" class="form-control med-name" placeholder="Tên thuốc..." style="text-align: left"></td>
-                <td><input type="number" class="w-100 med-s"></td>
-                <td><input type="number" class="w-100 med-t"></td>
-                <td><input type="number" class="w-100 med-c"></td>
-                <td><input type="number" class="w-100 med-night"></td>
-                <td><input type="number" class="w-100 med-total font-bold"></td>
+                <td>
+                    <div style="position: relative;">
+                        <input type="text" class="form-control med-name" value="${escapeHTML(name)}" placeholder="Tên thuốc..." style="text-align: left" autocomplete="off">
+                        <div class="suggestions-list" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 9999; max-height: 200px; overflow-y: auto; display: none;"></div>
+                    </div>
+                </td>
+                <td><input type="number" class="w-100 med-s" value="${s}"></td>
+                <td><input type="number" class="w-100 med-t" value="${t}"></td>
+                <td><input type="number" class="w-100 med-c" value="${c}"></td>
+                <td><input type="number" class="w-100 med-night" value="${night}"></td>
+                <td><input type="number" class="w-100 med-total font-bold" value="${total}"></td>
                 <td><button type="button" class="text-danger" onclick="this.closest('tr').remove()"><i class="fa-solid fa-trash"></i></button></td>
             `;
-            document.getElementById('med-list').appendChild(tr);
+            tbody.appendChild(tr);
+            
+            // Attach Autocomplete
+            initMedicineAutocomplete(tr);
+        }
+
+        function initMedicineAutocomplete(row) {
+            const input = row.querySelector('.med-name');
+            const suggestionsContainer = row.querySelector('.suggestions-list');
+            let activeIndex = -1;
+
+            input.addEventListener('input', async () => {
+                const q = input.value.trim();
+                if (q.length < 2) {
+                    suggestionsContainer.innerHTML = '';
+                    suggestionsContainer.style.display = 'none';
+                    return;
+                }
+
+                try {
+                    const data = await api.get('/medical-records/medicines?q=' + encodeURIComponent(q));
+                    if (data.length === 0) {
+                        suggestionsContainer.innerHTML = '<div style="padding: 0.75rem; color: #94a3b8; font-size: 0.85rem;">Không tìm thấy thuốc</div>';
+                        suggestionsContainer.style.display = 'block';
+                        return;
+                    }
+
+                    suggestionsContainer.innerHTML = data.map(m => `
+                        <div class="suggestion-item search-result-item" data-name="${escapeHTML(m.name)}" data-strength="${escapeHTML(m.strength || '')}" data-dosage-form="${escapeHTML(m.dosage_form || '')}">
+                            <div style="font-weight: 700; color: #1f2937; font-size: 0.9rem;">${escapeHTML(m.name)}</div>
+                            <div style="font-size: 0.75rem; color: #6b7280; margin-top: 2px;">
+                                ${m.strength ? `Hàm lượng: ${m.strength}` : ''}
+                                ${m.dosage_form ? ` | Dạng: ${m.dosage_form}` : ''}
+                                ${m.manufacturer ? ` | NSX: ${m.manufacturer}` : ''}
+                            </div>
+                        </div>
+                    `).join('');
+                    suggestionsContainer.style.display = 'block';
+                    activeIndex = -1;
+
+                    // Bind clicks
+                    suggestionsContainer.querySelectorAll('.suggestion-item').forEach((item) => {
+                        item.addEventListener('mousedown', (e) => {
+                            e.preventDefault();
+                            const name = item.getAttribute('data-name');
+                            const strength = item.getAttribute('data-strength');
+                            const form = item.getAttribute('data-dosage-form');
+                            
+                            input.value = name + (strength ? ` ${strength}` : '');
+                            suggestionsContainer.style.display = 'none';
+                        });
+                    });
+
+                } catch (e) {
+                    console.error("Lỗi lấy danh mục thuốc:", e);
+                }
+            });
+
+            // Prevent hiding immediately so click can register, but handle blur
+            input.addEventListener('blur', () => {
+                setTimeout(() => {
+                    suggestionsContainer.style.display = 'none';
+                }, 200);
+            });
+            
+            // Handle arrow keys and Enter
+            input.addEventListener('keydown', (e) => {
+                const items = suggestionsContainer.querySelectorAll('.suggestion-item');
+                if (suggestionsContainer.style.display !== 'block' || items.length === 0) return;
+
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    if (activeIndex < items.length - 1) {
+                        if (activeIndex >= 0) items[activeIndex].style.background = '';
+                        activeIndex++;
+                        items[activeIndex].style.background = '#f0fdf4';
+                        items[activeIndex].scrollIntoView({ block: 'nearest' });
+                    }
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    if (activeIndex > 0) {
+                        items[activeIndex].style.background = '';
+                        activeIndex--;
+                        items[activeIndex].style.background = '#f0fdf4';
+                        items[activeIndex].scrollIntoView({ block: 'nearest' });
+                    }
+                } else if (e.key === 'Enter') {
+                    if (activeIndex >= 0) {
+                        e.preventDefault();
+                        items[activeIndex].dispatchEvent(new Event('mousedown'));
+                    }
+                }
+            });
         }
 
         async function viewPrescription(appId, name) {
@@ -346,9 +661,40 @@
 
         function showTab(id, el) {
             document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
-            document.querySelectorAll('.side-link').forEach(l => l.classList.remove('active'));
+            
+            // Clear active state on all sidebar and mobile navigation links
+            document.querySelectorAll('.side-link, .mobile-nav-link').forEach(l => l.classList.remove('active'));
+            
             document.getElementById(id).style.display = 'block';
-            el.classList.add('active');
+            
+            // Auto-highlight corresponding tabs in both desktop sidebar and mobile bottom nav
+            document.querySelectorAll(`.side-link[onclick*="'${id}'"], .mobile-nav-link[onclick*="'${id}'"]`).forEach(l => {
+                l.classList.add('active');
+            });
+
+            if (id === 'appts-tab') loadAppointments();
+            if (id === 'schedule-tab') {
+                const today = new Date();
+                const localStr = new Date(today.getTime() - (today.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+                const sd = document.getElementById('sch-date');
+                if (sd) {
+                    sd.value = localStr;
+                    sd.setAttribute('min', localStr);
+                }
+                loadSchedules();
+            }
+            if (id === 'leaves-tab') {
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                const localStr = new Date(tomorrow.getTime() - (tomorrow.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+                const ld = document.getElementById('leave-date');
+                if (ld) {
+                    ld.value = localStr;
+                    ld.setAttribute('min', localStr);
+                }
+                loadLeaves();
+            }
+            if (id === 'profile-tab') loadDoctorProfile();
         }
 
         async function loadSpecialties() {
@@ -361,10 +707,259 @@
         }
 
         async function loadDoctorProfile() {
-            // Fetch from /doctors/me
+            try {
+                const profile = await api.get('/doctors/me');
+                if (profile.specialty_id) document.getElementById('prof-spec').value = profile.specialty_id;
+                document.getElementById('prof-exp').value = profile.experience_years || 0;
+                document.getElementById('prof-bio').value = profile.bio || '';
+            } catch (e) { console.error("Không thể tải hồ sơ bác sĩ", e); }
         }
 
+        async function updateProfile(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.disabled = true; btn.textContent = 'Đang xử lý...';
+            try {
+                const body = {
+                    specialty_id: document.getElementById('prof-spec').value,
+                    experience_years: parseInt(document.getElementById('prof-exp').value) || 0,
+                    bio: document.getElementById('prof-bio').value
+                };
+                await api.patch('/doctors/me', body);
+                alert("Cập nhật hồ sơ thành công!");
+            } catch (error) {
+                alert(error.message);
+            } finally {
+                btn.disabled = false; btn.textContent = 'Lưu thông tin';
+            }
+        }
+
+        // --- Schedules and Calendar ---
+        const DAY_NAMES = { 0: 'Chủ Nhật', 1: 'Thứ 2', 2: 'Thứ 3', 3: 'Thứ 4', 4: 'Thứ 5', 5: 'Thứ 6', 6: 'Thứ 7' };
+        let currentCalYear = new Date().getFullYear();
+        let currentCalMonth = new Date().getMonth();
+
+        async function loadSchedules() {
+            const calDays = document.getElementById('calendar-days');
+            const tableBody = document.getElementById('schedules-table-body');
+            calDays.innerHTML = '<p class="text-sm" style="grid-column: span 7;"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải...</p>';
+            try {
+                const res = await api.get('/doctors/me/schedules');
+                
+                // Always render calendar grid first, even if it is empty!
+                renderCalendar(res);
+                
+                if (res.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-gray">Chưa có lịch làm việc nào</td></tr>';
+                    return;
+                }
+                res.sort((a, b) => {
+                    if (a.day_of_week !== null && b.day_of_week !== null) return a.day_of_week - b.day_of_week;
+                    if (a.day_of_week !== null) return -1;
+                    if (b.day_of_week !== null) return 1;
+                    return a.specific_date.localeCompare(b.specific_date);
+                });
+                tableBody.innerHTML = res.map(s => {
+                    const dayText = s.specific_date ? formatDate(s.specific_date) : DAY_NAMES[s.day_of_week];
+                    const typeLabel = s.specific_date ? '<span class="badge badge-info">Riêng</span>' : '<span class="badge" style="background:#e2e8f0; color:#475569">Cố định</span>';
+                    return `<tr><td class="font-bold">${dayText} ${typeLabel}</td><td>${formatTime(s.start_time)} - ${formatTime(s.end_time)}</td><td>${s.slot_duration_min}m | max ${s.max_slots}</td><td class="text-center"><button class="btn btn-outline btn-sm text-danger" style="border-color:var(--danger); padding:2px 8px;" onclick="deleteSchedule('${s.id}')"><i class="fa-solid fa-trash"></i></button></td></tr>`;
+                }).join('');
+            } catch (e) {
+                document.getElementById('calendar-days').innerHTML = `<p class="text-danger text-sm" style="grid-column: span 7;">${escapeHTML(e.message)}</p>`;
+            }
+        }
+
+        function renderCalendar(schedules) {
+            const container = document.getElementById('calendar-days');
+            const monthYearEl = document.getElementById('calendar-month-year');
+            monthYearEl.textContent = `THÁNG ${currentCalMonth + 1} / ${currentCalYear}`;
+            const firstDay = new Date(currentCalYear, currentCalMonth, 1).getDay();
+            const daysInMonth = new Date(currentCalYear, currentCalMonth + 1, 0).getDate();
+            let html = '';
+            for (let i = 0; i < firstDay; i++) {
+                html += `<div class="calendar-cell inactive"></div>`;
+            }
+            const todayStr = new Date(new Date().getTime() - (new Date().getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+            for (let d = 1; d <= daysInMonth; d++) {
+                const tmp = new Date(currentCalYear, currentCalMonth, d);
+                const dateStr = new Date(tmp.getTime() - (tmp.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+                const dayOfWeek = tmp.getDay();
+                const daySchedules = schedules.filter(s => {
+                    if (s.specific_date && s.specific_date === dateStr) return true;
+                    if (s.day_of_week !== null && parseInt(s.day_of_week) === dayOfWeek) return true;
+                    return false;
+                });
+                const hasSchedule = daySchedules.length > 0;
+                let classes = 'calendar-cell';
+                let dotHtml = '';
+                let titleAttr = '';
+                if (hasSchedule) {
+                    classes += ' has-work';
+                    const lines = daySchedules.map(s => `${s.start_time.substring(0, 5)} - ${s.end_time.substring(0, 5)}`);
+                    titleAttr = `title="CA LÀM VIỆC:\n${lines.join('\n')}"`;
+                    dotHtml = `<div class="green-dot" style="margin-top: 4px; pointer-events: none;"></div>`;
+                }
+                if (dateStr === todayStr) {
+                    html += `<div class="${classes}" ${titleAttr} style="border: 2px solid var(--primary); background-color: #e0f2fe; box-shadow: 0 2px 4px rgba(0,0,0,0.1); font-weight: bold; transform: scale(1.02); cursor: default;"><span class="date-num text-primary">${d}</span><div style="font-size: 0.6rem; color: var(--primary); margin-top:2px;">HÔM NAY</div>${dotHtml}</div>`;
+                } else {
+                    html += `<div class="${classes}" ${titleAttr} style="${hasSchedule ? 'cursor: pointer;' : 'cursor: default;'}"><span class="date-num">${d}</span>${dotHtml}</div>`;
+                }
+            }
+            container.innerHTML = html;
+        }
+
+        function changeCalendarMonth(offset) {
+            currentCalMonth += offset;
+            if (currentCalMonth > 11) { currentCalMonth = 0; currentCalYear++; }
+            else if (currentCalMonth < 0) { currentCalMonth = 11; currentCalYear--; }
+            loadSchedules();
+        }
+
+        async function createSchedule(e) {
+            e.preventDefault();
+            const btn = document.getElementById('sch-submit-btn') || e.target.querySelector('button[type="submit"]');
+            const err = document.getElementById('sch-error');
+            btn.disabled = true; btn.textContent = 'Đang xử lý...'; err.style.display = 'none';
+            try {
+                const type = document.querySelector('input[name="sch-type"]:checked').value;
+                const body = {
+                    start_time: document.getElementById('sch-start').value + ":00",
+                    end_time: document.getElementById('sch-end').value + ":00",
+                    slot_duration_min: parseInt(document.getElementById('sch-duration').value),
+                    max_slots: parseInt(document.getElementById('sch-max').value)
+                };
+                if (type === 'recurring') {
+                    body.day_of_week = parseInt(document.getElementById('sch-day').value);
+                    body.specific_date = null;
+                } else {
+                    body.specific_date = document.getElementById('sch-date').value;
+                    body.day_of_week = null;
+                    if (!body.specific_date) throw new Error("Vui lòng chọn ngày cụ thể");
+                }
+                await api.post('/doctors/me/schedules', body);
+                document.getElementById('sch-start').value = '07:00';
+                document.getElementById('sch-end').value = '17:00';
+                loadSchedules();
+                alert("Thêm lịch làm việc thành công!");
+            } catch (error) {
+                err.textContent = error.message;
+                err.style.display = 'block';
+            } finally {
+                btn.disabled = false; btn.textContent = 'Tạo Lịch';
+            }
+        }
+
+        function deleteSchedule(id) {
+            if (confirm("Bạn có chắc chắn muốn xóa lịch làm việc này?")) {
+                api.delete(`/doctors/me/schedules/${id}`)
+                    .then(() => {
+                        alert("Đã xóa lịch làm việc");
+                        loadSchedules();
+                    })
+                    .catch(e => alert("Lỗi khi xóa: " + e.message));
+            }
+        }
+
+        // --- Leave Registration ---
+        async function loadLeaves() {
+            const list = document.getElementById('leaves-list');
+            list.innerHTML = '<p class="text-sm"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải...</p>';
+            try {
+                const res = await api.get('/doctors/me/leaves');
+                if (res.length === 0) {
+                    list.innerHTML = '<p class="text-sm text-gray text-center py-3 border rounded-md">Chưa có lịch nghỉ nào.</p>';
+                    return;
+                }
+                list.innerHTML = res.map(l => {
+                    let statusBadge = '';
+                    if (l.status === 'PENDING') {
+                        statusBadge = '<span class="badge" style="background-color:#f59e0b; color:white; padding:2px 8px; border-radius:4px; font-size:12px; font-weight:600;"><i class="fa-solid fa-clock mr-1"></i>Chờ duyệt</span>';
+                    } else if (l.status === 'APPROVED') {
+                        statusBadge = '<span class="badge" style="background-color:#10b981; color:white; padding:2px 8px; border-radius:4px; font-size:12px; font-weight:600;"><i class="fa-solid fa-check mr-1"></i>Đã duyệt</span>';
+                    } else {
+                        statusBadge = '<span class="badge" style="background-color:#ef4444; color:white; padding:2px 8px; border-radius:4px; font-size:12px; font-weight:600;"><i class="fa-solid fa-xmark mr-1"></i>Bị từ chối</span>';
+                    }
+                    return `
+                        <div class="p-3 border rounded-md shadow-sm bg-white flex justify-between gap-3 mb-3">
+                            <div style="flex:1;">
+                                <span class="font-bold text-danger mb-1 block"><i class="fa-solid fa-calendar-xmark mr-2"></i>Ngày nghỉ: ${formatDate(l.leave_date)}</span>
+                                <p class="text-sm text-gray" style="white-space:pre-wrap; word-break:break-word;">Lý do: ${escapeHTML(l.reason || 'Không có')}</p>
+                            </div>
+                            <div class="flex items-start gap-2" style="white-space:nowrap; align-items:center;">
+                                ${statusBadge}
+                                <button class="btn btn-outline btn-sm text-danger" style="border-color:var(--danger); padding:2px 8px;" onclick="deleteLeave('${l.id}')" title="Hủy lịch nghỉ"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (e) {
+                list.innerHTML = `<p class="text-danger text-sm">${escapeHTML(e.message)}</p>`;
+            }
+        }
+
+        async function createLeave(e) {
+            e.preventDefault();
+            const date = document.getElementById('leave-date').value;
+            const reason = document.getElementById('leave-reason').value;
+            if (confirm(`Bạn có chắc muốn đăng ký nghỉ ngày ${formatDate(date)}? Toàn bộ ca khám ngày này sẽ không thể đặt được.`)) {
+                const btn = document.getElementById('leave-submit-btn');
+                const err = document.getElementById('leave-error');
+                btn.disabled = true; btn.textContent = 'Đang đăng ký...'; err.style.display = 'none';
+                try {
+                    await api.post('/doctors/me/leaves', { leave_date: date, reason: reason });
+                    document.getElementById('leave-reason').value = '';
+                    const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+                    document.getElementById('leave-date').value = tomorrow.toISOString().split('T')[0];
+                    loadLeaves();
+                    alert("Đăng ký nghỉ phép thành công!");
+                } catch (error) {
+                    err.textContent = error.message; err.style.display = 'block';
+                } finally {
+                    btn.disabled = false; btn.textContent = 'Đăng Ký Nghỉ';
+                }
+            }
+        }
+
+        async function deleteLeave(id) {
+            if (confirm("Bạn có chắc chắn muốn hủy lịch nghỉ này?")) {
+                try {
+                    await api.delete(`/doctors/me/leaves/${id}`);
+                    alert("Đã hủy lịch nghỉ");
+                    loadLeaves();
+                } catch (e) {
+                    alert("Lỗi khi xóa: " + e.message);
+                }
+            }
+        }
+
+        function toggleSchType() {
+            const type = document.querySelector('input[name="sch-type"]:checked').value;
+            document.getElementById('sch-day-group').style.display = type === 'recurring' ? 'block' : 'none';
+            document.getElementById('sch-date-group').style.display = type === 'specific' ? 'block' : 'none';
+        }
+
+        function formatTime(t) { return t ? t.substring(0, 5) : '---'; }
         function escapeHTML(str) { const p = document.createElement('p'); p.textContent = str; return p.innerHTML; }
     </script>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav">
+        <a href="#" class="mobile-nav-link active" onclick="showTab('appts-tab', this)">
+            <i class="fa-solid fa-calendar-check"></i>
+            <span>Ca khám</span>
+        </a>
+        <a href="#" class="mobile-nav-link" onclick="showTab('schedule-tab', this)">
+            <i class="fa-solid fa-clock"></i>
+            <span>Lịch làm việc</span>
+        </a>
+        <a href="#" class="mobile-nav-link" onclick="showTab('profile-tab', this)">
+            <i class="fa-solid fa-user-md"></i>
+            <span>Hồ sơ</span>
+        </a>
+        <a href="#" class="mobile-nav-link" onclick="showTab('leaves-tab', this)">
+            <i class="fa-solid fa-calendar-day"></i>
+            <span>Đăng ký nghỉ</span>
+        </a>
+    </nav>
 </body>
 </html>

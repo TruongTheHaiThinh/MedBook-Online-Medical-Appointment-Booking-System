@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Khám bệnh - MedBook Premium</title>
     <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/print.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <style>
@@ -150,38 +151,12 @@
         .med-label { font-size: 0.7rem; font-weight: 900; color: #94a3b8; text-transform: uppercase; margin-bottom: 0.5rem; display: block; }
         
         /* ── A5 Prescription Slip (Print Only) ── */
-        #prescription-slip {
-            display: none;
-            width: 148mm; /* A5 Width */
-            padding: 10mm;
-            background: white;
-            color: black;
-            font-family: 'Times New Roman', serif;
-            line-height: 1.4;
-        }
-
+        #print-section { display: none; }
         @media print {
-            body * { visibility: hidden; }
-            #prescription-slip, #prescription-slip * { visibility: visible; }
-            #prescription-slip { 
-                display: block !important;
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                margin: 0;
-                padding: 0;
-            }
+            body > :not(#print-section) { display: none !important; }
+            #print-section { display: block !important; }
             .no-print { display: none !important; }
         }
-
-        .slip-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 20px; }
-        .slip-title { font-size: 24px; font-weight: bold; margin: 10px 0; text-transform: uppercase; }
-        .patient-info-table { width: 100%; margin-bottom: 20px; }
-        .patient-info-table td { padding: 5px 0; font-size: 14px; }
-        .med-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-        .med-table th { border-bottom: 1.5px solid #000; text-align: left; padding: 8px 0; font-size: 13px; }
-        .med-table td { border-bottom: 1px dotted #ccc; padding: 10px 0; font-size: 13px; }
         .slip-footer { margin-top: 40px; display: flex; justify-content: space-between; }
         .signature-box { text-align: center; width: 200px; }
 
@@ -201,11 +176,13 @@
         .text-danger { color: #f43f5e; }
         .suggestions-list {
             position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
             background: white;
-            width: 100%;
-            z-index: 100;
+            z-index: 9999;
             border-radius: 1rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
             max-height: 200px;
             overflow-y: auto;
             display: none;
@@ -421,63 +398,45 @@
     </div>
 
     <!-- Printable A5 Slip -->
-    <div id="prescription-slip">
-        <div class="slip-header">
-            <h3 style="margin: 0; font-size: 16px;">PHÒNG KHÁM ĐA KHOA MEDBOOK</h3>
-            <p style="margin: 2px 0; font-size: 11px;">Địa chỉ: Số 1 Đại Cồ Việt, Hai Bà Trưng, Hà Nội - Hotline: 1900 1234</p>
-            <div class="slip-title">ĐƠN THUỐC</div>
-            <div style="text-align: center; margin-bottom: 10px;">
+    <div id="print-section" class="prescription-a5">
+        <div class="presc-hospital-header">
+            <div class="hospital-info">
+                <p class="hospital-name">PHÒNG KHÁM ĐA KHOA MEDBOOK</p>
+                <p>Địa chỉ: 24 Nguyễn Văn Bảo, Phường Hạnh Thông, Thành phố Hồ Chí Minh</p>
+                <p>Hotline: 1900 1234</p>
+            </div>
+            <div class="barcode-area">
                 <svg id="barcode"></svg>
+                <p id="slip-appt-id" style="font-size: 8px; color: #666; margin: 0; text-align: center;"></p>
             </div>
-            <p id="slip-appt-id" style="font-size: 10px; color: #666; margin: 0;"></p>
         </div>
 
-        <table class="patient-info-table">
-            <tr>
-                <td colspan="2"><b>Họ và tên:</b> <span id="slip-patient-name" style="font-size: 16px; font-weight: bold; text-transform: uppercase;"></span></td>
-                <td><b>Tuổi:</b> <span id="slip-patient-age"></span></td>
-                <td><b>GT:</b> <span id="slip-patient-gender"></span></td>
-            </tr>
-            <tr>
-                <td colspan="2"><b>SĐT:</b> <span id="slip-patient-phone"></span></td>
-                <td colspan="2"><b>Nhóm máu:</b> <span id="slip-patient-blood"></span></td>
-            </tr>
-            <tr>
-                <td colspan="4"><b>Địa chỉ:</b> <span id="slip-patient-address"></span></td>
-            </tr>
-            <tr>
-                <td colspan="4"><b>Chẩn đoán:</b> <span id="slip-diagnosis" style="font-weight: bold;"></span></td>
-            </tr>
-        </table>
+        <div class="presc-main-title">ĐƠN THUỐC</div>
 
-        <table class="med-table">
-            <thead>
-                <tr>
-                    <th width="5%">STT</th>
-                    <th width="50%">Tên thuốc / Hàm lượng</th>
-                    <th width="20%">Cách dùng (S-T-C-T)</th>
-                    <th width="15%">Số lượng</th>
-                </tr>
-            </thead>
-            <tbody id="slip-med-list">
-                <!-- Meds here -->
-            </tbody>
-        </table>
-
-        <div style="margin-top: 15px; font-size: 13px;">
-            <p><b>Lời dặn:</b> <span id="slip-notes"></span></p>
-            <p id="slip-revisit" style="font-weight: bold; margin-top: 5px;"></p>
+        <div class="presc-patient-grid">
+            <div><b>Họ và tên:</b> <span id="slip-patient-name" style="text-transform: uppercase;"></span></div>
+            <div><b>Tuổi:</b> <span id="slip-patient-age"></span></div>
+            <div><b>GT:</b> <span id="slip-patient-gender"></span></div>
+            <div><b>Nhóm máu:</b> <span id="slip-patient-blood"></span></div>
+            <div class="full-row"><b>SĐT:</b> <span id="slip-patient-phone"></span></div>
+            <div class="full-row"><b>Địa chỉ:</b> <span id="slip-patient-address"></span></div>
+            <div class="full-row"><b>Chẩn đoán:</b> <span id="slip-diagnosis" style="font-weight: bold;"></span></div>
         </div>
 
-        <div class="slip-footer">
-            <div class="signature-box">
-                <p style="font-size: 11px;">Mã bệnh nhân</p>
-                <div id="slip-id-box" style="border: 1px solid #000; padding: 5px; font-family: monospace; margin-top: 5px;"></div>
+        <div class="presc-meds-list" id="slip-med-list">
+            <!-- Medicine items will be generated here -->
+        </div>
+
+        <div class="presc-bottom-layout">
+            <div class="presc-advice-left">
+                <p><b>Lời dặn:</b></p>
+                <div class="advice-content" id="slip-notes"></div>
+                <p id="slip-revisit" style="font-weight: bold; margin-top: 5px;"></p>
             </div>
-            <div class="signature-box">
-                <p id="slip-date-box" style="font-style: italic; font-size: 12px;"></p>
-                <p style="font-weight: bold; margin-top: 5px;">BÁC SĨ ĐIỀU TRỊ</p>
-                <div style="height: 60px;"></div>
+            <div class="presc-signature-right">
+                <p id="slip-date-box" style="font-style: italic; font-size: 11px;"></p>
+                <p style="font-weight: bold; margin-top: 2px;">BÁC SĨ ĐIỀU TRỊ</p>
+                <div class="sign-space"></div>
                 <p id="slip-doctor-name" style="font-weight: bold;"></p>
             </div>
         </div>
@@ -502,7 +461,11 @@
         })();
 
         // 2. Core Dependencies (Embedded)
-        const CONFIG = { API_URL: 'http://127.0.0.1:8000' };
+        const CONFIG = {
+            API_URL: (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+                ? 'http://127.0.0.1:8000'
+                : 'https://medbook-backend.onrender.com'
+        };
 
         const api = {
             _headers: function() {
@@ -701,21 +664,7 @@
                             const container = document.getElementById('medicine-list');
                             container.innerHTML = ''; // Clear empty state
                             record.prescriptions.forEach(p => {
-                                const row = document.createElement('div');
-                                row.className = 'med-row';
-                                const duration = p.duration ? parseInt(p.duration) : 7;
-                                row.innerHTML = `
-                                    <div><input type="text" class="med-input-field med-name" value="${p.medicine_name}" placeholder="Tên thuốc"></div>
-                                    <div><input type="text" class="med-input-field med-dosage" value="${p.dosage || ''}" placeholder="Liều"></div>
-                                    <div><input type="number" value="${p.morning}" class="med-input-field med-morning" oninput="calcTotal(this)"></div>
-                                    <div><input type="number" value="${p.noon}" class="med-input-field med-noon" oninput="calcTotal(this)"></div>
-                                    <div><input type="number" value="${p.afternoon}" class="med-input-field med-afternoon" oninput="calcTotal(this)"></div>
-                                    <div><input type="number" value="${p.evening}" class="med-input-field med-evening" oninput="calcTotal(this)"></div>
-                                    <div><input type="number" value="${duration}" class="med-input-field med-dur" oninput="calcTotal(this)"></div>
-                                    <div><input type="text" class="med-input-field med-total" value="${p.total_quantity}" readonly style="background: #f0fdf4;"></div>
-                                    <button onclick="this.closest('.med-row').remove();" class="text-danger"><i class="fa-solid fa-trash"></i></button>
-                                `;
-                                container.appendChild(row);
+                                createMedicineRow(p);
                             });
                         }
                     }
@@ -776,22 +725,27 @@
             const slipBody = document.getElementById('slip-med-list');
             slipBody.innerHTML = '';
             document.querySelectorAll('.med-row').forEach((row, index) => {
-                const name = row.querySelector('.med-name').value;
+                const name = row.querySelector('.med-name').value.trim();
                 if (!name) return;
+                const dosage = row.querySelector('.med-dosage').value.trim();
                 const m = row.querySelector('.med-morning').value || 0;
                 const n = row.querySelector('.med-noon').value || 0;
                 const a = row.querySelector('.med-afternoon').value || 0;
                 const e = row.querySelector('.med-evening').value || 0;
                 const total = row.querySelector('.med-total').value;
                 
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td><b>${name}</b><br><small><i>Uống: S${m}, T${n}, C${a}, T${e}</i></small></td>
-                    <td>S${m}-T${n}-C${a}-T${e}</td>
-                    <td><b>${total}</b></td>
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'med-item';
+                itemDiv.innerHTML = `
+                    <div class="med-main">
+                        <span>${index + 1}. ${name} ${dosage ? `(${dosage})` : ''}</span>
+                        <span>SL: ${total} viên</span>
+                    </div>
+                    <div class="med-usage">
+                        <i>Uống: Sáng ${m}, Trưa ${n}, Chiều ${a}, Tối ${e}</i>
+                    </div>
                 `;
-                slipBody.appendChild(tr);
+                slipBody.appendChild(itemDiv);
             });
         }
 
@@ -817,23 +771,167 @@
 
         // Add Medicine Logic
         function addMedicineRow() {
+            createMedicineRow();
+        }
+
+        function createMedicineRow(medData = null) {
             document.getElementById('empty-med-msg').style.display = 'none';
             const container = document.getElementById('medicine-list');
             const row = document.createElement('div');
             row.className = 'med-row';
+            
+            const name = medData ? medData.medicine_name : '';
+            const dosage = medData ? (medData.dosage || '') : '';
+            const morning = medData ? medData.morning : 1;
+            const noon = medData ? medData.noon : 0;
+            const afternoon = medData ? medData.afternoon : 0;
+            const evening = medData ? medData.evening : 1;
+            const duration = medData ? (medData.duration ? parseInt(medData.duration) : 7) : 7;
+            const total = medData ? medData.total_quantity : '';
+
             row.innerHTML = `
-                <div><input type="text" class="med-input-field med-name" placeholder="Tên thuốc"></div>
-                <div><input type="text" class="med-input-field med-dosage" placeholder="Liều"></div>
-                <div><input type="number" value="1" class="med-input-field med-morning" oninput="calcTotal(this)"></div>
-                <div><input type="number" value="0" class="med-input-field med-noon" oninput="calcTotal(this)"></div>
-                <div><input type="number" value="0" class="med-input-field med-afternoon" oninput="calcTotal(this)"></div>
-                <div><input type="number" value="1" class="med-input-field med-evening" oninput="calcTotal(this)"></div>
-                <div><input type="number" value="7" class="med-input-field med-dur" oninput="calcTotal(this)"></div>
-                <div><input type="text" class="med-input-field med-total" readonly style="background: #f0fdf4;"></div>
-                <button onclick="this.closest('.med-row').remove();" class="text-danger"><i class="fa-solid fa-trash"></i></button>
+                <div class="relative" style="position: relative;">
+                    <span class="med-label">Tên thuốc</span>
+                    <input type="text" class="med-input-field med-name" value="${escapeHTML(name)}" placeholder="Tên thuốc" autocomplete="off">
+                    <div class="suggestions-list"></div>
+                </div>
+                <div>
+                    <span class="med-label">Liều dùng</span>
+                    <input type="text" class="med-input-field med-dosage" value="${escapeHTML(dosage)}" placeholder="Liều">
+                </div>
+                <div>
+                    <span class="med-label">Sáng</span>
+                    <input type="number" value="${morning}" class="med-input-field med-morning" oninput="calcTotal(this)">
+                </div>
+                <div>
+                    <span class="med-label">Trưa</span>
+                    <input type="number" value="${noon}" class="med-input-field med-noon" oninput="calcTotal(this)">
+                </div>
+                <div>
+                    <span class="med-label">Chiều</span>
+                    <input type="number" value="${afternoon}" class="med-input-field med-afternoon" oninput="calcTotal(this)">
+                </div>
+                <div>
+                    <span class="med-label">Tối</span>
+                    <input type="number" value="${evening}" class="med-input-field med-evening" oninput="calcTotal(this)">
+                </div>
+                <div>
+                    <span class="med-label">Số ngày</span>
+                    <input type="number" value="${duration}" class="med-input-field med-dur" oninput="calcTotal(this)">
+                </div>
+                <div>
+                    <span class="med-label">Tổng</span>
+                    <input type="text" class="med-input-field med-total" value="${total}" readonly style="background: #f0fdf4;">
+                </div>
+                <button onclick="this.closest('.med-row').remove();" class="text-danger" style="margin-bottom: 0.75rem;"><i class="fa-solid fa-trash"></i></button>
             `;
             container.appendChild(row);
+            
+            // Attach Autocomplete
+            initMedicineAutocomplete(row);
+            
             calcTotal(row.querySelector('input'));
+        }
+
+        function escapeHTML(str) {
+            if (!str) return '';
+            const p = document.createElement('p');
+            p.textContent = str;
+            return p.innerHTML;
+        }
+
+        function initMedicineAutocomplete(row) {
+            const input = row.querySelector('.med-name');
+            const suggestionsContainer = row.querySelector('.suggestions-list');
+            const dosageInput = row.querySelector('.med-dosage');
+            let activeIndex = -1;
+
+            input.addEventListener('input', async () => {
+                const q = input.value.trim();
+                if (q.length < 2) {
+                    suggestionsContainer.innerHTML = '';
+                    suggestionsContainer.style.display = 'none';
+                    return;
+                }
+
+                try {
+                    const data = await api.get('/medical-records/medicines?q=' + encodeURIComponent(q));
+                    if (data.length === 0) {
+                        suggestionsContainer.innerHTML = '<div style="padding: 0.75rem; color: #94a3b8; font-size: 0.85rem;">Không tìm thấy thuốc</div>';
+                        suggestionsContainer.style.display = 'block';
+                        return;
+                    }
+
+                    suggestionsContainer.innerHTML = data.map(m => `
+                        <div class="suggestion-item" data-name="${escapeHTML(m.name)}" data-strength="${escapeHTML(m.strength || '')}" data-dosage-form="${escapeHTML(m.dosage_form || '')}">
+                            <div style="font-weight: 700; color: #1f2937; font-size: 0.9rem;">${escapeHTML(m.name)}</div>
+                            <div style="font-size: 0.75rem; color: #6b7280; margin-top: 2px;">
+                                ${m.strength ? `Hàm lượng: ${m.strength}` : ''}
+                                ${m.dosage_form ? ` | Dạng: ${m.dosage_form}` : ''}
+                                ${m.manufacturer ? ` | NSX: ${m.manufacturer}` : ''}
+                            </div>
+                        </div>
+                    `).join('');
+                    suggestionsContainer.style.display = 'block';
+                    activeIndex = -1;
+
+                    // Bind clicks
+                    suggestionsContainer.querySelectorAll('.suggestion-item').forEach((item, idx) => {
+                        item.addEventListener('mousedown', (e) => {
+                            e.preventDefault();
+                            const name = item.getAttribute('data-name');
+                            const strength = item.getAttribute('data-strength');
+                            const form = item.getAttribute('data-dosage-form');
+                            
+                            input.value = name;
+                            if (strength || form) {
+                                dosageInput.value = `${strength} ${form}`.trim();
+                            }
+                            suggestionsContainer.style.display = 'none';
+                            triggerAutoSave();
+                        });
+                    });
+
+                } catch (e) {
+                    console.error("Lỗi lấy danh mục thuốc:", e);
+                }
+            });
+
+            // Prevent hiding immediately so click can register, but handle blur
+            input.addEventListener('blur', () => {
+                setTimeout(() => {
+                    suggestionsContainer.style.display = 'none';
+                }, 200);
+            });
+            
+            // Handle arrow keys and Enter
+            input.addEventListener('keydown', (e) => {
+                const items = suggestionsContainer.querySelectorAll('.suggestion-item');
+                if (suggestionsContainer.style.display !== 'block' || items.length === 0) return;
+
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    if (activeIndex < items.length - 1) {
+                        if (activeIndex >= 0) items[activeIndex].style.background = '';
+                        activeIndex++;
+                        items[activeIndex].style.background = '#f0fdf4';
+                        items[activeIndex].scrollIntoView({ block: 'nearest' });
+                    }
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    if (activeIndex > 0) {
+                        items[activeIndex].style.background = '';
+                        activeIndex--;
+                        items[activeIndex].style.background = '#f0fdf4';
+                        items[activeIndex].scrollIntoView({ block: 'nearest' });
+                    }
+                } else if (e.key === 'Enter') {
+                    if (activeIndex >= 0) {
+                        e.preventDefault();
+                        items[activeIndex].dispatchEvent(new Event('mousedown'));
+                    }
+                }
+            });
         }
 
         function calcTotal(input) {

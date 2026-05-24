@@ -13,7 +13,7 @@ class LeaveRequest(Base):
     doctor_id = Column(UUID(as_uuid=True), ForeignKey("doctors.id", ondelete="CASCADE"), nullable=False)
     leave_date = Column(Date, nullable=False)
     reason = Column(String(500), nullable=True)
-    status = Column(String(20), nullable=False, default="APPROVED") # Auto-approved for now based on user's suggestion of "tick X"
+    status = Column(String(20), nullable=False, default="PENDING")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     doctor = relationship("Doctor", back_populates="leave_requests")

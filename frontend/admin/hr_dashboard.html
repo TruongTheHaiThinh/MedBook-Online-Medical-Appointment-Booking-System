@@ -25,6 +25,9 @@
                 <a href="#" class="side-link" onclick="showTab('doctors-tab', this)">
                     <i class="fa-solid fa-user-doctor"></i> Phê duyệt Bác sĩ
                 </a>
+                <a href="#" class="side-link" onclick="showTab('leaves-tab', this)">
+                    <i class="fa-solid fa-calendar-xmark"></i> Duyệt nghỉ phép
+                </a>
                 <a href="#" class="side-link" onclick="showTab('specialties-tab', this)">
                     <i class="fa-solid fa-stethoscope"></i> Chuyên khoa
                 </a>
@@ -104,6 +107,26 @@
                 </div>
             </div>
 
+            <!-- Tab: Leaves -->
+            <div id="leaves-tab" class="tab-content" style="display:none">
+                <h2 class="mb-4">Phê duyệt Lịch nghỉ phép</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Bác sĩ</th>
+                                <th>Ngày đăng ký nghỉ</th>
+                                <th>Lý do</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaves-pending-body">
+                            <tr><td colspan="4" class="text-center">Đang tải...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <!-- Tab: Specialties -->
             <div id="specialties-tab" class="tab-content" style="display:none">
                 <div class="flex justify-between items-center mb-6">
@@ -178,6 +201,7 @@
             document.addEventListener('DOMContentLoaded', () => {
                 loadStats();
                 loadPendingDoctors();
+                loadPendingLeaves();
                 loadSpecialties();
                 loadUsers();
             });
@@ -300,6 +324,53 @@
 
         async function toggleUserStatus(id) {
             try { await api.patch(`/admin/hr/users/${id}/toggle-active`); loadUsers(); } catch(e) { alert(e.message); }
+        }
+
+        async function loadPendingLeaves() {
+            const tbody = document.getElementById('leaves-pending-body');
+            try {
+                const leaves = await api.get('/admin/hr/leaves/pending');
+                if (leaves.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-gray">Không có yêu cầu nghỉ phép nào đang chờ duyệt.</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = leaves.map(l => `
+                    <tr>
+                        <td class="font-bold text-primary"><i class="fa-solid fa-user-doctor mr-2"></i>${escapeHTML(l.doctor_name)}</td>
+                        <td class="font-bold text-danger"><i class="fa-solid fa-calendar-day mr-2"></i>${formatDate(l.leave_date)}</td>
+                        <td style="max-width:300px; white-space:pre-wrap; word-break:break-word;">${escapeHTML(l.reason || 'Không có')}</td>
+                        <td>
+                            <button class="btn btn-primary btn-sm mr-2" onclick="approveLeave('${l.id}', '${escapeHTML(l.doctor_name)}', '${l.leave_date}')"><i class="fa-solid fa-check mr-1"></i>Duyệt</button>
+                            <button class="btn btn-outline btn-sm text-danger" style="border-color:var(--danger);" onclick="rejectLeave('${l.id}', '${escapeHTML(l.doctor_name)}', '${l.leave_date}')"><i class="fa-solid fa-xmark mr-1"></i>Từ chối</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch(e) { tbody.innerHTML = `<tr><td colspan="4" class="text-center text-danger py-4">${escapeHTML(e.message)}</td></tr>`; }
+        }
+
+        async function approveLeave(id, doctorName, date) {
+            if (!confirm(`Bạn có chắc muốn phê duyệt lịch nghỉ ngày ${formatDate(date)} cho bác sĩ ${doctorName}? Toàn bộ lịch khám ngày này của bác sĩ sẽ bị hủy.`)) return;
+            try {
+                const res = await api.patch(`/admin/hr/leaves/${id}/approve`);
+                alert(res.message || "Đã phê duyệt thành công!");
+                loadPendingLeaves();
+                loadStats();
+            } catch(e) { alert("Lỗi khi duyệt: " + e.message); }
+        }
+
+        async function rejectLeave(id, doctorName, date) {
+            if (!confirm(`Từ chối lịch nghỉ ngày ${formatDate(date)} của bác sĩ ${doctorName}?`)) return;
+            try {
+                const res = await api.patch(`/admin/hr/leaves/${id}/reject`);
+                alert(res.message || "Đã từ chối lịch nghỉ phép!");
+                loadPendingLeaves();
+            } catch(e) { alert("Lỗi khi từ chối: " + e.message); }
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            const [y, m, d] = dateStr.split('-');
+            return `${d}/${m}/${y}`;
         }
 
         function escapeHTML(str) { const p = document.createElement('p'); p.textContent = str; return p.innerHTML; }

@@ -15,9 +15,8 @@ venv/
 backend/scratch/
 backend/medbook.db
 backend/.env
-backend/medicine_dataset.csv
 
-# Docs / Deploy guides (khong push len repo)
+# Docs / Deploy guides (không push lên repo)
 docs/
 render_deploy_guide.md
 TruongTheHaiThinh_project-proposal.md

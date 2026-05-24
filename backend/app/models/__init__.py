@@ -5,6 +5,7 @@ from .schedule import Schedule
 from .appointment import Appointment, MedicalRecord, PrescriptionItem, Payment
 from .leave_request import LeaveRequest
 from .medicine import Medicine
+from .password_history import PasswordHistory
 
 __all__ = [
     "User",
@@ -17,4 +18,5 @@ __all__ = [
     "Payment",
     "LeaveRequest",
     "Medicine",
+    "PasswordHistory",
 ]
