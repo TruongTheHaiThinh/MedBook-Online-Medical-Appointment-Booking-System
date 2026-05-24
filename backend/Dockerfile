@@ -17,6 +17,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy toàn bộ mã nguồn backend vào container
 COPY . .
 
+# Xóa .env nếu bị copy vào — biến môi trường Render Dashboard sẽ được dùng thay thế
+RUN rm -f .env
+
+
 # Mở cổng 8000 của container
 EXPOSE 8000
 
