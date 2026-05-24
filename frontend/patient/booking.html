@@ -216,7 +216,7 @@
 
         async function loadSpecialties() {
             try {
-                const spRes = await api.get('/admin/hr/specialties');
+                const spRes = await api.get('/doctors/specialties');
                 const sel = document.getElementById('spec-select');
                 sel.innerHTML = '<option value="">-- Chọn chuyên khoa --</option>' + 
                     spRes.map(sp => `<option value="${sp.id}">${escapeHTML(sp.name)}</option>`).join('');

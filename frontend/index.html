@@ -411,7 +411,7 @@
 
             // Load Specialties
             try {
-                const specialties = await api.get('/admin/hr/specialties');
+                const specialties = await api.get('/doctors/specialties');
                 const grid = document.getElementById('specialties-grid');
 
                 if (grid && specialties.length > 0) {

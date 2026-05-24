@@ -25,6 +25,13 @@ from app.core.security import get_current_user, require_doctor
 router = APIRouter(prefix="/doctors", tags=["Doctors"])
 
 
+@router.get("/specialties", response_model=List[SpecialtyResponse])
+async def list_specialties_public(db: AsyncSession = Depends(get_db)):
+    """Danh sách chuyên khoa (public) – dùng cho trang chủ, đặt lịch..."""
+    result = await db.execute(select(Specialty))
+    return result.scalars().all()
+
+
 @router.get("", response_model=List[DoctorProfileResponse])
 async def list_doctors(
     specialty_id: Optional[UUID] = None,
