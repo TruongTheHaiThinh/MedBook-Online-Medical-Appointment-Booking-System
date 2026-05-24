@@ -331,6 +331,150 @@ Giao diện của MedBook được thiết kế theo phong cách tối giản, h
   - Trang in đơn thuốc A5 được định dạng CSS in riêng biệt (loại bỏ sidebar, footer và button khi bấm in, căn lề chuẩn mực).
   - Biểu đồ Dashboard thống kê y khoa chuyên sâu thể hiện bằng Chart.js mượt mà.
 
+### 3.3.1 Thiết kế bố cục giao diện (Wireframes)
+
+Để trực quan hóa cấu trúc các màn hình chức năng chính, dưới đây là wireframe chi tiết và sơ đồ phân vùng vị trí bố cục (Layout Structure) cho các vai trò:
+
+#### A. Giao diện Đặt lịch khám của Bệnh nhân (Patient Portal - Booking Screen)
+Màn hình đặt lịch có bố cục chia đôi (2-column layout) giúp bệnh nhân dễ dàng chọn chuyên khoa ở cột bên trái và xem các slot giờ khả dụng động ở cột bên phải.
+
+```
++-----------------------------------------------------------------------------------+
+|  [Logo] MedBook                      [Đặt lịch]  [Sổ khám]  [Cá nhân]  [Đăng xuất]  |
++-----------------------------------------------------------------------------------+
+|  CHỌN CHUYÊN KHOA                  CHỌN BÁC SĨ & LỊCH KHÁM                        |
+|  +------------------------------+  +--------------------------------------------+ |
+|  | [x] Khoa Tim mạch            |  | Bác sĩ: BS. Nguyễn Văn A                   | |
+|  | [ ] Khoa Tiêu hóa            |  | Phòng: P.102 - Chuyên khoa: Tim mạch       | |
+|  | [ ] Khoa Da liễu             |  +--------------------------------------------+ |
+|  | [ ] Khoa Thần kinh           |  | CHỌN NGÀY: [ 25/05/2026 ]                  | |
+|  +------------------------------+  +--------------------------------------------+ |
+|                                    | CHỌN KHUNG GIỜ CÒN TRỐNG:                  | |
+|                                    | [ 08:00 ] [ 08:30 ] [ 09:00 ] [ 09:30 ]    | |
+|                                    | [ 10:00 ] [ 10:30 ] [ 13:30 ] [ 14:00 ]    | |
+|                                    +--------------------------------------------+ |
+|                                    | LÝ DO KHÁM:                                | |
+|                                    | [ Đau ngực trái kéo dài...               ] | |
+|                                    +--------------------------------------------+ |
+|                                    |              [ XÁC NHẬN ĐẶT LỊCH (100K) ]  | |
+|                                    +--------------------------------------------+ |
++-----------------------------------------------------------------------------------+
+```
+
+#### B. Giao diện Khám bệnh & Kê đơn của Bác sĩ (Doctor Portal - Examination Screen)
+Bố cục chia vùng thông tin lâm sàng bên trái (Nhập chẩn đoán, lời dặn, kê thuốc) và xem tiền sử bệnh án lịch sử của bệnh nhân ở cột bên phải (tránh chuyển trang gây mất dữ liệu đang gõ).
+
+```
++---------------------------------------------------+-------------------------------+
+|  BS. Nguyễn Việt Nam | Khoa Tim mạch              | Hàng chờ: 03 bệnh nhân        |
++---------------------------------------------------+-------------------------------+
+|  THÔNG TIN BỆNH NHÂN ĐANG KHÁM                    | TIỀN SỬ BỆNH ÁN CHI TIẾT      |
+|  Họ tên: Trương Thế Hải Thịnh   Mã BN: MB-001     | +---------------------------+ |
+|  Tuổi: 20   Giới tính: Nam      Máu: O+           | | Ngày 10/05/2026           | |
+|  Lý do khám: Đau ngực trái khi vận động           | | - Chẩn đoán: Rối loạn nhịp| |
+|  +----------------------------------------------+ | | - Đơn thuốc: Panadol,...  | |
+|  | CHẨN ĐOÁN LÂM SÀNG (*)                       | | +---------------------------+ |
+|  | [ Thiếu máu cơ tim cục bộ                  ] | | Ngày 01/04/2026           | |
+|  +----------------------------------------------+ | | - Chẩn đoán: Cao huyết áp | |
+|  | LỜI DẶN BÁC SĨ                               | | - Đơn thuốc: Amlodipine...| |
+|  | [ Hạn chế vận động mạnh, tái khám đúng hẹn ] | | +---------------------------+ |
+|  +----------------------------------------------+ +-------------------------------+
+|  | KÊ ĐƠN THUỐC                                 |                                 |
+|  | Thuốc: [ Gõ tên thuốc... (Autocomplete)   ]  |                                 |
+|  | +------------------------------------------+ |                                 |
+|  | | Tên thuốc  | S | T | C | T | Tổng | Xóa | | |                                 |
+|  | |------------+---+---+---+---+------+-----| | |                                 |
+|  | | Aspirin    | 1 | 0 | 0 | 0 |  10  | [x] | | |                                 |
+|  | +------------------------------------------+ |                                 |
+|  +----------------------------------------------+                                 |
+|  | [x] Yêu cầu tái khám  Ngày tái khám: [25/06] |                                 |
+|  +----------------------------------------------+                                 |
+|  |                                  [ HOÀN TẤT VÀ GỬI ĐƠN THUỐC ]                 |
++-----------------------------------------------------------------------------------+
+```
+
+#### C. Giao diện Admin Dashboard (Admin Portal - User Registry & System Control)
+Bố cục tiêu chuẩn với Sidebar điều hướng bên trái và vùng hiển thị thẻ thống kê, form đăng ký nhân viên mới dạng grid cùng bảng quản lý tài khoản người dùng bên phải.
+
+```
++-----------------------------------------------------------------------------------+
+|  MedBook Admin Panel                                    Admin | Quản trị hệ thống |
++-----------------------------------------------------------------------------------+
+|  [ Thống kê ]  [ Đăng ký Nhân viên ]  [ Nghỉ phép ]  [ Chuyên khoa ]  [ Nhật ký ] |
++-----------------------------------------------------------------------------------+
+|  ĐĂNG KÝ TÀI KHOẢN NHÂN VIÊN MỚI                                                  |
+|  Vai trò: [ Bác sĩ      v ]  Họ tên: [ Nguyễn Văn B       ]  SĐT: [ 0912345678 ]  |
+|  Email:  [ doctor.b@medbook.vn ]  Mật khẩu: [ •••••••••••• ]  ĐC:  [ Gò Vấp, HCM ]  |
+|  +------------------------------------------------------------------------------+ |
+|  | THÔNG TIN CHUYÊN MÔN (Chỉ dành cho Bác sĩ)                                   | |
+|  | Chuyên khoa: [ Khoa Tim mạch v ] Kinh nghiệm: [ 8 ] năm  Phòng: [ P.201     ] | |
+|  | Giới thiệu:  [ Chuyên gia chẩn đoán hình ảnh tim mạch...                   ] | |
+|  +------------------------------------------------------------------------------+ |
+|  |                                                         [ ĐĂNG KÝ NHÂN VIÊN ]| |
+|  +------------------------------------------------------------------------------+ |
+|  DANH SÁCH USER HỆ THỐNG                                                          |
+|  Bộ lọc vai trò: [ Tất cả vai trò v ]                                             |
+|  +------------------------------------------------------------------------------+ |
+|  | Họ tên         | Email              | Vai trò   | Trạng thái     | Hành động | |
+|  |----------------+--------------------+-----------+----------------+-----------| |
+|  | BS. Nguyễn A   | pk1@medbook.com    | Bác sĩ    | Đang hoạt động | [ Khóa ]  | |
+|  | Thu ngân Test  | cashier@medbook.vn | Thu ngân  | Đang hoạt động | [ Khóa ]  | |
+|  +------------------------------------------------------------------------------+ |
++-----------------------------------------------------------------------------------+
+```
+
+#### D. Mã thiết kế mẫu của Bố cục Giao diện (CSS Layout Code)
+Hệ thống sử dụng Flexbox và CSS Grid thuần túy để xây dựng cấu trúc bố cục một cách hiện đại, responsive cao mà không cần đến framework bên thứ ba:
+
+```css
+/* Thiết kế Sidebar điều hướng và khung màn hình chính */
+.dashboard-container {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: 100vh;
+    background: #f8fafc;
+}
+
+/* Glassmorphism sidebar */
+.sidebar {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px);
+    border-right: 1px solid rgba(226, 232, 240, 0.8);
+    padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Main Content Area */
+.content-area {
+    padding: 2.5rem;
+    overflow-y: auto;
+}
+
+/* Khung lưới chia đôi (Cột trái/Cột phải) dùng cho đặt lịch & khám bệnh */
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+/* Khung lưới chia 3 dùng cho Dashboard thống kê */
+.grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+/* Thẻ (Card) chứa nội dung */
+.card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid #edf2f7;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+```
+
 ---
 
 ## 4. TRIỂN KHAI HỆ THỐNG
