@@ -147,35 +147,68 @@ async def seed_data():
         # 6. Nhập dữ liệu Thuốc từ CSV
         csv_path = os.path.join(os.path.dirname(__file__), "..", "medicine_dataset.csv")
         if os.path.exists(csv_path):
-            print("Dang tai danh sach thuoc hien co de toi uu hoa...")
-            existing_result = await db.execute(select(Medicine.name))
-            existing_names = set(existing_result.scalars().all())
-            print(f"Da tai {len(existing_names)} thuoc hien co. Bat dau nhap tu CSV...")
+            print("Dang lam sach bang medicines de loai bo duplicate...")
+            from sqlalchemy import delete
+            await db.execute(delete(Medicine))
+            
+            print("Dang doc va loc du lieu thuoc tu CSV...")
             with open(csv_path, mode='r', encoding='utf-8') as f:
                 reader = csv.DictReader(f)
+                all_rows = list(reader)
+                
+                # Loc trung lap trong file CSV theo tat ca cac truong
+                unique_rows = []
+                seen_full = set()
+                for row in all_rows:
+                    key = (
+                        row.get('Name', '').strip(),
+                        row.get('Category', '').strip(),
+                        row.get('Dosage Form', '').strip(),
+                        row.get('Strength', '').strip(),
+                        row.get('Manufacturer', '').strip(),
+                        row.get('Indication', '').strip(),
+                        row.get('Classification', '').strip()
+                    )
+                    if key not in seen_full:
+                        seen_full.add(key)
+                        unique_rows.append(row)
+                
+                total_unique = len(unique_rows)
+                print(f"Tong so thuoc duy nhat trong CSV: {total_unique}")
+                
+                # Lay 20000 thuoc dau + 316 thuoc cuoi
+                selected_rows = []
+                
+                # 20000 thuoc dau
+                first_part_limit = min(20000, total_unique)
+                first_part = unique_rows[:first_part_limit]
+                
+                # 316 thuoc cuoi
+                last_part_start = max(0, total_unique - 316)
+                last_part = unique_rows[last_part_start:]
+                
+                # Ghep lai
+                selected_rows = first_part + last_part
+                
+                # Chuyen thanh batch list
                 batch = []
-                count = 0
                 import uuid
-                for row in reader:
-                    if row['Name'] not in existing_names:
-                        batch.append({
-                            "id": uuid.uuid4(),
-                            "name": row['Name'],
-                            "category": row.get('Category'),
-                            "dosage_form": row.get('Dosage Form'),
-                            "strength": row.get('Strength'),
-                            "manufacturer": row.get('Manufacturer'),
-                            "indication": row.get('Indication'),
-                            "classification": row.get('Classification')
-                        })
-                        existing_names.add(row['Name'])
-                        count += 1
-                        if count >= 2000:
-                            break
+                for row in selected_rows:
+                    batch.append({
+                        "id": uuid.uuid4(),
+                        "name": row['Name'],
+                        "category": row.get('Category'),
+                        "dosage_form": row.get('Dosage Form'),
+                        "strength": row.get('Strength'),
+                        "manufacturer": row.get('Manufacturer'),
+                        "indication": row.get('Indication'),
+                        "classification": row.get('Classification')
+                    })
+                
                 if batch:
                     from sqlalchemy import insert
                     await db.execute(insert(Medicine), batch)
-            print(f"Da nhap {count} loai thuoc moi bang bulk insert.")
+            print(f"Da nhap {len(batch)} loai thuoc moi (20000 dau + 316 cuoi) vao database.")
 
         await db.commit()
         print("--- Hoan tat do du lieu mau ---")
