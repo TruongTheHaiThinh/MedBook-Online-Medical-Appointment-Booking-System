@@ -71,6 +71,7 @@ class UserResponse(BaseModel):
     full_name: str
     phone: str
     address: Optional[str]
+    patient_code: Optional[str] = None
     date_of_birth: Optional[datetime]
     gender: Optional[str]
     blood_type: Optional[str]

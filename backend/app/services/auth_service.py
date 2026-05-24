@@ -24,6 +24,28 @@ from app.core.email import send_verify_email, send_reset_password_email
 from app.config import settings
 
 
+async def _generate_next_patient_code(db: AsyncSession) -> str:
+    # Query all patient codes that start with "MB-"
+    result = await db.execute(
+        select(User.patient_code).where(User.patient_code.like("MB-%"))
+    )
+    codes = result.scalars().all()
+    max_num = 0
+    for code in codes:
+        if code:
+            try:
+                # Extract number from "MB-XXX" (e.g. MB-001 -> 1)
+                parts = code.split("-")
+                if len(parts) == 2:
+                    num = int(parts[1])
+                    if num > max_num:
+                        max_num = num
+            except ValueError:
+                pass
+    next_num = max_num + 1
+    return f"MB-{next_num:03d}"
+
+
 class AuthService:
     """Stateless service – every method receives `db` session explicitly."""
 
@@ -42,6 +64,10 @@ class AuthService:
             if result_e.scalar_one_or_none():
                 raise HTTPException(status_code=400, detail="Email đã được sử dụng")
 
+        p_code = None
+        if data.role == "patient":
+            p_code = await _generate_next_patient_code(db)
+
         user = User(
             email=data.email,
             password_hash=hash_password(data.password),
@@ -53,6 +79,7 @@ class AuthService:
             date_of_birth=data.date_of_birth,
             gender=data.gender,
             blood_type=data.blood_type,
+            patient_code=p_code,
         )
         db.add(user)
         await db.flush()
@@ -86,6 +113,10 @@ class AuthService:
         if result_p.scalar_one_or_none():
             raise HTTPException(status_code=400, detail="Số điện thoại đã được sử dụng")
 
+        p_code = None
+        if data.role == "patient":
+            p_code = await _generate_next_patient_code(db)
+
         user = User(
             email=data.email,
             password_hash=hash_password(data.password),
@@ -94,6 +125,7 @@ class AuthService:
             address=data.address,
             role=data.role,
             is_verified=True,  # Admin-created accounts are pre-verified
+            patient_code=p_code,
         )
         db.add(user)
         await db.flush()

@@ -155,25 +155,24 @@
                 <p id="slip-id" style="font-family: monospace; font-size: 0.8rem; color: #999;"></p>
             </div>
             
-            <div class="slip-qr" id="slip-qr-container"><i class="fa-solid fa-qrcode fa-5x" style="color: #ddd;"></i></div>
-            <p style="text-align: center; font-size: 0.8rem; color: #636e72; margin-bottom: 1.5rem;">Quét mã này tại quầy để tiếp nhận nhanh</p>
+            <!-- Barcode representation -->
+            <div style="text-align: center; margin: 1rem 0 0.5rem 0;">
+                <svg id="slip-barcode"></svg>
+            </div>
 
             <div class="slip-content">
                 <div class="slip-row"><span class="slip-label">Bệnh nhân:</span> <span class="slip-value" id="slip-patient"></span></div>
+                <div class="slip-row"><span class="slip-label">Mã bệnh nhân:</span> <span class="slip-value" id="slip-patient-code" style="font-weight: 700; color: var(--secondary);"></span></div>
                 <div class="slip-row"><span class="slip-label">Bác sĩ khám:</span> <span class="slip-value" id="slip-doctor"></span></div>
                 <div class="slip-row"><span class="slip-label">Ngày & Giờ:</span> <span class="slip-value" id="slip-datetime"></span></div>
                 <div class="slip-highlight">
                     <div style="font-size: 0.8rem; color: #636e72; mb: 0.3rem;">SỐ THỨ TỰ (STT)</div>
-                    <div style="font-size: 2.5rem; font-weight: 800; color: var(--primary);" id="slip-stt">--</div>
+                    <div style="font-size: 2.8rem; font-weight: 800; color: var(--primary);" id="slip-stt">--</div>
                     <div style="margin-top: 0.5rem; font-weight: 700;" id="slip-room">Phòng: Đang xếp...</div>
                 </div>
                 <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #eee;">
-                    <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem;">Lộ trình khám:</p>
-                    <ol style="font-size: 0.85rem; padding-left: 1.2rem; color: #636e72;">
-                        <li>Đến quầy Thu ngân xuất trình mã QR.</li>
-                        <li>Đến phòng khám ghi trên phiếu để chờ đến lượt.</li>
-                        <li>Nhận toa thuốc từ bác sĩ và quay lại quầy để thanh toán.</li>
-                    </ol>
+                    <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem;">Lưu ý:</p>
+                    <p style="font-size: 0.85rem; color: #636e72;">Vui lòng đến đúng phòng và chờ gọi tên theo số thứ tự trên.</p>
                 </div>
             </div>
 
@@ -199,6 +198,7 @@
 
     <div id="toast-container" class="no-print"></div>
 
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <script src="../js/config.js"></script>
     <script src="../js/api.js"></script>
     <script src="../js/auth.js"></script>
@@ -342,10 +342,28 @@
             closeModals();
             document.getElementById('slip-id').textContent = "Mã: " + appt.id.toUpperCase();
             document.getElementById('slip-patient').textContent = appt.patient_name || "Bệnh nhân";
+            document.getElementById('slip-patient-code').textContent = appt.patient_code || "---";
             document.getElementById('slip-doctor').textContent = appt.doctor_name || "Bác sĩ";
             document.getElementById('slip-datetime').textContent = appt.scheduled_time + ' - ' + appt.scheduled_date;
             document.getElementById('slip-stt').textContent = appt.queue_number || "--";
             document.getElementById('slip-room').textContent = "Phòng: " + (appt.room_number || "Gửi sau");
+            
+            // Generate barcode
+            if (typeof JsBarcode === 'function') {
+                try {
+                    JsBarcode("#slip-barcode", appt.patient_code || "MB-000", {
+                        format: "CODE128",
+                        width: 1.5,
+                        height: 40,
+                        displayValue: true,
+                        fontSize: 12,
+                        margin: 0
+                    });
+                } catch (e) {
+                    console.error("Barcode generation failed", e);
+                }
+            }
+            
             document.getElementById('modal-slip').classList.add('active');
         }
 
