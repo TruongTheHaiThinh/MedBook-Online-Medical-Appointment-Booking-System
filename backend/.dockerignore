@@ -1,0 +1,15 @@
+# Không copy .env vào Docker image — biến môi trường được inject bởi Render Dashboard
+.env
+.env.*
+
+# Không cần copy venv, scratch, và các file không cần thiết
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.db
+*.sqlite3
+scratch/
+.pytest_cache/
+medbook.db
+medicine_dataset.csv
