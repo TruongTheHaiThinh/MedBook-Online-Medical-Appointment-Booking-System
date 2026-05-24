@@ -1,0 +1,24 @@
+services:
+  # ── Backend Web Service (Docker) ──
+  - type: web
+    name: medbook-backend
+    env: docker
+    plan: free
+    region: singapore
+    rootDir: backend
+    envVars:
+      - key: DATABASE_URL
+        value: postgresql+asyncpg://medbook_db_afly_user:9pi1EbszDmx81MBt1yLJTfP9Oxng24D9@dpg-d89feur7uimc739iqge0-a.singapore-postgres.render.com/medbook_db_afly?ssl=require
+      - key: SECRET_KEY
+        generateValue: true
+      - key: FRONTEND_URL
+        value: https://medbook-app.onrender.com # Thay thế bằng URL thực tế sau khi tạo xong frontend
+
+  # ── Frontend Static Site (Miễn phí & Tốc độ cao) ──
+  - type: web
+    name: medbook-app
+    env: static
+    plan: free
+    region: singapore
+    rootDir: frontend
+    publishDir: .
