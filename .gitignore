@@ -12,7 +12,6 @@ venv/
 *.sqlite3
 
 # Project specific
-backend/scratch/
 backend/medbook.db
 backend/.env
 

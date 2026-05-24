@@ -147,33 +147,41 @@ async def seed_data():
         # 6. Nhập dữ liệu Thuốc từ CSV
         csv_path = os.path.join(os.path.dirname(__file__), "..", "medicine_dataset.csv")
         if os.path.exists(csv_path):
-            print("Dang nhap du lieu thuoc tu CSV...")
+            print("Dang tai danh sach thuoc hien co de toi uu hoa...")
+            existing_result = await db.execute(select(Medicine.name))
+            existing_names = set(existing_result.scalars().all())
+            print(f"Da tai {len(existing_names)} thuoc hien co. Bat dau nhap tu CSV...")
             with open(csv_path, mode='r', encoding='utf-8') as f:
                 reader = csv.DictReader(f)
+                batch = []
                 count = 0
+                import uuid
                 for row in reader:
-                    # Kiểm tra xem thuốc đã tồn tại chưa (Case-sensitive fix: dùng row['Name'])
-                    stmt = select(Medicine).where(Medicine.name == row['Name'])
-                    existing = (await db.execute(stmt)).scalar_one_or_none()
-                    if not existing:
-                        db.add(Medicine(
-                            name=row['Name'],
-                            category=row.get('Category'),
-                            dosage_form=row.get('Dosage Form'),
-                            strength=row.get('Strength'),
-                            manufacturer=row.get('Manufacturer'),
-                            indication=row.get('Indication'),
-                            classification=row.get('Classification')
-                        ))
+                    if row['Name'] not in existing_names:
+                        batch.append({
+                            "id": uuid.uuid4(),
+                            "name": row['Name'],
+                            "category": row.get('Category'),
+                            "dosage_form": row.get('Dosage Form'),
+                            "strength": row.get('Strength'),
+                            "manufacturer": row.get('Manufacturer'),
+                            "indication": row.get('Indication'),
+                            "classification": row.get('Classification')
+                        })
+                        existing_names.add(row['Name'])
                         count += 1
-                        if count % 100 == 0: await db.flush()
-            print(f"Da nhap {count} loai thuoc.")
+                        if count >= 2000:
+                            break
+                if batch:
+                    from sqlalchemy import insert
+                    await db.execute(insert(Medicine), batch)
+            print(f"Da nhap {count} loai thuoc moi bang bulk insert.")
 
         await db.commit()
         print("--- Hoan tat do du lieu mau ---")
 
 async def main():
-    await init_db()
+    # await init_db()  # Tables already created, skip to avoid DDL locks
     await seed_data()
 
 if __name__ == "__main__":
