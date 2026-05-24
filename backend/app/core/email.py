@@ -129,6 +129,13 @@ async def send_appointment_email(
 
 async def send_verify_email(to_email: str, full_name: str, token: str):
     verify_url = f"{settings.FRONTEND_URL}/verify-email.html?token={token}"
+    
+    # Print to console for development testing
+    print("\n" + "="*80)
+    print(f"✅ [DEVELOPMENT VERIFY LINK] for {full_name} ({to_email}):")
+    print(f"👉 {verify_url}")
+    print("="*80 + "\n")
+    
     html = _render(
         VERIFY_EMAIL_CONTENT,
         full_name=full_name,
@@ -140,6 +147,13 @@ async def send_verify_email(to_email: str, full_name: str, token: str):
 
 async def send_reset_password_email(to_email: str, full_name: str, token: str):
     reset_url = f"{settings.FRONTEND_URL}/reset-password.html?token={token}"
+    
+    # Print to console for development testing
+    print("\n" + "="*80)
+    print(f"🔑 [DEVELOPMENT RESET LINK] for {full_name} ({to_email}):")
+    print(f"👉 {reset_url}")
+    print("="*80 + "\n")
+    
     html = _render(
         RESET_PASSWORD_CONTENT,
         full_name=full_name,

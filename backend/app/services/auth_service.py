@@ -152,10 +152,16 @@ class AuthService:
         )
         user = result.scalar_one_or_none()
 
-        if not user or not verify_password(data.password, user.password_hash):
+        if not user:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Số điện thoại/Email hoặc mật khẩu không đúng",
+                detail="Không tìm thấy tài khoản",
+            )
+
+        if not verify_password(data.password, user.password_hash):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Sai mật khẩu, vui lòng thử lại",
             )
 
         if not user.is_active:
