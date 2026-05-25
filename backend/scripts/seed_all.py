@@ -19,10 +19,10 @@ from app.core.security import hash_password
 from sqlalchemy import select, insert, delete
 
 SPECIALTIES_LIST = [
-    "Khoa Tim mach", "Khoa Tieu hoa", "Khoa Chan thuong chinh hinh", "Khoa Noi Than kinh",
-    "Khoa Truyen nhiem", "Khoa San phu khoa", "Khoa Than - Loc mau", "Khoa Ung buou",
-    "Khoa Rang Ham Mat", "Khoa Tai Mui Hong", "Khoa Mat", "Khoa Phuc hoi chuc nang",
-    "Khoa Da lieu", "Khoa Cap cuu"
+    "Khoa Tim mạch", "Khoa Tiêu hóa", "Khoa Chấn thương chỉnh hình", "Khoa Nội thần kinh",
+    "Khoa Truyền nhiễm", "Khoa Sản phụ khoa", "Khoa Thận - Lọc máu", "Khoa Ung bướu",
+    "Khoa Răng Hàm Mặt", "Khoa Tai Mũi Họng", "Khoa Mắt", "Khoa Phục hồi chức năng",
+    "Khoa Da liễu", "Khoa Cấp cứu"
 ]
 
 async def init_db():
@@ -40,7 +40,7 @@ async def seed_data():
         print("[1/5] Seeding Chuyen khoa...")
         specs = {}
         for spec_name in SPECIALTIES_LIST:
-            new_spec = Specialty(name=spec_name, description=f"Kham chuyen sau tai {spec_name}")
+            new_spec = Specialty(name=spec_name, description=f"Khám chuyên sâu tại {spec_name}")
             db.add(new_spec)
             await db.flush()
             specs[spec_name] = new_spec
@@ -49,8 +49,8 @@ async def seed_data():
         # 2. Tạo ROLE: HR ADMIN & CASHIER ADMIN
         print("[2/5] Seeding he thong tai khoan quan ly...")
         for email, pwd, name, role in [
-            ("admin@medbook.vn", "123y", "Quan tri vien", "hr_admin"),
-            ("cashier@medbook.vn", "Cashier@123", "Thu ngan chinh", "cashier_admin")
+            ("admin@medbook.vn", "123y", "Quản trị viên", "hr_admin"),
+            ("cashier@medbook.vn", "Cashier@123", "Thu ngân chính", "cashier_admin")
         ]:
             db.add(User(
                 email=email,
@@ -93,7 +93,7 @@ async def seed_data():
         for i, spec_name in enumerate(SPECIALTIES_LIST, 1):
             for suffix in ["", "b"]:
                 dr_email = f"pk{i}{suffix}@medbook.com"
-                dr_name = f"Bac si {spec_name.replace('Khoa ', '')} {('A' if suffix == '' else 'B')}"
+                dr_name = f"Bác sĩ {spec_name.replace('Khoa ', '')} {('A' if suffix == '' else 'B')}"
                 
                 dr_user = User(
                     email=dr_email,
@@ -110,7 +110,7 @@ async def seed_data():
                 doc = Doctor(
                     user_id=dr_user.id,
                     specialty_id=specs[spec_name].id,
-                    bio=f"Chuyen gia {spec_name}.",
+                    bio=f"Chuyên gia {spec_name}.",
                     experience_years=10,
                     is_approved=True,
                     room_number=f"Room {100+i}"
@@ -145,7 +145,7 @@ async def seed_data():
                 doctor_id=sample_doctor_id,
                 scheduled_date=date.today(),
                 scheduled_time=time(14, 0),
-                reason="Dau nguc trai, kho tho nhe.",
+                reason="Đau ngực trái, khó thở nhẹ.",
                 status="CONFIRMED",
                 queue_number=1,
                 room_number="Room 101"
@@ -157,7 +157,7 @@ async def seed_data():
                 doctor_id=sample_doctor_id,
                 scheduled_date=date(2026, 4, 1),
                 scheduled_time=time(9, 30),
-                reason="Kham dinh ky tim mach.",
+                reason="Khám định kỳ tim mạch.",
                 status="COMPLETED"
             )
             db.add(past_appt)
@@ -167,8 +167,8 @@ async def seed_data():
                 appointment_id=past_appt.id,
                 patient_id=sample_patient1_id,
                 doctor_id=sample_doctor_id,
-                diagnosis="Huyet ap cao nhe, nhip tim on dinh.",
-                notes="Han che an man, tap the duc deu dan.",
+                diagnosis="Huyết áp cao nhẹ, nhịp tim ổn định.",
+                notes="Hạn chế ăn mặn, tập thể dục đều đặn.",
                 revisit_required=True,
                 revisit_date=date(2026, 5, 1)
             )
@@ -181,7 +181,7 @@ async def seed_data():
                 dosage="5mg",
                 morning=1.0,
                 total_quantity=30.0,
-                instructions="Uong sau khi an sang."
+                instructions="Uống sau khi ăn sáng."
             ))
 
             # Ca 3: Chờ thanh toán (PRESCRIPTION_SENT) kèm hóa đơn mẫu PENDING
@@ -190,7 +190,7 @@ async def seed_data():
                 doctor_id=sample_doctor_id,
                 scheduled_date=date.today(),
                 scheduled_time=time(10, 0),
-                reason="Dau dau, hoa mat.",
+                reason="Đau đầu, hoa mắt.",
                 status="PRESCRIPTION_SENT",
                 queue_number=2
             )
@@ -201,8 +201,8 @@ async def seed_data():
                 appointment_id=pay_appt.id,
                 patient_id=sample_patient1_id,
                 doctor_id=sample_doctor_id,
-                diagnosis="Thieu mau nao nhe.",
-                notes="Nghi ngoi nhieu hon, tranh thuc khuya."
+                diagnosis="Thiếu máu não nhẹ.",
+                notes="Nghỉ ngơi nhiều hơn, tránh thức khuya."
             )
             db.add(pay_record)
             await db.flush()
@@ -214,7 +214,7 @@ async def seed_data():
                 morning=1.0,
                 evening=1.0,
                 total_quantity=60.0,
-                instructions="Uong trong khi an."
+                instructions="Uống trong khi ăn."
             ))
 
             db.add(Payment(

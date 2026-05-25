@@ -39,14 +39,19 @@ Dưới đây là danh sách toàn bộ các tài khoản thử nghiệm đã đ
 ---
 
 ## ⚡ CÁCH 1: KHỞI CHẠY TỰ ĐỘNG BẰNG SCRIPT (KHUYÊN DÙNG)
-Để giúp Giáo viên dễ dàng khởi động toàn bộ hệ thống mà không cần gõ lệnh thủ công, MedBook đã tích hợp sẵn tệp kịch bản khởi chạy tự động **`run_all.bat`** ở thư mục gốc của dự án.
+Để giúp Giáo viên dễ dàng khởi động toàn bộ hệ thống mà không cần gõ lệnh thủ công, MedBook đã tích hợp sẵn tệp kịch bản khởi chạy tự động **`run_all.bat`** ở thư mục gốc của dự án. Tệp kịch bản này đã được nâng cấp để tự động thiết lập và sử dụng môi trường ảo `.venv`.
 
 ### Các bước thực hiện:
-1. Đảm bảo máy tính đã cài đặt **Python (phiên bản từ 3.9 đến 3.12)** và đã thêm Python vào biến môi trường **PATH** lúc cài đặt.
-2. Click đúp chuột vào tệp **`run_all.bat`** ở thư mục gốc của dự án.
-3. Kịch bản sẽ tự động:
-   - Cài đặt/cập nhật tất cả thư viện cần thiết từ tệp `requirements.txt`.
-   - Khởi tạo cấu trúc bảng Database và tự động nạp (seed) dữ liệu mẫu đầy đủ.
+1. Đảm bảo máy tính đã cài đặt **Python (phiên bản từ 3.9 trở lên)** và đã cài đặt **Docker / Docker Desktop** đang chạy.
+2. Mở Terminal tại thư mục dự án và khởi động container cơ sở dữ liệu PostgreSQL trước bằng lệnh:
+   ```powershell
+   docker-compose up -d db
+   ```
+3. Click đúp chuột vào tệp **`run_all.bat`** ở thư mục gốc của dự án (hoặc chạy lệnh `.\run_all.bat` trong PowerShell/CMD).
+4. Kịch bản sẽ tự động:
+   - Tạo môi trường ảo **`.venv`** nếu chưa có.
+   - Cài đặt/cập nhật tất cả thư viện cần thiết vào `.venv` từ tệp `requirements.txt`.
+   - Khởi tạo cấu trúc bảng Database và tự động nạp (seed) đầy đủ dữ liệu mẫu (32 tài khoản, 20,316 loại thuốc...).
    - Khởi động đồng thời **Backend API Server** (cổng 8000) và **Frontend Server** (cổng 5500) ở hai cửa sổ terminal riêng biệt.
    - Tự động mở trình duyệt dẫn trực tiếp đến trang chủ ứng dụng: [http://localhost:5500/frontend/index.html](http://localhost:5500/frontend/index.html)
 
@@ -54,35 +59,47 @@ Dưới đây là danh sách toàn bộ các tài khoản thử nghiệm đã đ
 
 ## 🛠️ CÁCH 2: KHỞI CHẠY THỦ CÔNG (TỪNG BƯỚC)
 
-Nếu Giáo viên muốn tự chạy từng bước thủ công bằng dòng lệnh, hãy mở terminal và thực hiện:
+Nếu Giáo viên muốn tự chạy từng bước thủ công bằng dòng lệnh, hãy mở terminal tại thư mục gốc của dự án và thực hiện:
 
-### 1. Cài đặt thư viện:
+### 1. Khởi động Cơ sở dữ liệu (PostgreSQL):
+MedBook sử dụng PostgreSQL làm cơ sở dữ liệu chính. Khởi động nhanh database bằng Docker Compose:
 ```powershell
-pip install -r backend/requirements.txt
+docker-compose up -d db
 ```
 
-### 2. Làm sạch và nạp lại dữ liệu mẫu (Tùy chọn - chỉ chạy khi muốn reset database về trạng thái ban đầu):
+### 2. Tạo và kích hoạt môi trường ảo Python (.venv):
+Tạo môi trường ảo để cô lập các thư viện của dự án:
+```powershell
+# Tạo môi trường ảo .venv
+python -m venv .venv
+```
+
+### 3. Cài đặt thư viện:
+Cài đặt toàn bộ thư viện vào môi trường ảo `.venv` vừa tạo:
+```powershell
+# Trên Windows PowerShell hoặc CMD
+.venv\Scripts\pip install -r backend/requirements.txt
+```
+
+### 4. Khởi tạo cấu trúc bảng và nạp dữ liệu mẫu (Seed):
+Chạy mã nạp dữ liệu mẫu để tạo sẵn các tài khoản thử nghiệm và danh mục thuốc:
 ```powershell
 cd backend
-python scripts/seed_all.py
+..\.venv\Scripts\python scripts/seed_all.py
 cd ..
 ```
 
-### 3. Khởi chạy Backend API Server (Terminal 1):
+### 5. Khởi chạy Backend API Server (Terminal 1):
 ```powershell
 cd backend
-# Trên Windows PowerShell
-$env:PYTHONPATH="."
-python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-
-# Trên Windows Command Prompt (cmd)
+# Trên Windows PowerShell/CMD
 set PYTHONPATH=.
-python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+..\.venv\Scripts\python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-### 4. Khởi chạy Frontend Server (Terminal 2 - Đứng ở thư mục gốc của dự án):
+### 6. Khởi chạy Frontend Server (Terminal 2 - Mở tab terminal mới đứng ở thư mục gốc của dự án):
 ```powershell
-python -m http.server 5500
+.venv\Scripts\python -m http.server 5500
 ```
 *Sau khi chạy, truy cập ứng dụng tại địa chỉ:* [http://localhost:5500/frontend/index.html](http://localhost:5500/frontend/index.html)
 
