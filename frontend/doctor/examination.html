@@ -414,7 +414,8 @@
         <div class="presc-main-title">ĐƠN THUỐC</div>
 
         <div class="presc-patient-grid">
-            <div><b>Họ và tên:</b> <span id="slip-patient-name" style="text-transform: uppercase;"></span></div>
+            <div class="full-row"><b>Họ và tên:</b> <span id="slip-patient-name" style="text-transform: uppercase;"></span></div>
+            <div><b>Mã BN:</b> <span id="slip-id-box" style="font-weight: bold;"></span></div>
             <div><b>Tuổi:</b> <span id="slip-patient-age"></span></div>
             <div><b>GT:</b> <span id="slip-patient-gender"></span></div>
             <div><b>Nhóm máu:</b> <span id="slip-patient-blood"></span></div>
@@ -688,28 +689,33 @@
 
         // Print Logic
         function prepareSlip() {
-            // Basic Info
+            // Helper to safely set textContent
+            const setSafeText = (id, text) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = text;
+            };
+
             const userStr = localStorage.getItem('medbook_user');
             const user = userStr ? JSON.parse(userStr) : { full_name: "Bác sĩ" };
             
-            document.getElementById('slip-patient-name').textContent = document.getElementById('patient-name').textContent;
-            document.getElementById('slip-patient-age').textContent = window.currentAge || '---';
-            document.getElementById('slip-patient-gender').textContent = window.currentGender || '---';
-            document.getElementById('slip-patient-phone').textContent = window.currentPhone || '---';
-            document.getElementById('slip-patient-blood').textContent = window.currentBlood || '---';
-            document.getElementById('slip-patient-address').textContent = window.currentAddress || '---';
+            setSafeText('slip-patient-name', document.getElementById('patient-name').textContent);
+            setSafeText('slip-patient-age', window.currentAge || '---');
+            setSafeText('slip-patient-gender', window.currentGender || '---');
+            setSafeText('slip-patient-phone', window.currentPhone || '---');
+            setSafeText('slip-patient-blood', window.currentBlood || '---');
+            setSafeText('slip-patient-address', window.currentAddress || '---');
             
-            document.getElementById('slip-diagnosis').textContent = document.getElementById('diagnosis').value;
-            document.getElementById('slip-notes').textContent = document.getElementById('doctor-notes').value;
+            setSafeText('slip-diagnosis', document.getElementById('diagnosis').value);
+            setSafeText('slip-notes', document.getElementById('doctor-notes').value);
             
             const revisitReq = document.getElementById('revisit-required').checked;
             const revisitDate = document.getElementById('revisit-date').value;
-            document.getElementById('slip-revisit').textContent = revisitReq ? `Hẹn tái khám ngày: ${formatDate(revisitDate)}` : "";
+            setSafeText('slip-revisit', revisitReq ? `Hẹn tái khám ngày: ${formatDate(revisitDate)}` : "");
             
-            document.getElementById('slip-doctor-name').textContent = `BS. ${user.full_name}`;
-            document.getElementById('slip-date-box').textContent = `Hà Nội, ngày ${new Date().getDate()} tháng ${new Date().getMonth()+1} năm ${new Date().getFullYear()}`;
-            document.getElementById('slip-id-box').textContent = document.getElementById('patient-id-badge').textContent;
-            document.getElementById('slip-appt-id').textContent = `Mã ca: ${apptId}`;
+            setSafeText('slip-doctor-name', `BS. ${user.full_name}`);
+            setSafeText('slip-date-box', `Hà Nội, ngày ${new Date().getDate()} tháng ${new Date().getMonth()+1} năm ${new Date().getFullYear()}`);
+            setSafeText('slip-id-box', document.getElementById('patient-id-badge').textContent);
+            setSafeText('slip-appt-id', `Mã ca: ${apptId}`);
 
             // Generate Barcode
             try {
