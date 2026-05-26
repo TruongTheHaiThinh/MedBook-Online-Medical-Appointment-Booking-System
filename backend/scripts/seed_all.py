@@ -67,8 +67,8 @@ async def seed_data():
         # 2. Tạo ROLE: HR ADMIN & CASHIER ADMIN
         print("[2/5] Seeding he thong tai khoan quan ly...")
         for email, pwd, name, role in [
-            ("admin@medbook.vn", "123y", "Quản trị viên", "hr_admin"),
-            ("cashier@medbook.vn", "Cashier@123", "Thu ngân chính", "cashier_admin")
+            ("admin@medbook.vn", "123y", "Quản trị viên Trần Quốc Bảo", "hr_admin"),
+            ("cashier@medbook.vn", "Cashier@123", "Thu Ngân - Nguyễn Minh Khuê", "cashier_admin")
         ]:
             db.add(User(
                 email=email,
@@ -108,10 +108,20 @@ async def seed_data():
 
         # 4. Tạo DOCTORS (28 Bác sĩ thuộc 14 chuyên khoa)
         print("[4/5] Seeding 28 Bac si va lich lam viec...")
+        DOCTOR_NAMES = [
+            "Phạm Hoàng Nam", "Nguyễn Tấn Phát", "Lê Thị Mai", "Trần Minh Quân",
+            "Hoàng Đức Hải", "Vũ Thanh Hằng", "Đỗ Quốc Bảo", "Nguyễn Mỹ Linh",
+            "Phan Thanh Bình", "Trần Thị Hồng", "Lý Gia Kiệt", "Nguyễn Hữu Đạt",
+            "Lê Huy Hoàng", "Nguyễn Bích Ngọc", "Bùi Anh Tuấn", "Phạm Minh Trí",
+            "Trần Ngọc Lan", "Nguyễn Quang Huy", "Đặng Văn Lâm", "Lê Thu Thảo",
+            "Vũ Hoàng Long", "Nguyễn Bảo Châu", "Hoàng Kim Oanh", "Trần Việt Anh",
+            "Phạm Hùng Cường", "Đỗ Thu Trang", "Nguyễn Duy Mạnh", "Lê Công Vinh"
+        ]
         for i, spec_name in enumerate(SPECIALTIES_LIST, 1):
             for suffix in ["", "b"]:
                 dr_email = f"pk{i}{suffix}@medbook.com"
-                dr_name = f"Bác sĩ {spec_name.replace('Khoa ', '')} {('A' if suffix == '' else 'B')}"
+                idx = (i - 1) * 2 + (0 if suffix == "" else 1)
+                dr_name = f"Bác sĩ {DOCTOR_NAMES[idx % len(DOCTOR_NAMES)]}"
                 
                 dr_user = User(
                     email=dr_email,

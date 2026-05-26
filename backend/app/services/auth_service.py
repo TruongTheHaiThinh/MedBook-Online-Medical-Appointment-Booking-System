@@ -115,10 +115,14 @@ class AuthService:
         if data.role == "patient":
             p_code = await _generate_next_patient_code(db)
 
+        full_name = data.full_name
+        if data.role == "cashier_admin" and not full_name.startswith("Thu Ngân -"):
+            full_name = f"Thu Ngân - {full_name}"
+
         user = User(
             email=data.email,
             password_hash=hash_password(data.password),
-            full_name=data.full_name,
+            full_name=full_name,
             phone=data.phone,
             address=data.address,
             role=data.role,
