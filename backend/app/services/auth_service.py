@@ -63,7 +63,7 @@ class AuthService:
         if data.email:
             result_e = await db.execute(select(User).where(User.email == data.email))
             if result_e.scalar_one_or_none():
-                raise HTTPException(status_code=400, detail="Email đã được sử dụng")
+                raise HTTPException(status_code=400, detail="gmail đã được sử dụng hoặc đã có tài khoản sử dụng gmail này rồi")
 
         p_code = None
         if data.role == "patient":
@@ -104,7 +104,7 @@ class AuthService:
         # Check email unique
         result_e = await db.execute(select(User).where(User.email == data.email))
         if result_e.scalar_one_or_none():
-            raise HTTPException(status_code=400, detail="Email đã được sử dụng")
+            raise HTTPException(status_code=400, detail="gmail đã được sử dụng hoặc đã có tài khoản sử dụng gmail này rồi")
 
         # Check phone unique
         result_p = await db.execute(select(User).where(User.phone == data.phone))
