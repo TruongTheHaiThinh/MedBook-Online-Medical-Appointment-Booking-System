@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import auth, doctors, appointments, admin_hr, admin_cashier, medical_records
+from app.routers import auth, doctors, appointments, admin_hr, admin_cashier, medical_records, news
 from app.config import settings
 from app.core.scheduler import start_scheduler
 from app.database import get_db
@@ -38,6 +38,7 @@ app.include_router(appointments.router)
 app.include_router(admin_hr.router)
 app.include_router(admin_cashier.router)
 app.include_router(medical_records.router)
+app.include_router(news.router)
 
 
 

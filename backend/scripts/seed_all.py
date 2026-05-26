@@ -25,6 +25,23 @@ SPECIALTIES_LIST = [
     "Khoa Da liễu", "Khoa Cấp cứu"
 ]
 
+SPECIALTIES_DETAILS = {
+    "Khoa Tim mạch": "Chẩn đoán và điều trị chuyên sâu các bệnh lý về tim mạch, huyết áp và mạch máu bằng công nghệ y khoa tiên tiến.",
+    "Khoa Tiêu hóa": "Tầm soát, điều trị các bệnh lý đường tiêu hóa, gan mật, kết hợp phương pháp nội soi không đau hiện đại.",
+    "Khoa Chấn thương chỉnh hình": "Phẫu thuật chấn thương cơ xương khớp, phục hồi vận động và tái tạo chức năng sau chấn thương.",
+    "Khoa Nội thần kinh": "Điều trị các bệnh lý thần kinh, đau đầu, đột quỵ, rối loạn giấc ngủ và các hội chứng suy giảm trí nhớ.",
+    "Khoa Truyền nhiễm": "Chẩn đoán, phòng ngừa và điều trị các bệnh truyền nhiễm nguy hiểm, dịch bệnh theo mùa và tiêm chủng bảo vệ cơ thể.",
+    "Khoa Sản phụ khoa": "Chăm sóc sức khỏe thai kỳ toàn diện, điều trị phụ khoa và tư vấn kế hoạch hóa gia đình tận tâm.",
+    "Khoa Thận - Lọc máu": "Điều trị suy thận cấp và mãn tính, lọc máu chu kỳ bằng hệ thống màng lọc thế hệ mới an toàn tuyệt đối.",
+    "Khoa Ung bướu": "Tầm soát ung thư sớm, tư vấn phác đồ điều trị đa mô thức và đồng hành chăm sóc giảm nhẹ cho người bệnh.",
+    "Khoa Răng Hàm Mặt": "Chăm sóc và điều trị các bệnh răng miệng, nha khoa thẩm mỹ chất lượng cao, phục hình răng sứ không đau.",
+    "Khoa Tai Mũi Họng": "Điều trị hiệu quả các bệnh lý tai mũi họng cấp và mãn tính ở cả người lớn và trẻ em bằng kỹ thuật nội soi.",
+    "Khoa Mắt": "Khám điều trị các tật khúc xạ, phẫu thuật đục thủy tinh thể và bảo vệ thị lực toàn diện.",
+    "Khoa Phục hồi chức năng": "Thiết kế bài tập chuyên biệt giúp phục hồi khả năng vận động sau tai biến, phẫu thuật hoặc chấn thương cột sống.",
+    "Khoa Da liễu": "Điều trị chuyên sâu các bệnh lý da liễu bẩm sinh, viêm da, mụn trứng cá và chăm sóc thẩm mỹ da an toàn.",
+    "Khoa Cấp cứu": "Tiếp nhận và xử trí nhanh chóng, kịp thời các ca bệnh khẩn cấp 24/7 với trang thiết bị hồi sức hiện đại nhất."
+}
+
 async def init_db():
     print("--- RESETTING SCHEMA (DROP & CREATE TABLES) ---")
     async with engine.begin() as conn:
@@ -40,7 +57,8 @@ async def seed_data():
         print("[1/5] Seeding Chuyen khoa...")
         specs = {}
         for spec_name in SPECIALTIES_LIST:
-            new_spec = Specialty(name=spec_name, description=f"Khám chuyên sâu tại {spec_name}")
+            desc = SPECIALTIES_DETAILS.get(spec_name, f"Khám chuyên sâu tại {spec_name}")
+            new_spec = Specialty(name=spec_name, description=desc)
             db.add(new_spec)
             await db.flush()
             specs[spec_name] = new_spec

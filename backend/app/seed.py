@@ -1,20 +1,36 @@
 """
 MedBook Mega Seed v7.3 - Safe Edition
-Final clean run without special characters for Windows terminal.
+Final clean run with special characters support for Windows terminal.
 """
 import asyncio
+import sys
+import io
 from datetime import date, time
 from sqlalchemy import select, delete, text
+
+# Setup UTF-8 encoding for Windows command prompt to support accents
+if sys.platform == "win32":
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 
 from app.database import engine, AsyncSessionLocal, Base
 from app.models import User, Specialty, Doctor, Schedule, Appointment, MedicalRecord, PrescriptionItem, Payment
 from app.core.security import hash_password
 
 SPECIALTIES_LIST = [
-    "Khoa Tim mach", "Khoa Tieu hoa", "Khoa Chan thuong chinh hinh", "Khoa Noi Than kinh",
-    "Khoa Truyen nhiem", "Khoa San phu khoa", "Khoa Than - Loc mau", "Khoa Ung buou",
-    "Khoa Rang Ham Mat", "Khoa Tai Mui Hong", "Khoa Mat", "Khoa Phuc hoi chuc nang",
-    "Khoa Da lieu", "Khoa Cap cuu"
+    {"name": "Khoa Tim mạch", "desc": "Chẩn đoán và điều trị chuyên sâu các bệnh lý về tim mạch, huyết áp và mạch máu bằng công nghệ y khoa tiên tiến."},
+    {"name": "Khoa Tiêu hóa", "desc": "Tầm soát, điều trị các bệnh lý đường tiêu hóa, gan mật, kết hợp phương pháp nội soi không đau hiện đại."},
+    {"name": "Khoa Chấn thương chỉnh hình", "desc": "Phẫu thuật chấn thương cơ xương khớp, phục hồi vận động và tái tạo chức năng sau chấn thương."},
+    {"name": "Khoa Nội thần kinh", "desc": "Điều trị các bệnh lý thần kinh, đau đầu, đột quỵ, rối loạn giấc ngủ và các hội chứng suy giảm trí nhớ."},
+    {"name": "Khoa Truyền nhiễm", "desc": "Chẩn đoán, phòng ngừa và điều trị các bệnh truyền nhiễm nguy hiểm, dịch bệnh theo mùa và tiêm chủng bảo vệ cơ thể."},
+    {"name": "Khoa Sản phụ khoa", "desc": "Chăm sóc sức khỏe thai kỳ toàn diện, điều trị phụ khoa và tư vấn kế hoạch hóa gia đình tận tâm."},
+    {"name": "Khoa Thận - Lọc máu", "desc": "Điều trị suy thận cấp và mãn tính, lọc máu chu kỳ bằng hệ thống màng lọc thế hệ mới an toàn tuyệt đối."},
+    {"name": "Khoa Ung bướu", "desc": "Tầm soát ung thư sớm, tư vấn phác đồ điều trị đa mô thức và đồng hành chăm sóc giảm nhẹ cho người bệnh."},
+    {"name": "Khoa Răng Hàm Mặt", "desc": "Chăm sóc và điều trị các bệnh răng miệng, nha khoa thẩm mỹ chất lượng cao, phục hình răng sứ không đau."},
+    {"name": "Khoa Tai Mũi Họng", "desc": "Điều trị hiệu quả các bệnh lý tai mũi họng cấp và mãn tính ở cả người lớn và trẻ em bằng kỹ thuật nội soi."},
+    {"name": "Khoa Mắt", "desc": "Khám điều trị các tật khúc xạ, phẫu thuật đục thủy tinh thể và bảo vệ thị lực toàn diện."},
+    {"name": "Khoa Phục hồi chức năng", "desc": "Thiết kế bài tập chuyên biệt giúp phục hồi khả năng vận động sau tai biến, phẫu thuật hoặc chấn thương cột sống."},
+    {"name": "Khoa Da liễu", "desc": "Điều trị chuyên sâu các bệnh lý da liễu bẩm sinh, viêm da, mụn trứng cá và chăm sóc thẩm mỹ da an toàn."},
+    {"name": "Khoa Cấp cứu", "desc": "Tiếp nhận và xử trí nhanh chóng, kịp thời các ca bệnh khẩn cấp 24/7 với trang thiết bị hồi sức hiện đại nhất."}
 ]
 
 async def seed():
@@ -62,14 +78,14 @@ async def seed():
         await db.flush()
 
         print("[3/4] SEEDING SPECIALTIES & 28 DOCTORS...")
-        for i, spec_name in enumerate(SPECIALTIES_LIST, 1):
-            spec_obj = Specialty(name=spec_name, description=f"Kham chuyen sau tai {spec_name}")
+        for i, spec in enumerate(SPECIALTIES_LIST, 1):
+            spec_obj = Specialty(name=spec["name"], description=spec["desc"])
             db.add(spec_obj)
             await db.flush()
 
             for suffix in ["", "b"]:
                 dr_email = f"pk{i}{suffix}@medbook.com"
-                dr_name = f"Bac si {spec_name.replace('Khoa ', '')} {('A' if suffix == '' else 'B')}"
+                dr_name = f"Bác sĩ {spec['name'].replace('Khoa ', '')} {('A' if suffix == '' else 'B')}"
                 
                 dr_user = User(
                     email=dr_email,
@@ -83,7 +99,7 @@ async def seed():
                 db.add(dr_user)
                 await db.flush()
 
-                doc = Doctor(user_id=dr_user.id, specialty_id=spec_obj.id, bio=f"Chuyen gia {spec_name}.", experience_years=10, is_approved=True, room_number=f"Room {100+i}")
+                doc = Doctor(user_id=dr_user.id, specialty_id=spec_obj.id, bio=f"Chuyên gia {spec['name']}.", experience_years=10, is_approved=True, room_number=f"Room {100+i}")
                 db.add(doc)
                 await db.flush()
 
