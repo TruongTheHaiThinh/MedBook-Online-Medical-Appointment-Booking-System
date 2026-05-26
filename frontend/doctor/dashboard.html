@@ -713,6 +713,18 @@
                 document.getElementById('prof-exp').value = profile.experience_years || 0;
                 document.getElementById('prof-bio').value = profile.bio || '';
                 
+                // Đồng bộ tên của bác sĩ từ database lên giao diện và cache localStorage
+                if (profile.full_name) {
+                    const nameEls = document.querySelectorAll('.user-name-display');
+                    nameEls.forEach(el => el.textContent = profile.full_name);
+                    
+                    const localUser = getUser();
+                    if (localUser && localUser.full_name !== profile.full_name) {
+                        localUser.full_name = profile.full_name;
+                        localStorage.setItem('medbook_user', JSON.stringify(localUser));
+                    }
+                }
+                
                 // Hiển thị Chuyên khoa lên giao diện bác sĩ
                 if (profile.specialty_name) {
                     const subtitleEl = document.getElementById('doctor-spec-subtitle');
