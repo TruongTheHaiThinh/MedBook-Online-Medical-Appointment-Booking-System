@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import auth, doctors, appointments, admin_hr, admin_cashier, medical_records
+from app.routers import auth, doctors, appointments, admin_hr, admin_cashier, medical_records, news
 from app.config import settings
 from app.core.scheduler import start_scheduler
 from app.database import get_db
@@ -22,8 +22,9 @@ app.add_middleware(
         "http://127.0.0.1:5500",
         "http://localhost:8000",
         "http://127.0.0.1:8000",
-        settings.FRONTEND_URL,
-        settings.FRONTEND_URL.rstrip("/frontend"),
+        "https://medbook-medical.vercel.app",
+        settings.FRONTEND_URL.rstrip("/"),
+        settings.FRONTEND_URL.rstrip("/").rstrip("/frontend"),
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -37,6 +38,7 @@ app.include_router(appointments.router)
 app.include_router(admin_hr.router)
 app.include_router(admin_cashier.router)
 app.include_router(medical_records.router)
+app.include_router(news.router)
 
 
 
@@ -64,3 +66,34 @@ async def root():
 @app.get("/health", tags=["Health"])
 async def health():
     return {"status": "ok"}
+
+
+@app.get("/healthz", tags=["Health"])
+async def healthz():
+    return {"status": "ok"}
+
+
+@app.get("/debug-db", tags=["Health"])
+async def debug_db():
+    """Temporary debug: show what DATABASE_URL is being used"""
+    from app.database import _db_url, _connect_args
+    return {
+        "db_url_masked": _db_url.split("@")[1] if "@" in _db_url else _db_url,
+        "db_url_scheme": _db_url.split("://")[0] if "://" in _db_url else "unknown",
+        "ssl_in_url": "ssl" in _db_url.lower(),
+        "connect_args_keys": list(_connect_args.keys()),
+    }
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    from fastapi.responses import JSONResponse
+    import traceback
+    return JSONResponse(
+        status_code=500,
+        content={
+            "detail": str(exc),
+            "traceback": traceback.format_exc(),
+        }
+    )
+

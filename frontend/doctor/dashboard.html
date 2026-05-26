@@ -131,12 +131,12 @@
         <main class="content-area">
             <header class="flex justify-between items-center mb-8">
                 <div>
-                    <h1 class="text-2xl font-bold">Bác sĩ <span class="user-name-display">...</span></h1>
-                    <p class="text-gray text-sm">Cùng chung tay chăm sóc sức khỏe cộng đồng.</p>
+                    <h1 class="text-2xl font-bold"><span class="user-name-display">...</span></h1>
+                    <p class="text-gray text-sm" id="doctor-spec-subtitle">Cùng chung tay chăm sóc sức khỏe cộng đồng.</p>
                 </div>
                 <div class="glass p-3 rounded-lg flex items-center gap-3">
                     <div class="text-right">
-                        <p class="text-xs font-bold uppercase tracking-wider text-primary">Chuyên gia y tế</p>
+                        <p class="text-xs font-bold uppercase tracking-wider text-primary" id="doctor-role-badge">Chuyên gia y tế</p>
                         <p class="text-sm font-bold user-name-display"></p>
                     </div>
                     <div class="icon-box" style="width:40px; height:40px; margin-bottom:0">
@@ -701,7 +701,7 @@
             const sel = document.getElementById('prof-spec');
             if(!sel) return;
             try {
-                const spRes = await api.get('/admin/hr/specialties');
+                const spRes = await api.get('/doctors/specialties');
                 sel.innerHTML = spRes.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
             } catch(e) {}
         }
@@ -712,6 +712,30 @@
                 if (profile.specialty_id) document.getElementById('prof-spec').value = profile.specialty_id;
                 document.getElementById('prof-exp').value = profile.experience_years || 0;
                 document.getElementById('prof-bio').value = profile.bio || '';
+                
+                // Đồng bộ tên của bác sĩ từ database lên giao diện và cache localStorage
+                if (profile.full_name) {
+                    const nameEls = document.querySelectorAll('.user-name-display');
+                    nameEls.forEach(el => el.textContent = profile.full_name);
+                    
+                    const localUser = getUser();
+                    if (localUser && localUser.full_name !== profile.full_name) {
+                        localUser.full_name = profile.full_name;
+                        localStorage.setItem('medbook_user', JSON.stringify(localUser));
+                    }
+                }
+                
+                // Hiển thị Chuyên khoa lên giao diện bác sĩ
+                if (profile.specialty_name) {
+                    const subtitleEl = document.getElementById('doctor-spec-subtitle');
+                    if (subtitleEl) {
+                        subtitleEl.innerHTML = `<i class="fa-solid fa-notes-medical mr-1 text-primary"></i> Chuyên khoa: <span class="font-bold text-primary">${escapeHTML(profile.specialty_name)}</span>`;
+                    }
+                    const badgeEl = document.getElementById('doctor-role-badge');
+                    if (badgeEl) {
+                        badgeEl.textContent = profile.specialty_name;
+                    }
+                }
             } catch (e) { console.error("Không thể tải hồ sơ bác sĩ", e); }
         }
 

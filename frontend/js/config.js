@@ -3,7 +3,7 @@ const CONFIG = {
     // Modify this if backend runs on a different port/IP
     API_URL: (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
         ? 'http://127.0.0.1:8000'
-        : 'https://medbook-backend.onrender.com', // Cấu hình URL Backend Render của bạn tại đây khi deploy
+        : 'https://medbook-backend-wyzd.onrender.com', // Cấu hình URL Backend Render của bạn tại đây khi deploy
 };
 
 // Utils

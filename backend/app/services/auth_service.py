@@ -63,7 +63,7 @@ class AuthService:
         if data.email:
             result_e = await db.execute(select(User).where(User.email == data.email))
             if result_e.scalar_one_or_none():
-                raise HTTPException(status_code=400, detail="Email đã được sử dụng")
+                raise HTTPException(status_code=400, detail="gmail đã được sử dụng hoặc đã có tài khoản sử dụng gmail này rồi")
 
         p_code = None
         if data.role == "patient":
@@ -85,10 +85,7 @@ class AuthService:
         db.add(user)
         await db.flush()
 
-        # If doctor role, create doctor profile (requires HR admin approval)
-        if data.role == "doctor":
-            doctor = Doctor(user_id=user.id, is_approved=False)
-            db.add(doctor)
+        # Doctors cannot self-register anymore. Only patients can register.
 
         await db.commit()
         await db.refresh(user)
@@ -107,7 +104,7 @@ class AuthService:
         # Check email unique
         result_e = await db.execute(select(User).where(User.email == data.email))
         if result_e.scalar_one_or_none():
-            raise HTTPException(status_code=400, detail="Email đã được sử dụng")
+            raise HTTPException(status_code=400, detail="gmail đã được sử dụng hoặc đã có tài khoản sử dụng gmail này rồi")
 
         # Check phone unique
         result_p = await db.execute(select(User).where(User.phone == data.phone))
@@ -118,10 +115,14 @@ class AuthService:
         if data.role == "patient":
             p_code = await _generate_next_patient_code(db)
 
+        full_name = data.full_name
+        if data.role == "cashier_admin" and not full_name.startswith("Thu Ngân -"):
+            full_name = f"Thu Ngân - {full_name}"
+
         user = User(
             email=data.email,
             password_hash=hash_password(data.password),
-            full_name=data.full_name,
+            full_name=full_name,
             phone=data.phone,
             address=data.address,
             role=data.role,
@@ -133,7 +134,14 @@ class AuthService:
 
         # If doctor role, create doctor profile (pre-approved by admin)
         if data.role == "doctor":
-            doctor = Doctor(user_id=user.id, is_approved=True)
+            doctor = Doctor(
+                user_id=user.id,
+                is_approved=True,
+                specialty_id=data.specialty_id,
+                experience_years=data.experience_years,
+                bio=data.bio,
+                room_number=data.room_number,
+            )
             db.add(doctor)
 
         await db.commit()

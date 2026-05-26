@@ -258,7 +258,7 @@
             
             <p class="text-xs font-bold text-gray mt-4" id="appt-qr-code"></p>
             
-            <button class="btn btn-primary w-100 mt-6" onclick="location.reload()">Đóng</button>
+            <button class="btn btn-primary w-100 mt-6" onclick="window.location.href = window.location.pathname">Đóng</button>
         </div>
     </div>
 
@@ -366,10 +366,13 @@
                 // Check for payment result from VNPAY
                 if (urlParams.get('payment') === 'success') {
                     showToast("Thanh toán VNPAY thành công!", "success");
+                    // Xóa các tham số query trong URL ngay lập tức để tránh vòng lặp reload vô hạn
+                    window.history.replaceState({}, document.title, window.location.pathname);
                     // Tự động hiện QR sau khi thanh toán thành công
                     setTimeout(showLatestPaymentSuccess, 1000);
                 } else if (urlParams.get('payment') === 'failed') {
                     showToast("Thanh toán VNPAY thất bại hoặc đã bị hủy.", "error");
+                    window.history.replaceState({}, document.title, window.location.pathname);
                 }
 
                 // Check for new booking success

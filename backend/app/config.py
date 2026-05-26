@@ -30,10 +30,20 @@ class Settings(BaseSettings):
     FRONTEND_URL: str = "http://localhost:5500"
 
     # ── VNPAY ──
-    VNP_TMN_CODE: str = "2QXG2Y47"
-    VNP_HASH_SECRET: str = ""
+    VNP_TMN_CODE: str = "E2EMF78A"
+    VNP_HASH_SECRET: str = "1I1UDPIJZCYV9RIMZK0IQKDBQYJ8OPSR"
     VNP_URL: str = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
     VNP_RETURN_URL: str = "http://127.0.0.1:8000/appointments/vnpay-return"
+
+    def __init__(self, **values):
+        super().__init__(**values)
+        # Render cung cấp URL dạng postgres:// hoặc postgresql://, asyncpg cần postgresql+asyncpg://
+        url = self.DATABASE_URL
+        if url.startswith("postgres://"):
+            url = url.replace("postgres://", "postgresql+asyncpg://", 1)
+        elif url.startswith("postgresql://") and "+asyncpg" not in url:
+            url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+        self.DATABASE_URL = url
 
     class Config:
         env_file = ".env"

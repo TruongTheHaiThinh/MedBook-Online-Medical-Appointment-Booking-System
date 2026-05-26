@@ -193,7 +193,7 @@ async def get_vnpay_url(
     vnp_TxnRef = f"{str(appt.id)[:18]}_{int(datetime.now().timestamp())}"
     
     order_info = f"Thanh toan dat lich hen {appt.id}"
-    vnp_ReturnUrl = "http://127.0.0.1:8000/appointments/vnpay-return"
+    vnp_ReturnUrl = settings.VNP_RETURN_URL
     vnp_url = vnp.get_payment_url(
         vnp_TxnRef=vnp_TxnRef,
         vnp_Amount=100000, # 100k
@@ -359,6 +359,29 @@ async def get_doctor_appointments(
     if status:
         query = query.where(Appointment.status == status.upper())
     query = query.order_by(Appointment.scheduled_date.asc()).offset((page - 1) * size).limit(size)
+
+    result = await db.execute(query)
+    appointments = result.scalars().all()
+
+    responses = []
+    for appt in appointments:
+        responses.append(await _enrich_appointment(appt, db))
+    return responses
+
+
+@router.get("/all", response_model=List[AppointmentResponse])
+async def get_all_appointments(
+    status: str = None,
+    page: int = Query(1, ge=1),
+    size: int = Query(20, ge=1, le=100),
+    current_user: User = Depends(RoleChecker(["cashier_admin", "hr_admin"])),
+    db: AsyncSession = Depends(get_db),
+):
+    """Thu ngân / HR Admin xem toàn bộ lịch hẹn"""
+    query = select(Appointment)
+    if status:
+        query = query.where(Appointment.status == status.upper())
+    query = query.order_by(Appointment.scheduled_date.desc()).offset((page - 1) * size).limit(size)
 
     result = await db.execute(query)
     appointments = result.scalars().all()
@@ -553,29 +576,6 @@ async def get_finance_queue(
     result = await db.execute(query)
     appointments = result.scalars().all()
     return [await _enrich_appointment(a, db) for a in appointments]
-
-
-@router.get("/all", response_model=List[AppointmentResponse])
-async def get_all_appointments(
-    status: str = None,
-    page: int = Query(1, ge=1),
-    size: int = Query(20, ge=1, le=100),
-    current_user: User = Depends(RoleChecker(["cashier_admin", "hr_admin"])),
-    db: AsyncSession = Depends(get_db),
-):
-    """Thu ngân / HR Admin xem toàn bộ lịch hẹn"""
-    query = select(Appointment)
-    if status:
-        query = query.where(Appointment.status == status.upper())
-    query = query.order_by(Appointment.scheduled_date.desc()).offset((page - 1) * size).limit(size)
-
-    result = await db.execute(query)
-    appointments = result.scalars().all()
-
-    responses = []
-    for appt in appointments:
-        responses.append(await _enrich_appointment(appt, db))
-    return responses
 
 
 @router.patch("/{appointment_id}/complete-exam", response_model=AppointmentResponse)

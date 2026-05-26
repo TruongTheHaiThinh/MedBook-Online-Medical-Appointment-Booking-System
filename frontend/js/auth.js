@@ -101,7 +101,7 @@ async function handleLogin(e) {
         else {
              const user = res.user;
              if (user.role === 'patient') window.location.href = 'patient/dashboard.html';
-             else if (user.role === 'doctor') window.location.href = 'admin/doctor_main.html';
+             else if (user.role === 'doctor') window.location.href = 'doctor/dashboard.html';
              else if (user.role === 'hr_admin') window.location.href = 'admin/hr_dashboard.html';
              else if (user.role === 'cashier_admin') window.location.href = 'admin/cashier_main.html';
         }

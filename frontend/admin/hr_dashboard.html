@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HR Manager - MedBook Premium</title>
+    <title>Admin Dashboard - MedBook Premium</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/style.css">
@@ -23,7 +23,7 @@
                     <i class="fa-solid fa-chart-line"></i> Dashboard
                 </a>
                 <a href="#" class="side-link" onclick="showTab('doctors-tab', this)">
-                    <i class="fa-solid fa-user-doctor"></i> Phê duyệt Bác sĩ
+                    <i class="fa-solid fa-user-gear"></i> Đăng ký Nhân viên
                 </a>
                 <a href="#" class="side-link" onclick="showTab('leaves-tab', this)">
                     <i class="fa-solid fa-calendar-xmark"></i> Duyệt nghỉ phép
@@ -33,6 +33,12 @@
                 </a>
                 <a href="#" class="side-link" onclick="showTab('users-tab', this)">
                     <i class="fa-solid fa-users-gear"></i> Quản lý User
+                </a>
+                <a href="#" class="side-link" onclick="showTab('transactions-tab', this)">
+                    <i class="fa-solid fa-file-invoice-dollar"></i> Nhật ký Giao dịch
+                </a>
+                <a href="#" class="side-link" onclick="showTab('patient-records-tab', this)">
+                    <i class="fa-solid fa-folder-open"></i> Hồ sơ Bệnh án
                 </a>
             </nav>
             <div style="margin-top: auto;">
@@ -46,12 +52,12 @@
         <main class="content-area">
             <header class="flex justify-between items-center mb-8">
                 <div>
-                    <h1 class="text-2xl font-bold">Xin chào, <span class="user-name-display">Manager</span></h1>
-                    <p class="text-gray text-sm">Hôm nay có bác sĩ mới đang chờ bạn duyệt.</p>
+                    <h1 class="text-2xl font-bold">Xin chào, <span class="user-name-display">Admin</span></h1>
+                    <p class="text-gray text-sm">Bảng điều khiển quản trị hệ thống.</p>
                 </div>
                 <div class="glass p-3 rounded-lg flex items-center gap-3">
                     <div class="text-right">
-                        <p class="text-xs font-bold uppercase tracking-wider text-primary">HR Management</p>
+                        <p class="text-xs font-bold uppercase tracking-wider text-primary">System Admin</p>
                         <p class="text-sm font-bold user-name-display"></p>
                     </div>
                     <div class="icon-box" style="width:40px; height:40px; margin-bottom:0">
@@ -88,22 +94,65 @@
 
             <!-- Tab: Doctors -->
             <div id="doctors-tab" class="tab-content" style="display:none">
-                <h2 class="mb-4">Phê duyệt Bác sĩ</h2>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Họ tên</th>
-                                <th>Chuyên khoa</th>
-                                <th>Kinh nghiệm</th>
-                                <th>Bio</th>
-                                <th>Hành động</th>
-                            </tr>
-                        </thead>
-                        <tbody id="doctors-pending-body">
-                            <tr><td colspan="5" class="text-center">Đang tải...</td></tr>
-                        </tbody>
-                    </table>
+                <div class="card mb-8" style="background: rgba(255, 255, 255, 0.45); box-shadow: var(--glass-shadow);">
+                    <h2 class="mb-4 text-primary"><i class="fa-solid fa-user-plus mr-2"></i>Đăng ký tài khoản Nhân viên mới</h2>
+                    <form id="staff-reg-form" onsubmit="submitStaffReg(event)">
+                        <div class="grid grid-3">
+                            <div class="form-group">
+                                <label class="form-label">Vai trò</label>
+                                <select id="staff-reg-role" class="form-control" onchange="toggleStaffFields()" required>
+                                    <option value="doctor">Bác sĩ</option>
+                                    <option value="cashier_admin">Thu ngân</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Họ tên nhân viên</label>
+                                <input type="text" id="staff-reg-fullname" class="form-control" placeholder="Nguyễn Văn A" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Email đăng nhập</label>
+                                <input type="email" id="staff-reg-email" class="form-control" placeholder="nhanvien@medbook.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Mật khẩu</label>
+                                <input type="password" id="staff-reg-password" class="form-control" placeholder="Tối thiểu 8 ký tự" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Số điện thoại</label>
+                                <input type="text" id="staff-reg-phone" class="form-control" placeholder="Ví dụ: 0987654321" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Địa chỉ</label>
+                                <input type="text" id="staff-reg-address" class="form-control" placeholder="Ví dụ: Quận Gò Vấp, TP. HCM" required>
+                            </div>
+                            
+                            <!-- Doctor-only fields -->
+                            <div class="form-group doctor-only-field">
+                                <label class="form-label">Chuyên khoa</label>
+                                <select id="dr-reg-specialty" class="form-control">
+                                    <option value="">-- Chọn chuyên khoa --</option>
+                                    <!-- Dynamic options -->
+                                </select>
+                            </div>
+                            <div class="form-group doctor-only-field">
+                                <label class="form-label">Số năm kinh nghiệm</label>
+                                <input type="number" id="dr-reg-exp" class="form-control" min="0" max="60" placeholder="Ví dụ: 5">
+                            </div>
+                            <div class="form-group doctor-only-field">
+                                <label class="form-label">Phòng khám</label>
+                                <input type="text" id="dr-reg-room" class="form-control" placeholder="Ví dụ: P.204">
+                            </div>
+                            <div class="form-group doctor-only-field" style="grid-column: span 3;">
+                                <label class="form-label">Mô tả giới thiệu y khoa</label>
+                                <input type="text" id="dr-reg-bio" class="form-control" placeholder="Ví dụ: Chuyên gia điều trị nội tim mạch...">
+                            </div>
+                        </div>
+                        <div class="flex justify-end mt-4">
+                            <button type="submit" class="btn btn-primary" style="padding: 0.75rem 2rem;">
+                                <i class="fa-solid fa-user-check mr-2"></i>Đăng ký nhân viên
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
 
@@ -148,7 +197,7 @@
                         <option value="">-- Tất cả vai trò --</option>
                         <option value="patient">Bệnh nhân</option>
                         <option value="doctor">Bác sĩ</option>
-                        <option value="hr_admin">Quản lý nhân sự</option>
+                        <option value="hr_admin">Admin hệ thống</option>
                         <option value="cashier_admin">Thu ngân</option>
                     </select>
                 </div>
@@ -166,6 +215,77 @@
                         </thead>
                         <tbody id="users-body">
                             <tr><td colspan="6" class="text-center">Đang tải...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab: Transactions -->
+            <div id="transactions-tab" class="tab-content" style="display:none">
+                <div class="flex justify-between items-center mb-6">
+                    <h2>Nhật ký Giao dịch</h2>
+                    <div class="flex gap-3">
+                        <select id="tx-status-filter" class="form-control w-auto" onchange="loadTransactions()">
+                            <option value="">-- Tất cả trạng thái khám --</option>
+                            <option value="PENDING">Chờ xác nhận</option>
+                            <option value="AWAITING_PAYMENT">Chờ thanh toán khám</option>
+                            <option value="CONFIRMED">Đã xác nhận</option>
+                            <option value="IN_PROGRESS">Đang khám</option>
+                            <option value="PRESCRIPTION_SENT">Chờ thanh toán thuốc</option>
+                            <option value="COMPLETED">Đã hoàn thành</option>
+                            <option value="CANCELLED">Đã hủy</option>
+                        </select>
+                        <select id="tx-payment-filter" class="form-control w-auto" onchange="loadTransactions()">
+                            <option value="">-- Tất cả thanh toán --</option>
+                            <option value="PAID">Đã thanh toán</option>
+                            <option value="PENDING">Chờ thanh toán</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Thời gian</th>
+                                <th>Bệnh nhân</th>
+                                <th>Bác sĩ / Khoa</th>
+                                <th>Lý do khám</th>
+                                <th>Số tiền</th>
+                                <th>Thanh toán</th>
+                                <th>Trạng thái khám</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactions-body">
+                            <tr><td colspan="7" class="text-center">Đang tải...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab: Patient Records -->
+            <div id="patient-records-tab" class="tab-content" style="display:none">
+                <div class="flex justify-between items-center mb-6">
+                    <h2>Danh sách Hồ sơ Bệnh nhân</h2>
+                    <div class="flex gap-3">
+                        <input type="text" id="patient-search-input" class="form-control w-auto" placeholder="Tìm kiếm tên, số ĐT..." oninput="filterPatients()">
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Mã BN</th>
+                                <th>Họ tên</th>
+                                <th>Email</th>
+                                <th>Số điện thoại</th>
+                                <th>Ngày sinh</th>
+                                <th>Giới tính</th>
+                                <th>Nhóm máu</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody id="patients-body">
+                            <tr><td colspan="8" class="text-center">Đang tải...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -193,6 +313,17 @@
         </div>
     </div>
 
+    <!-- Modal: Patient Medical History -->
+    <div class="modal-overlay" id="medical-history-modal">
+        <div class="modal-content glass shadow-xl" style="max-width: 800px; max-height: 85vh; overflow-y: auto;">
+            <button class="close-btn" onclick="closeHistoryModal()"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="mb-4 text-xl font-bold">Lịch sử Bệnh án - <span id="history-modal-patient-name">-</span></h3>
+            <div id="medical-history-content">
+                <!-- Records loaded here dynamically -->
+            </div>
+        </div>
+    </div>
+
     <script src="../js/config.js"></script>
     <script src="../js/api.js"></script>
     <script src="../js/auth.js"></script>
@@ -200,10 +331,10 @@
         if (guardRoute('hr_admin')) {
             document.addEventListener('DOMContentLoaded', () => {
                 loadStats();
-                loadPendingDoctors();
                 loadPendingLeaves();
                 loadSpecialties();
                 loadUsers();
+                toggleStaffFields();
             });
         }
 
@@ -212,6 +343,11 @@
             document.querySelectorAll('.side-link').forEach(l => l.classList.remove('active'));
             document.getElementById(id).style.display = 'block';
             el.classList.add('active');
+            if (id === 'transactions-tab') {
+                loadTransactions();
+            } else if (id === 'patient-records-tab') {
+                loadPatientRecords();
+            }
         }
 
         async function loadStats() {
@@ -223,56 +359,35 @@
             } catch(e) { console.error(e); }
         }
 
-        async function loadPendingDoctors() {
-            const tbody = document.getElementById('doctors-pending-body');
-            try {
-                const docs = await api.get('/admin/hr/doctors/pending');
-                if (docs.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-gray">Không có hồ sơ chờ duyệt.</td></tr>';
-                    return;
-                }
-                tbody.innerHTML = docs.map(d => `
-                    <tr>
-                        <td class="font-bold">${escapeHTML(d.full_name)}<br><span class="text-xs text-gray">${d.email}</span></td>
-                        <td>${escapeHTML(d.specialty_name || '-')}</td>
-                        <td>${d.experience_years} năm</td>
-                        <td class="text-xs" style="max-width:200px">${escapeHTML(d.bio || '-')}</td>
-                        <td>
-                            <button class="btn btn-primary btn-sm mr-2" onclick="approveDoctor('${d.id}')">Duyệt</button>
-                            <button class="btn btn-outline btn-sm" onclick="rejectDoctor('${d.id}')">Từ chối</button>
-                        </td>
-                    </tr>
-                `).join('');
-            } catch(e) { tbody.innerHTML = `<tr><td colspan="5">${e.message}</td></tr>`; }
-        }
 
-        async function approveDoctor(id) {
-            if(!confirm("Duyệt bác sĩ này?")) return;
-            try { await api.patch(`/admin/hr/doctors/${id}/approve`); loadPendingDoctors(); loadStats(); } catch(e) { alert(e.message); }
-        }
-
-        async function rejectDoctor(id) {
-            if(!confirm("Từ chối bác sĩ này?")) return;
-            try { await api.patch(`/admin/hr/doctors/${id}/reject`); loadPendingDoctors(); } catch(e) { alert(e.message); }
-        }
 
         async function loadSpecialties() {
             const grid = document.getElementById('specialties-grid');
+            const selectEl = document.getElementById('dr-reg-specialty');
             try {
                 const spRes = await api.get('/admin/hr/specialties');
-                grid.innerHTML = spRes.map(sp => `
-                    <div class="card hover-float">
-                        <div class="flex justify-between items-start">
-                            <h3 class="text-primary">${escapeHTML(sp.name)}</h3>
-                            <div class="flex gap-2">
-                                <button class="text-gray" onclick="openSpecModal('${sp.id}', '${encodeURIComponent(sp.name)}', '${encodeURIComponent(sp.description || '')}')"><i class="fa-solid fa-pen-to-square"></i></button>
-                                <button class="text-danger" onclick="deleteSpec('${sp.id}')"><i class="fa-solid fa-trash"></i></button>
+                if (grid) {
+                    grid.innerHTML = spRes.map(sp => `
+                        <div class="card hover-float">
+                            <div class="flex justify-between items-start">
+                                <h3 class="text-primary">${escapeHTML(sp.name)}</h3>
+                                <div class="flex gap-2">
+                                    <button class="text-gray" onclick="openSpecModal('${sp.id}', '${encodeURIComponent(sp.name)}', '${encodeURIComponent(sp.description || '')}')"><i class="fa-solid fa-pen-to-square"></i></button>
+                                    <button class="text-danger" onclick="deleteSpec('${sp.id}')"><i class="fa-solid fa-trash"></i></button>
+                                </div>
                             </div>
+                            <p class="text-sm text-gray mt-2">${escapeHTML(sp.description || 'Không có mô tả')}</p>
                         </div>
-                        <p class="text-sm text-gray mt-2">${escapeHTML(sp.description || 'Không có mô tả')}</p>
-                    </div>
-                `).join('');
-            } catch(e) { grid.innerHTML = e.message; }
+                    `).join('');
+                }
+                
+                if (selectEl) {
+                    selectEl.innerHTML = '<option value="">-- Chọn chuyên khoa --</option>' + 
+                        spRes.map(sp => `<option value="${sp.id}">${escapeHTML(sp.name)}</option>`).join('');
+                }
+            } catch(e) { 
+                if (grid) grid.innerHTML = e.message; 
+            }
         }
 
         function openSpecModal(id='', name='', desc='') {
@@ -304,7 +419,7 @@
                 const roleMap = {
                     'patient': 'Bệnh nhân',
                     'doctor': 'Bác sĩ',
-                    'hr_admin': 'Nhân sự',
+                    'hr_admin': 'Admin hệ thống',
                     'cashier_admin': 'Thu ngân'
                 };
                 tbody.innerHTML = users.map(u => `
@@ -374,6 +489,279 @@
         }
 
         function escapeHTML(str) { const p = document.createElement('p'); p.textContent = str; return p.innerHTML; }
+
+        let allPatients = []; // Cache list of patients for local searching
+
+        async function loadTransactions() {
+            const txBody = document.getElementById('transactions-body');
+            txBody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-gray"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Đang tải giao dịch...</td></tr>';
+            try {
+                const statusFilter = document.getElementById('tx-status-filter').value;
+                const paymentFilter = document.getElementById('tx-payment-filter').value;
+                
+                let url = '/appointments/all?size=100';
+                if (statusFilter) {
+                    url += `&status=${statusFilter}`;
+                }
+                const appts = await api.get(url);
+                
+                let filtered = appts;
+                if (paymentFilter) {
+                    filtered = appts.filter(a => a.payment_status === paymentFilter);
+                }
+                
+                if (filtered.length === 0) {
+                    txBody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-gray">Không tìm thấy giao dịch nào.</td></tr>';
+                    return;
+                }
+                
+                const apptStatusMap = {
+                    'PENDING': { text: 'Chờ xác nhận', class: 'badge-warning' },
+                    'AWAITING_PAYMENT': { text: 'Chờ thanh toán khám', class: 'badge-warning' },
+                    'CONFIRMED': { text: 'Đã xác nhận', class: 'badge-info' },
+                    'IN_PROGRESS': { text: 'Đang khám', class: 'badge-info' },
+                    'PRESCRIPTION_SENT': { text: 'Chờ thanh toán thuốc', class: 'badge-warning' },
+                    'COMPLETED': { text: 'Đã hoàn thành', class: 'badge-success' },
+                    'CANCELLED': { text: 'Đã hủy', class: 'badge-danger' }
+                };
+                
+                const payStatusMap = {
+                    'PAID': { text: 'Đã thanh toán', class: 'badge-success' },
+                    'PENDING': { text: 'Chờ thanh toán', class: 'badge-danger' }
+                };
+                
+                txBody.innerHTML = filtered.map(a => {
+                    const apptStatus = apptStatusMap[a.status] || { text: a.status, class: 'badge-info' };
+                    const payStatus = payStatusMap[a.payment_status] || { text: a.payment_status, class: 'badge-warning' };
+                    const formattedDate = formatDate(a.scheduled_date) + ' ' + (a.scheduled_time || '');
+                    const amountText = a.payment_amount ? (a.payment_amount.toLocaleString('vi-VN') + 'đ') : '0đ';
+                    
+                    return `
+                        <tr>
+                            <td>${formattedDate}</td>
+                            <td>
+                                <span class="font-bold">${escapeHTML(a.patient_name || 'Bệnh nhân')}</span>
+                                <br><span class="text-xs text-gray">${a.patient_phone || '-'}</span>
+                            </td>
+                            <td>
+                                <span class="font-bold text-primary">${escapeHTML(a.doctor_name || 'Chưa phân công')}</span>
+                                <br><span class="text-xs text-gray">${escapeHTML(a.specialty_name || 'Đa khoa')}</span>
+                            </td>
+                            <td class="text-sm">${escapeHTML(a.reason || '-')}</td>
+                            <td class="font-bold text-primary">${amountText}</td>
+                            <td><span class="badge ${payStatus.class}">${payStatus.text}</span></td>
+                            <td><span class="badge ${apptStatus.class}">${apptStatus.text}</span></td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch(e) { 
+                txBody.innerHTML = `<tr><td colspan="7" class="text-center text-danger py-4">Lỗi: ${escapeHTML(e.message)}</td></tr>`; 
+            }
+        }
+
+        async function loadPatientRecords() {
+            const tbody = document.getElementById('patients-body');
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-gray"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Đang tải danh sách bệnh nhân...</td></tr>';
+            try {
+                const users = await api.get('/admin/hr/users?role=patient');
+                allPatients = users;
+                renderPatients(allPatients);
+            } catch(e) { 
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center text-danger py-4">Lỗi: ${escapeHTML(e.message)}</td></tr>`; 
+            }
+        }
+
+        function renderPatients(patients) {
+            const tbody = document.getElementById('patients-body');
+            if (patients.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-gray">Không có bệnh nhân nào trong hệ thống.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = patients.map(u => {
+                const formattedDob = u.date_of_birth ? formatDate(u.date_of_birth.split('T')[0]) : '-';
+                const genderText = u.gender === 'male' ? 'Nam' : (u.gender === 'female' ? 'Nữ' : (u.gender || '-'));
+                return `
+                    <tr>
+                        <td class="font-bold text-primary">${escapeHTML(u.patient_code || 'MB-XXX')}</td>
+                        <td class="font-bold">${escapeHTML(u.full_name)}</td>
+                        <td>${u.email || '-'}</td>
+                        <td>${u.phone || '-'}</td>
+                        <td>${formattedDob}</td>
+                        <td>${genderText}</td>
+                        <td class="font-bold text-danger">${u.blood_type || '-'}</td>
+                        <td>
+                            <button class="btn btn-primary btn-sm" onclick="viewPatientMedicalHistory('${u.id}', '${encodeURIComponent(u.full_name)}')">
+                                <i class="fa-solid fa-notes-medical mr-1"></i>Xem bệnh án
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function filterPatients() {
+            const query = document.getElementById('patient-search-input').value.toLowerCase().trim();
+            if (!query) {
+                renderPatients(allPatients);
+                return;
+            }
+            const filtered = allPatients.filter(u => 
+                (u.full_name && u.full_name.toLowerCase().includes(query)) ||
+                (u.phone && u.phone.includes(query)) ||
+                (u.patient_code && u.patient_code.toLowerCase().includes(query)) ||
+                (u.email && u.email.toLowerCase().includes(query))
+            );
+            renderPatients(filtered);
+        }
+
+        async function viewPatientMedicalHistory(patientId, encodedName) {
+            const patientName = decodeURIComponent(encodedName);
+            document.getElementById('history-modal-patient-name').textContent = patientName;
+            const contentDiv = document.getElementById('medical-history-content');
+            contentDiv.innerHTML = '<div class="text-center py-8 text-gray"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Đang tải lịch sử bệnh án...</div>';
+            document.getElementById('medical-history-modal').classList.add('active');
+            
+            try {
+                const records = await api.get(`/medical-records/patient/${patientId}`);
+                if (records.length === 0) {
+                    contentDiv.innerHTML = '<div class="text-center py-8 text-gray">Bệnh nhân này chưa có lịch sử khám bệnh nào trên hệ thống.</div>';
+                    return;
+                }
+                
+                contentDiv.innerHTML = records.map(record => {
+                    const revisitText = record.revisit_required ? `<i class="fa-solid fa-calendar-check mr-1"></i>${formatDate(record.revisit_date)}` : 'Không yêu cầu';
+                    const recordDate = record.created_at ? formatDate(record.created_at.split('T')[0]) : '-';
+                    
+                    return `
+                        <div class="card mb-4" style="border-left: 5px solid var(--primary); background: rgba(255,255,255,0.7); box-shadow: var(--glass-shadow); padding: 1.5rem; text-align: left;">
+                            <div class="flex justify-between items-center mb-3">
+                                <h4 class="text-primary font-bold text-lg"><i class="fa-solid fa-file-medical mr-2"></i>Chẩn đoán: ${escapeHTML(record.diagnosis)}</h4>
+                                <span class="text-gray text-sm font-bold"><i class="fa-solid fa-calendar-day mr-1"></i>${recordDate}</span>
+                            </div>
+                            <div class="grid grid-2 mb-3">
+                                <div>
+                                    <p class="text-xs text-gray uppercase font-bold">Bác sĩ điều trị</p>
+                                    <p class="font-bold text-gray-800">${escapeHTML(record.doctor_name || 'Bác sĩ MedBook')}</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray uppercase font-bold">Lịch hẹn tái khám</p>
+                                    <p class="font-bold ${record.revisit_required ? 'text-primary' : 'text-gray-500'}">
+                                        ${revisitText}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <p class="text-xs text-gray uppercase font-bold">Ghi chú y khoa</p>
+                                <p class="text-sm text-gray-700" style="white-space: pre-wrap;">${escapeHTML(record.notes || 'Không có ghi chú')}</p>
+                            </div>
+                            
+                            <!-- Prescriptions -->
+                            ${record.prescriptions && record.prescriptions.length > 0 ? `
+                                <div style="background: rgba(255,255,255,0.5); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--gray-200);">
+                                    <p class="text-xs text-gray uppercase font-bold mb-2"><i class="fa-solid fa-pills mr-1"></i>Đơn thuốc</p>
+                                    <table style="width: 100%; border-collapse: collapse;">
+                                        <thead>
+                                            <tr style="background: none;">
+                                                <th style="padding: 0.5rem; text-transform: none; font-size: 0.75rem; text-align: left; background: none;">Tên thuốc</th>
+                                                <th style="padding: 0.5rem; text-transform: none; font-size: 0.75rem; text-align: left; background: none;">Liều lượng</th>
+                                                <th style="padding: 0.5rem; text-transform: none; font-size: 0.75rem; text-align: left; background: none;">Tần suất</th>
+                                                <th style="padding: 0.5rem; text-transform: none; font-size: 0.75rem; text-align: left; background: none;">Số lượng</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${record.prescriptions.map(p => `
+                                                <tr>
+                                                    <td style="padding: 0.5rem; border-top: 1px solid rgba(0,0,0,0.05); font-weight: bold;">${escapeHTML(p.medicine_name)}</td>
+                                                    <td style="padding: 0.5rem; border-top: 1px solid rgba(0,0,0,0.05);">${escapeHTML(p.dosage)} - dùng ${p.duration} ngày</td>
+                                                    <td style="padding: 0.5rem; border-top: 1px solid rgba(0,0,0,0.05);">${escapeHTML(p.frequency)} ${p.instructions ? `<br><span class="text-gray text-xs font-normal">${escapeHTML(p.instructions)}</span>` : ''}</td>
+                                                    <td style="padding: 0.5rem; border-top: 1px solid rgba(0,0,0,0.05); font-weight: bold;">${p.total_quantity}</td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            ` : `
+                                <p class="text-xs text-gray"><i class="fa-solid fa-circle-info mr-1"></i>Không kê đơn thuốc</p>
+                            `}
+                        </div>
+                    `;
+                }).join('');
+            } catch(e) {
+                contentDiv.innerHTML = `<div class="text-center text-danger py-4">Lỗi tải bệnh án: ${escapeHTML(e.message)}</div>`;
+            }
+        }
+
+        function closeHistoryModal() {
+            document.getElementById('medical-history-modal').classList.remove('active');
+        }
+
+        function toggleStaffFields() {
+            const role = document.getElementById('staff-reg-role').value;
+            const drFields = document.querySelectorAll('.doctor-only-field');
+            drFields.forEach(el => {
+                if (role === 'doctor') {
+                    el.style.display = 'block';
+                } else {
+                    el.style.display = 'none';
+                }
+            });
+        }
+
+        async function submitStaffReg(e) {
+            e.preventDefault();
+            const role = document.getElementById('staff-reg-role').value;
+            const email = document.getElementById('staff-reg-email').value;
+            const password = document.getElementById('staff-reg-password').value;
+            const fullName = document.getElementById('staff-reg-fullname').value;
+            const phone = document.getElementById('staff-reg-phone').value;
+            const address = document.getElementById('staff-reg-address').value;
+            
+            // Basic password validation
+            if (password.length < 8) {
+                alert("Mật khẩu phải tối thiểu 8 ký tự");
+                return;
+            }
+            if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password)) {
+                alert("Mật khẩu phải chứa ít nhất 1 chữ hoa, 1 chữ thường và 1 chữ số");
+                return;
+            }
+
+            const body = {
+                email: email,
+                password: password,
+                full_name: fullName,
+                phone: phone,
+                address: address,
+                role: role
+            };
+
+            if (role === 'doctor') {
+                const specialtyId = document.getElementById('dr-reg-specialty').value;
+                const exp = parseInt(document.getElementById('dr-reg-exp').value);
+                const room = document.getElementById('dr-reg-room').value;
+                const bio = document.getElementById('dr-reg-bio').value;
+
+                if (!specialtyId) { alert("Vui lòng chọn chuyên khoa cho bác sĩ!"); return; }
+                if (isNaN(exp)) { alert("Vui lòng nhập số năm kinh nghiệm!"); return; }
+                if (!room) { alert("Vui lòng nhập số phòng khám!"); return; }
+
+                body.specialty_id = specialtyId;
+                body.experience_years = exp;
+                body.room_number = room;
+                body.bio = bio;
+            }
+
+            try {
+                const res = await api.post('/admin/hr/users', body);
+                alert(`Đăng ký thành công tài khoản ${role === 'doctor' ? 'bác sĩ' : 'thu ngân'}: ${res.full_name}!`);
+                document.getElementById('staff-reg-form').reset();
+                toggleStaffFields();
+                loadStats();
+                loadUsers();
+            } catch(err) {
+                alert("Lỗi đăng ký: " + err.message);
+            }
+        }
     </script>
 </body>
 </html>
