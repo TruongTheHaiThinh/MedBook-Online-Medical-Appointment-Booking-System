@@ -117,6 +117,36 @@ async def seed_data():
             "Vũ Hoàng Long", "Nguyễn Bảo Châu", "Hoàng Kim Oanh", "Trần Việt Anh",
             "Phạm Hùng Cường", "Đỗ Thu Trang", "Nguyễn Duy Mạnh", "Lê Công Vinh"
         ]
+        DOCTOR_PROFILES = [
+            {"bio": "Hơn 15 năm kinh nghiệm điều trị nội tim mạch, chuyên sâu về suy tim, tăng huyết áp và rối loạn nhịp tim.", "exp": 15, "room": "Phòng 101"},
+            {"bio": "Chuyên gia can thiệp tim mạch, tốt nghiệp khóa đào tạo chuyên sâu tại Bệnh viện Tim mạch Quốc gia.", "exp": 12, "room": "Phòng 102"},
+            {"bio": "Chuyên điều trị các bệnh lý dạ dày, đại tràng và gan mật. Có thế mạnh về nội soi tiêu hóa không đau.", "exp": 10, "room": "Phòng 103"},
+            {"bio": "Nghiên cứu sâu về hội chứng ruột kích thích, trào ngược dạ dày thực quản và các bệnh lý gan mật cấp tính.", "exp": 8, "room": "Phòng 104"},
+            {"bio": "Nguyên phó khoa chấn thương tại bệnh viện đầu ngành, chuyên phẫu thuật thay khớp, nội soi khớp và tái tạo dây chằng.", "exp": 18, "room": "Phòng 201"},
+            {"bio": "Chuyên gia về chỉnh hình nhi, điều trị dị tật bẩm sinh hệ vận động và phục hồi chức năng sau chấn thương thể thao.", "exp": 7, "room": "Phòng 202"},
+            {"bio": "Chuyên điều trị đột quỵ, động kinh, Parkinson và các hội chứng đau đầu mãn tính, rối loạn giấc ngủ.", "exp": 14, "room": "Phòng 203"},
+            {"bio": "Bác sĩ nội trú thần kinh, có nhiều công trình nghiên cứu về suy giảm trí nhớ và các bệnh lý thoái hóa thần kinh ở người cao tuổi.", "exp": 9, "room": "Phòng 204"},
+            {"bio": "Nhiều năm kinh nghiệm trong công tác phòng chống dịch bệnh, chuyên điều trị viêm gan virus, sốt xuất huyết và các nhiễm trùng cơ hội.", "exp": 16, "room": "Phòng 301"},
+            {"bio": "Thạc sĩ Y học lâm sàng nhiệt đới, chuyên sâu về các bệnh lý nhiễm trùng hô hấp và ký sinh trùng đường ruột.", "exp": 11, "room": "Phòng 302"},
+            {"bio": "Chuyên gia sản khoa uy tín, hỗ trợ sinh sản, quản lý thai kỳ nguy cơ cao và phẫu thuật nội soi phụ khoa phức tạp.", "exp": 20, "room": "Phòng 303"},
+            {"bio": "Chuyên điều trị vô sinh hiếm muộn, phẫu thuật tạo hình phụ khoa và tư vấn chăm sóc sức khỏe tiền hôn nhân.", "exp": 13, "room": "Phòng 304"},
+            {"bio": "Chuyên gia lọc máu chu kỳ, quản lý bệnh nhân suy thận mãn tính và điều trị viêm cầu thận cấp.", "exp": 15, "room": "Phòng 401"},
+            {"bio": "Nhiều kinh nghiệm vận hành hệ thống lọc máu hiện đại, chăm sóc bệnh nhân trước và sau ghép thận.", "exp": 10, "room": "Phòng 402"},
+            {"bio": "Tiến sĩ Y khoa chuyên ngành ung bướu, tư vấn phác đồ điều trị đa mô thức, hóa trị và chăm sóc giảm nhẹ.", "exp": 22, "room": "Phòng 403"},
+            {"bio": "Chuyên sâu về tầm soát ung thư sớm đường tiêu hóa và ung thư vú, tư vấn liệu pháp miễn dịch hiện đại.", "exp": 11, "room": "Phòng 404"},
+            {"bio": "Chuyên sâu về nha khoa thẩm mỹ, bọc răng sứ, niềng răng mắc cài và khay trong suốt Invisalign.", "exp": 12, "room": "Phòng 501"},
+            {"bio": "Bác sĩ chuyên khoa cấy ghép Implant nha khoa, tiểu phẫu răng khôn mọc ngầm không đau bằng máy Piezotome.", "exp": 9, "room": "Phòng 502"},
+            {"bio": "Chuyên phẫu thuật nội soi mũi xoang, cắt amidan bằng công nghệ Plasma và điều trị viêm tai giữa cấp.", "exp": 14, "room": "Phòng 503"},
+            {"bio": "Khám và điều trị các bệnh lý tai mũi họng trẻ em bẩm sinh, điều trị viêm thanh quản và khản tiếng.", "exp": 8, "room": "Phòng 504"},
+            {"bio": "Chuyên phẫu thuật Phaco điều trị đục thủy tinh thể, phẫu thuật khúc xạ (Lasik, Smile) và điều trị Glaucoma.", "exp": 17, "room": "Phòng 601"},
+            {"bio": "Chuyên điều trị tật khúc xạ ở trẻ em (cận thị, loạn thị), điều trị bệnh lý võng mạc đái tháo đường.", "exp": 10, "room": "Phòng 602"},
+            {"bio": "Chuyên thiết kế các chương trình phục hồi chức năng sau tai biến mạch máu não và chấn thương cột sống phức tạp.", "exp": 15, "room": "Phòng 603"},
+            {"bio": "Thế mạnh về vật lý trị liệu chấn thương thể thao, kéo giãn cột sống bằng máy và phục hồi chức năng xương khớp.", "exp": 8, "room": "Phòng 604"},
+            {"bio": "Điều trị chuyên sâu các bệnh tự miễn như vảy nến, eczema, viêm da cơ địa và ứng dụng laser thẩm mỹ da.", "exp": 13, "room": "Phòng 701"},
+            {"bio": "Chuyên điều trị mụn trứng cá nặng, sẹo rỗ, nám má và tư vấn các liệu trình chăm sóc da khoa học.", "exp": 9, "room": "Phòng 702"},
+            {"bio": "Hơn 16 năm công tác tại phòng cấp cứu hồi sức tích cực, chuyên xử trí nhanh các ca sốc phản vệ, đa chấn thương và suy hô hấp.", "exp": 16, "room": "Phòng 703"},
+            {"bio": "Bác sĩ hồi sức cấp cứu, thành thạo các kỹ thuật đặt nội khí quản, lọc máu liên tục và cấp cứu ngừng tuần hoàn.", "exp": 10, "room": "Phòng 704"}
+        ]
         for i, spec_name in enumerate(SPECIALTIES_LIST, 1):
             for suffix in ["", "b"]:
                 dr_email = f"pk{i}{suffix}@medbook.com"
@@ -135,13 +165,14 @@ async def seed_data():
                 db.add(dr_user)
                 await db.flush()
 
+                prof = DOCTOR_PROFILES[idx % len(DOCTOR_PROFILES)]
                 doc = Doctor(
                     user_id=dr_user.id,
                     specialty_id=specs[spec_name].id,
-                    bio=f"Chuyên gia {spec_name}.",
-                    experience_years=10,
+                    bio=prof["bio"],
+                    experience_years=prof["exp"],
                     is_approved=True,
-                    room_number=f"Room {100+i}"
+                    room_number=prof["room"]
                 )
                 db.add(doc)
                 await db.flush()
